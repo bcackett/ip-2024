@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -10,7 +11,7 @@ function App() {
       {/* <Route path="/train" element={<Training />} />
       <Route path="/play" element={<Play />} /> */}
       <Route path="/" element={<Home />} />
-      {/* <Route path="/*" element={<NotFound />} /> */}
+      <Route path="/*" element={<NotFound />} />
     </Routes>
     // <div className="App">
     //   <header className="App-header">
