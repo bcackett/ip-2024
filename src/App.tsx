@@ -7,17 +7,17 @@ import NotFound from './pages/NotFound';
 
 function App() {
   return (
-    <>
-      <div className="name-frame">
-        <h1>Welcome to I.Poker!</h1>
-      </div>
-    </>
-    // <Routes>
-    //   {/* <Route path="/train" element={<Training />} />
-    //   <Route path="/play" element={<Play />} /> */}
-    //   <Route path="/" element={<Home />} />
-    //   <Route path="/*" element={<NotFound />} />
-    // </Routes>
+    // <>
+    //   <div className="name-frame">
+    //     <h1>Welcome to I.Poker!</h1>
+    //   </div>
+    // </>
+    <Routes>
+      {/* <Route path="/train" element={<Training />} />
+      <Route path="/play" element={<Play />} /> */}
+      <Route path="/" element={<Home />} />
+      <Route path="/*" element={<NotFound />} />
+    </Routes>
   );
 }
 
