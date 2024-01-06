@@ -15,7 +15,7 @@ function Welcome() {
       <div className="name-frame">
         <h1>Welcome to I.Poker!</h1>
       </div>
-      <div>
+      {/* <div>
         <label>I.Poker is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
       </div>
       <div>
@@ -25,7 +25,7 @@ function Welcome() {
         <button className="spaced-button" type="button" onClick={goToPlay}>
           "Play Online"
         </button>
-      </div>
+      </div> */}
     </>
   );
 }
