@@ -19,6 +19,8 @@ code {
 
 .spaced-button {
   margin: 10px 10px 10px 10px;
+  width: 100px;
+  height: 50px;
 }
 
 h1 {
@@ -44,16 +46,28 @@ h1 {
 
 #card-face > * {
   position: absolute;
-  font-size: x-large;
+  font-size: large;
   padding: 5px;
 }
 
 #table {
   position: relative;
-  display:inline-block;
+  display:inline-flex;
   height: 800px;
   width:800px;
   background-color:darkgreen;
   border: 2px solid black;
   border-radius: 10px;
+  justify-content: center;
 }
+
+#table > #hole-cards {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+}
+
+#table > .communal-cards {
+  justify-content: center;
+}
+
