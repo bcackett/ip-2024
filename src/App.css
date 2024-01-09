@@ -36,12 +36,3 @@
     transform: rotate(360deg);
   }
 }
-
-.name-frame {
-  padding: 20px 20px 20px 20px;
-  background-color: rgba(125, 2, 2, 1);
-}
-
-.spaced-button {
-  margin: 10px 10px 10px 10px;
-}

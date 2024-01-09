@@ -20,10 +20,10 @@ function Welcome() {
       </div>
       <div>
         <button className="spaced-button" type="button" onClick={goToTrain}>
-          "Training Lessons"
+          Training Lessons
         </button>
         <button className="spaced-button" type="button" onClick={goToPlay}>
-          "Play Online"
+          Play Online
         </button>
       </div>
     </>
