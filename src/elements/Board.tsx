@@ -157,8 +157,8 @@ function FindBestHand(cards: number[]) {
     }
   }
   let hands = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
-  document.getElementById("best-hand")!.innerText = bestHand.toString();
-  // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
+  // document.getElementById("best-hand")!.innerText = bestHand.toString();
+  document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
   return bestHand.splice(1, 5);
 }
 
