@@ -3,7 +3,7 @@ import Card from "../elements/Card";
 function Play() {
   return (
     <>
-      <Card
+      {/* <Card
         suit="S"
         rank="1"
       />
@@ -18,7 +18,7 @@ function Play() {
       <Card
         suit="S"
         rank="6"
-      />
+      /> */}
     </>
   );
 }
