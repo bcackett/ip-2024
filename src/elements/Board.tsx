@@ -1,6 +1,7 @@
 import { table } from "console";
-import Card from "./Card"
-import Deck from "./Deck"
+import Card from "./Card";
+import Deck from "./Deck";
+import { useState } from "react";
 
 type roomSize = {
   players: number;
@@ -33,7 +34,7 @@ function TurnDeal(cards: number[]) {
 
 function RiverDeal(cards:number[]) {
   document.getElementById("river-button")!.hidden = true;
-  document.getElementById("hole-button")!.hidden = false;
+  document.getElementById("reset-button")!.hidden = false;
   document.getElementById("river-card")!.hidden = false;
   let bestHand = FindBestHand(cards);
 }
@@ -166,6 +167,25 @@ function Board({players} : roomSize) {
   var deck: Deck = new Deck;
   deck.Shuffle();
   var cards = deck.Deal();
+  const[state, setState] = useState(cards);
+
+  function Reset() {
+    deck.Shuffle();
+    cards = deck.Deal()
+    document.getElementById("reset-button")!.hidden = true;
+    document.getElementById("hole-button")!.hidden = false;
+    document.getElementById("river-button")!.hidden = true;
+    document.getElementById("best-hand")!.innerText = "";
+    document.getElementById("hole-card-one")!.hidden = true;
+    document.getElementById("hole-card-two")!.hidden = true;
+    document.getElementById("flop-card-one")!.hidden = true;
+    document.getElementById("flop-card-two")!.hidden = true;
+    document.getElementById("flop-card-three")!.hidden = true;
+    document.getElementById("turn-card")!.hidden = true;
+    document.getElementById("river-card")!.hidden = true;
+    setState(cards);
+  }
+
   return (
     <>
       <div id="table">
@@ -180,6 +200,9 @@ function Board({players} : roomSize) {
        </button>
        <button onClick={() => RiverDeal(cards.slice(0, 7))} className="spaced-button" id="river-button" type="button" hidden={true}>
          Deal River
+       </button>
+       <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
+        Reset
        </button>
        {/* <div className="hole-cards"> */}
          <div id="hole-card-one" hidden={true}>
