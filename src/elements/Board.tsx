@@ -9,7 +9,7 @@ type roomSize = {
 
 function HoleDeal(cards: number[]) {
   document.getElementById("hole-button")!.hidden = true;
-  document.getElementById("flop-button")!.hidden = false;
+  document.getElementById("player-button")!.hidden = false;
   document.getElementById("hole-card-one")!.hidden = false;
   document.getElementById("hole-card-two")!.hidden = false;
   let bestHand = FindBestHand(cards);
@@ -18,7 +18,7 @@ function HoleDeal(cards: number[]) {
 
 function FlopDeal(cards: number[]) {
   document.getElementById("flop-button")!.hidden = true;
-  document.getElementById("turn-button")!.hidden = false;
+  document.getElementById("player-button")!.hidden = false;
   document.getElementById("flop-card-one")!.hidden = false;
   document.getElementById("flop-card-two")!.hidden = false;
   document.getElementById("flop-card-three")!.hidden = false;
@@ -27,14 +27,14 @@ function FlopDeal(cards: number[]) {
 
 function TurnDeal(cards: number[]) {
   document.getElementById("turn-button")!.hidden = true;
-  document.getElementById("river-button")!.hidden = false;
+  document.getElementById("player-button")!.hidden = false;
   document.getElementById("turn-card")!.hidden = false;
   let bestHand = FindBestHand(cards);
 }
 
 function RiverDeal(cards:number[]) {
   document.getElementById("river-button")!.hidden = true;
-  document.getElementById("reset-button")!.hidden = false;
+  document.getElementById("player-button")!.hidden = false;
   document.getElementById("river-card")!.hidden = false;
   let bestHand = FindBestHand(cards);
 }
@@ -159,19 +159,19 @@ function FindBestHand(cards: number[]) {
   }
   let hands = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
   // document.getElementById("best-hand")!.innerText = bestHand.toString();
-  document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
+  // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
   return bestHand.splice(1, 5);
 }
 
 function Board({players} : roomSize) {
   var deck: Deck = new Deck;
   deck.Shuffle();
-  var cards = deck.Deal();
-  const[state, setState] = useState(cards);
-
+  const [cards, setCards] = useState(deck.Deal(players));
+  // const [currentCards, setCurrentCards] = useState(cards.slice(0, 2).concat(cards.slice(cards.length - 6, 5)));
+  const [playerNum, setPlayerNum] = useState(1);
   function Reset() {
     deck.Shuffle();
-    cards = deck.Deal()
+    setCards(deck.Deal(players));
     document.getElementById("reset-button")!.hidden = true;
     document.getElementById("hole-button")!.hidden = false;
     document.getElementById("river-button")!.hidden = true;
@@ -183,54 +183,81 @@ function Board({players} : roomSize) {
     document.getElementById("flop-card-three")!.hidden = true;
     document.getElementById("turn-card")!.hidden = true;
     document.getElementById("river-card")!.hidden = true;
-    setState(cards);
+    // setCurrentCards(cards.slice(0, 2).concat(cards.slice(cards.length - 6, 5)));
+  }
+
+  function ChangePlayer() {
+    let newPlayerNum = playerNum + 1;
+    if (newPlayerNum != players + 1) {
+      setPlayerNum(newPlayerNum);
+      let currentCards = cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(-5, 5));
+      // setCurrentCards(cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(cards.length - 6, 5)));
+      FindBestHand(currentCards);
+    } else {
+      newPlayerNum = 1;
+      document.getElementById("player-button")!.hidden = true;
+      if (document.getElementById("flop-card-one")!.hidden === true) {
+        document.getElementById("flop-button")!.hidden = false;
+      } else if (document.getElementById("turn-card")!.hidden === true) {
+        document.getElementById("turn-button")!.hidden = false;
+      } else if (document.getElementById("river-card")!.hidden === true) {
+        document.getElementById("river-button")!.hidden = false;
+      } else {
+        document.getElementById("reset-button")!.hidden = false;
+      }
+      setPlayerNum(newPlayerNum);
+      let currentCards = cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(-5, 5));
+      // setCurrentCards(cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(cards.length - 6, 5)));
+      FindBestHand(currentCards);
+    }
   }
 
   return (
     <>
       <div id="table">
-       <button onClick={() => HoleDeal(cards.slice(0, 2))} className="spaced-button" id="hole-button" type="button">
-         Deal Hole
-       </button>
-       <button onClick={() => FlopDeal(cards.slice(0, 5))} className="spaced-button" id="flop-button" type="button" hidden={true}>
-         Deal Flop
-       </button>
-       <button onClick={() => TurnDeal(cards.slice(0, 6))} className="spaced-button" id="turn-button" type="button" hidden={true}>
-         Deal Turn
-       </button>
-       <button onClick={() => RiverDeal(cards.slice(0, 7))} className="spaced-button" id="river-button" type="button" hidden={true}>
-         Deal River
-       </button>
-       <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
-        Reset
-       </button>
-       {/* <div className="hole-cards"> */}
-         <div id="hole-card-one" hidden={true}>
-           <Card val={cards[0]}/>  
-         </div> 
-         <div id="hole-card-two" hidden={true}>
-           <Card val={cards[1]}/>
-         </div>   
-       {/* </div> */}
-       <div className="communal-cards">
-         <div id="flop-card-one" hidden={true}style={{float:"left"}}>
-           <Card val={cards[2]}/>
-         </div>
-         <div id="flop-card-two" hidden={true} style={{float:"left"}}>
-           <Card val={cards[3]}/>
-         </div>
-         <div id="flop-card-three" hidden={true} style={{float:"left"}}>
-           <Card val={cards[4]}/>
-         </div>
-         <div id="turn-card" hidden={true} style={{float:"left"}}>
-           <Card val={cards[5]}/>
-         </div>
-         <div id="river-card" hidden={true} style={{float:"left"}}>
-           <Card val={cards[6]}/>
-         </div>
-       </div>
-     </div>
-     <h1 id="best-hand"></h1>
+        <button onClick={() => HoleDeal(cards.slice(2 * (playerNum - 1), 2))} className="spaced-button" id="hole-button" type="button">
+          Deal Hole
+        </button>
+        <button onClick={() => FlopDeal(cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(-5, 3)))} className="spaced-button" id="flop-button" type="button" hidden={true}>
+          Deal Flop
+        </button>
+        <button onClick={() => TurnDeal(cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(-5, 3)))} className="spaced-button" id="turn-button" type="button" hidden={true}>
+          Deal Turn
+        </button>
+        <button onClick={() => RiverDeal(cards.slice(2 * (playerNum - 1), 2).concat(cards.slice(-5, 3)))} className="spaced-button" id="river-button" type="button" hidden={true}>
+          Deal River
+        </button>
+        <button onClick={() => ChangePlayer()} className="spaced-button" id="player-button" type="button" hidden={true}>
+          Next Player
+        </button>
+        <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
+          Reset
+        </button>
+        <div id="hole-card-one" hidden={true}>
+          <Card val={cards[2 * playerNum]}/>  
+        </div> 
+        <div id="hole-card-two" hidden={true}>
+          <Card val={cards[2 * playerNum + 1]}/>
+        </div>   
+        <div className="communal-cards">
+          <div id="flop-card-one" hidden={true}style={{float:"left"}}>
+            <Card val={cards[cards.length - 5]}/>
+          </div>
+          <div id="flop-card-two" hidden={true} style={{float:"left"}}>
+            <Card val={cards[cards.length - 4]}/>
+          </div>
+          <div id="flop-card-three" hidden={true} style={{float:"left"}}>
+            <Card val={cards[cards.length - 3]}/>
+          </div>
+          <div id="turn-card" hidden={true} style={{float:"left"}}>
+            <Card val={cards[cards.length - 2]}/>
+          </div>
+          <div id="river-card" hidden={true} style={{float:"left"}}>
+            <Card val={cards[cards.length - 1]}/>
+          </div>
+        </div>
+      </div>
+      <h1 id="best-hand">{cards.toString()}</h1>
     </>
   );
 }

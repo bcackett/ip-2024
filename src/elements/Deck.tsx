@@ -13,8 +13,8 @@ class Deck {
     }
   }
 
-  Deal() {
-    let dealtCards = this.cards.slice(0, 7);
+  Deal(players: number) {
+    let dealtCards = this.cards.slice(0, 2*players + 5);
     return dealtCards;
   }
 
