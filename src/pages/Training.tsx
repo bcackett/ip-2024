@@ -2,7 +2,7 @@ import Board from "../elements/Board"
 
 function Training() {
   return (
-    <Board players={2}/>
+    <Board players={3}/>
   );
 }
 
