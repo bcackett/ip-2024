@@ -11,16 +11,23 @@ function Board({players} : roomSize) {
   var deck: Deck = new Deck;
   deck.Shuffle();
   const STARTBANK = 200;
+  // const [cards, setCards] = useState(deck.Deal(players));
   const [cards, setCards] = useState(deck.Deal(players));
+  const [startingPlayer, setStartingPlayer] = useState(1);
   const [currentPlayer, setCurrentPlayer] = useState(1);
   const[playerBanks, setPlayerBanks] = useState(Array.from({length: players}).map(bank=>STARTBANK));
   const [currentBet, setCurrentBet] = useState(10);
+  const [bestHandText, setBestHandText] = useState("");
+  const [foldedPlayers, setFoldedPlayers] = useState(new Array(players).fill(0));
+  const [pot, setPot] = useState(0);
 
   function HoleDeal(cards: number[]) {
     document.getElementById("hole-card-one")!.hidden = false;
     document.getElementById("hole-card-two")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
+    document.getElementById("start-button")!.hidden = true;
     let bestHand = FindBestHand(cards);
     setCurrentBet(10);
   }
@@ -31,6 +38,7 @@ function Board({players} : roomSize) {
     document.getElementById("flop-card-three")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards);
     setCurrentBet(10);
   }
@@ -39,6 +47,7 @@ function Board({players} : roomSize) {
     document.getElementById("turn-card")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards);
     setCurrentBet(10);
   }
@@ -47,6 +56,7 @@ function Board({players} : roomSize) {
     document.getElementById("river-card")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards);
     setCurrentBet(10);
   }
@@ -59,39 +69,43 @@ function Board({players} : roomSize) {
     let spades = cards.filter(function(card) {return Math.floor(card / 15) === 3});
     let allSortedSuits = [hearts, diamonds, clubs, spades];
     let sortedSuitLengths = allSortedSuits.map(suit => suit.length);
-    if (sortedSuitLengths.indexOf(Math.max(...sortedSuitLengths)) >= 5) {
-      cardsOfSameSuit.concat([1], allSortedSuits[sortedSuitLengths.indexOf(Math.max(...sortedSuitLengths))]);
+    if (sortedSuitLengths[sortedSuitLengths.indexOf(Math.max(hearts.length, diamonds.length, clubs.length, spades.length))] >= 5) {
+      cardsOfSameSuit = [1].concat(allSortedSuits[sortedSuitLengths.indexOf(Math.max(hearts.length, diamonds.length, clubs.length, spades.length))]);
       //One added first to mark that the cards returned are the same suit.
     } else {
-      cardsOfSameSuit.concat([0], cards); //Zero added first to mark that the cards returned are not the same suit.
+      cardsOfSameSuit = [0].concat(cards); //Zero added first to mark that the cards returned are not the same suit.
     }
     return cardsOfSameSuit;
   }
   
   function CheckForConsecutivity(cards: number[]) {
-    cards.sort(c => c % 15); 
+    cards = cards.sort(c => c % 15); 
     let cardValues: number[] = cards.map(c => c % 15); //Checks only for card value, not suit.
-    let nonConsecutiveTally: number = 0;
+    let nonConsecutiveCount: number = 0;
     let consecutiveCards: number[] = [0, cards[0]];
     for (let i = 0; i < cardValues.length; i++) {
       if (cardValues[i + 1] != cardValues[i] + 1) {
-        if (consecutiveCards.length >= 6) {
+        if (consecutiveCards.length >= 6) { // 5 cards + result indicator
           consecutiveCards[0] = 1;
           return consecutiveCards;
         } else {
-          nonConsecutiveTally++;
+          // console.log(cards[i + 1]);
+          nonConsecutiveCount++;
           consecutiveCards = [0, cards[i + 1]];
         }
-      }
-      if (nonConsecutiveTally > 2) {
-        consecutiveCards = consecutiveCards.concat([0], cards); //Zero added first to mark that the cards returned are not consecutive.
-        return consecutiveCards;
+
+        if (nonConsecutiveCount > 2) {
+          consecutiveCards = [0].concat(cards); //Zero added first to mark that the cards returned are not consecutive.
+          return consecutiveCards;
+        }
       } else {
-        consecutiveCards.push(cards[i + 1])
+        consecutiveCards = consecutiveCards.concat(cards[i + 1])
       }
     }
     if (consecutiveCards.length >= 6) {
       consecutiveCards[0] = 1;
+    } else {
+      consecutiveCards = [0].concat(cards);
     }
     return consecutiveCards;
   }
@@ -112,28 +126,31 @@ function Board({players} : roomSize) {
     return valueMap;
   }
   
-  function FindBestHand(cards: number[]) { //NOT READY FOR MULTIPLAYER
+  function FindBestHand(cards: number[]) {
     /*Returns value of best hand (0 for high card -> 9 for royal flush), followed by values of cards in best hand.
     Eg: [9, 59, 58, 57, 56, 55] = royal flush with spades. */
-    let sameSuitCards = CheckForSameSuit(cards);
     let bestHand: number[] = [];
+    let sameSuitCards = CheckForSameSuit(cards);
     if (sameSuitCards[0] === 1) {
-      let consecutiveCards = CheckForConsecutivity(sameSuitCards.slice(1, sameSuitCards.length - 2));
+      let consecutiveCards = CheckForConsecutivity(sameSuitCards.slice(1, sameSuitCards.length));
       if(consecutiveCards[0] === 1) {
+        consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
         if (CheckHighestCard(consecutiveCards) % 15 === 14) {
-          bestHand = [9].concat(consecutiveCards.slice(0, consecutiveCards.length - 6)); //Royal Flush
+          bestHand = [9].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Royal Flush
         } else {
-          bestHand = [8].concat(consecutiveCards.slice(0, consecutiveCards.length - 6)); //Straight Flush
+          bestHand = [8].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Straight Flush
         }
       } else {
-        consecutiveCards.splice(0, 1).sort()
-        bestHand = [5].concat(consecutiveCards.slice(0, consecutiveCards.length - 6)) //Flush
+        sameSuitCards = sameSuitCards.slice(1, sameSuitCards.length).sort();
+        bestHand = [5].concat(sameSuitCards.slice(sameSuitCards.length - 5, sameSuitCards.length)); //Flush
       }
     } else {
       let consecutiveCards = CheckForConsecutivity(cards);
       if (consecutiveCards[0] === 1) {
-        bestHand = [4].concat(consecutiveCards.slice(0, consecutiveCards.length - 6)); //Straight
+        consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
+        bestHand = [4].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Straight
       } else {
+        consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
         let valueArray = Array.from(CheckMatchingValues(cards));
         if (valueArray.map(p => p[1]).includes(4)) {
           let fourOfAKindValue = valueArray[valueArray.map(p => p[1]).indexOf(4)][0];
@@ -171,22 +188,39 @@ function Board({players} : roomSize) {
     }
     let hands = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
     // document.getElementById("best-hand")!.innerText = bestHand.toString();
+    setBestHandText(bestHand.toString())
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
+    // setBestHandText(hands[bestHand[0]]);
     return bestHand.splice(1, 5);
   }
   
   function Reset() {
     deck.Shuffle();
     setCards(deck.Deal(players));
+    setFoldedPlayers(new Array(players).fill(0));
     HoleDeal(cards.slice(2 * (currentPlayer - 1), 2));
     document.getElementById("reset-button")!.hidden = true;
     document.getElementById("full-reset-button")!.hidden = true;
-    document.getElementById("best-hand")!.innerText = "";
+    document.getElementById("winner-text")!.innerText = "";
+    document.getElementById("raise-button")!.hidden = true;
+    document.getElementById("fold-button")!.hidden = true;
+    document.getElementById("bet-button")!.hidden = true;
+    document.getElementById("fold-button")!.hidden = true;
+    document.getElementById("hole-card-one")!.hidden = true;
+    document.getElementById("hole-card-two")!.hidden = true;
     document.getElementById("flop-card-one")!.hidden = true;
     document.getElementById("flop-card-two")!.hidden = true;
     document.getElementById("flop-card-three")!.hidden = true;
     document.getElementById("turn-card")!.hidden = true;
     document.getElementById("river-card")!.hidden = true;
+    document.getElementById("start-button")!.hidden = false;
+    setBestHandText("");
+    let newStartingPlayer = startingPlayer + 1;
+    if (newStartingPlayer > players) {
+      newStartingPlayer = 1;
+    }
+    setStartingPlayer(newStartingPlayer);
+    setCurrentPlayer(newStartingPlayer);
   }
 
   function FullReset() {
@@ -195,29 +229,51 @@ function Board({players} : roomSize) {
     Reset();
   }
 
-  function ChangePlayer() { //There is a bug here in that the best hand displayed will always use all cards, not just the ones dealt so far
-    let newPlayerNum = currentPlayer + 1;
-    if (newPlayerNum != players + 1) {
-      setCurrentPlayer(newPlayerNum);
-      let currentCards = cards.slice(2 * (currentPlayer - 1), 2).concat(cards.slice(-5, 5));
-      FindBestHand(currentCards);
+  function ChangePlayer() {
+    if (foldedPlayers.filter(p => p === 0).length === 1) {
+      let winner = foldedPlayers.indexOf(0) + 1;
+      DisplayWinner(winner);
     } else {
-      newPlayerNum = 1;
-      if (document.getElementById("flop-card-one")!.hidden === true) {
-        FlopDeal(cards.slice(2 * (currentPlayer - 1), 2).concat(cards.slice(-5, 3)))
-      } else if (document.getElementById("turn-card")!.hidden === true) {
-        TurnDeal(cards.slice(2 * (currentPlayer - 1), 2).concat(cards.slice(-5, 3)))
-      } else if (document.getElementById("river-card")!.hidden === true) {
-        RiverDeal(cards.slice(2 * (currentPlayer - 1), 2).concat(cards.slice(-5, 3)))
-      } else {
-        document.getElementById("reset-button")!.hidden = false;
-        document.getElementById("full-reset-button")!.hidden = false;
-        document.getElementById("bet-button")!.hidden = true;
-        document.getElementById("raise-button")!.hidden = true;
+      let newPlayerNum = currentPlayer + 1;
+      let firstPlayer = foldedPlayers.indexOf(0) + 1;
+      let newCard = false;
+
+      if (newPlayerNum === players + 1) {
+        newPlayerNum = firstPlayer;
+        newCard = true;
       }
-      setCurrentPlayer(newPlayerNum);
-      let currentCards = cards.slice(2 * (currentPlayer - 1), 2).concat(cards.slice(-5, 5));
-      FindBestHand(currentCards);
+
+      while (foldedPlayers[newPlayerNum - 1] === 1) {
+        newPlayerNum++;
+        if (newPlayerNum === players + 1) {
+          newPlayerNum = firstPlayer;
+          newCard = true;
+        }
+      }
+
+      if (newCard === true) {
+        setCurrentPlayer(firstPlayer);
+        if (document.getElementById("flop-card-one")!.hidden === true) {
+          FlopDeal(cards.slice(0, 2).concat(cards.slice(-5, -2)))
+        } else if (document.getElementById("turn-card")!.hidden === true) {
+          TurnDeal(cards.slice(0, 2).concat(cards.slice(-5, -1)))
+        } else if (document.getElementById("river-card")!.hidden === true) {
+          RiverDeal(cards.slice(0, 2).concat(cards.slice(-5, cards.length)))
+        } else {
+          DisplayWinner(1);
+        }
+      } else {
+        if (document.getElementById("flop-card-one")!.hidden === true) {
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2))
+        } else if (document.getElementById("turn-card")!.hidden === true) {
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)))
+        } else if (document.getElementById("river-card")!.hidden === true) {
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)))
+        } else {
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)))
+        }
+        setCurrentPlayer(newPlayerNum);
+      }
     }
   }
 
@@ -231,6 +287,7 @@ function Board({players} : roomSize) {
       newBanks[currentPlayer - 1] -= amount;
       setCurrentBet(amount);
       setPlayerBanks(newBanks);
+      setPot(pot + currentBet);
       ChangePlayer();
     }
   }
@@ -240,23 +297,47 @@ function Board({players} : roomSize) {
       let newBanks = playerBanks;
       newBanks[currentPlayer - 1] -= currentBet;
       setPlayerBanks(newBanks);
+      setPot(pot + currentBet);
       ChangePlayer();
     }
+  }
+
+  function Fold() {
+    let newFoldedPlayers = foldedPlayers;
+    newFoldedPlayers[currentPlayer - 1] = 1;
+    setFoldedPlayers(newFoldedPlayers);
+    ChangePlayer();
+  }
+
+  function DisplayWinner(playerNum: number) {
+    document.getElementById("winner-text")!.innerText = "Player " + playerNum + " wins the pot!";
+    document.getElementById("reset-button")!.hidden = false;
+    document.getElementById("full-reset-button")!.hidden = false;
+    document.getElementById("bet-button")!.hidden = true;
+    document.getElementById("raise-button")!.hidden = true;
+    document.getElementById("fold-button")!.hidden = true;
+    let newBanks = playerBanks;
+    newBanks[playerNum - 1] += pot;
+    setPlayerBanks(newBanks);
+    setPot(0);
   }
 
   return (
     <>
       <div id="table">
+        <button onClick={() => HoleDeal(cards.slice(2 * (currentPlayer - 1), 2))} className="spaced-button" id="start-button" type="button">
+          Start Game
+        </button>
         <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
           Reset
         </button>
         <button onClick={() => FullReset()} className="spaced-button" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
-        <div id="hole-card-one">
+        <div id="hole-card-one" hidden={true}>
           <Card val={cards[2 * (currentPlayer - 1)]}/>  
         </div> 
-        <div id="hole-card-two">
+        <div id="hole-card-two" hidden={true}>
           <Card val={cards[2 * (currentPlayer - 1) + 1]}/>
         </div>   
         <div className="communal-cards">
@@ -300,14 +381,19 @@ function Board({players} : roomSize) {
         <h1 id="p8-stats" className=".player-stats" hidden={playerBanks.length < 8}>
           Player 8: £{playerBanks[7]}
         </h1>
-        <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} disabled={playerBanks[currentPlayer - 1] === 0}>
+        <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
           Bet
         </button>
-        <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0}>
+        <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
           Raise
         </button>
+        <button id="fold-button" className="spaced-button" type="button" onClick={() => Fold()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+          Fold
+        </button>
+        <h1 id="winner-text" hidden={true} style={{display:"inline-block", position:"absolute", left:"50px", bottom:"50px"}}/>
+        <h1 id="pot">Pot = {pot}</h1>
       </div>
-      <h1 id="best-hand">{cards.toString()}</h1>
+      <h1 id="best-hand">{bestHandText}</h1>
     </>
   );
 }

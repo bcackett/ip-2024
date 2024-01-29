@@ -87,3 +87,11 @@ h1 {
   text-align: left;
 }
 
+#table > #pot {
+  position: absolute;
+  bottom: 50%;
+  left: 55%;
+  display: inline-block;
+  font-size: 60px;
+}
+
