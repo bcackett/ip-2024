@@ -16,7 +16,7 @@ function Welcome() {
         <h1>Welcome to I.Poker!</h1>
       </div>
       <div>
-        <label>I.Poker is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
+        <label style={{color: "#f5f8e7"}}>I.Poker is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
       </div>
       <div>
         <button className="spaced-button" type="button" onClick={goToTrain}>

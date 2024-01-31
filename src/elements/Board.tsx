@@ -11,12 +11,12 @@ function Board({players} : roomSize) {
   var deck: Deck = new Deck;
   deck.Shuffle();
   const STARTBANK = 200;
-  // const [cards, setCards] = useState(deck.Deal(players));
-  const [cards, setCards] = useState([10, 11, 46, 47, 12, 13, 1, 38, 58]);
+  const BIGBLIND = 10;
+  const [cards, setCards] = useState(deck.Deal(players));
   const [startingPlayer, setStartingPlayer] = useState(1);
   const [currentPlayer, setCurrentPlayer] = useState(1);
   const[playerBanks, setPlayerBanks] = useState(Array.from({length: players}).map(bank=>STARTBANK));
-  const [currentBet, setCurrentBet] = useState(10);
+  const [currentBet, setCurrentBet] = useState(0);
   const [bestHandText, setBestHandText] = useState("");
   const [foldedPlayers, setFoldedPlayers] = useState(new Array(players).fill(0));
   const [pot, setPot] = useState(0);
@@ -229,6 +229,7 @@ function Board({players} : roomSize) {
     document.getElementById("turn-card")!.hidden = true;
     document.getElementById("river-card")!.hidden = true;
     document.getElementById("start-button")!.hidden = false;
+    document.getElementById("play-text")!.innerText = "";
     setBestHandText("");
     let newStartingPlayer = startingPlayer + 1;
     if (newStartingPlayer > players) {
@@ -305,6 +306,7 @@ function Board({players} : roomSize) {
       setCurrentBet(amount);
       setPlayerBanks(newBanks);
       setPot(pot + currentBet);
+      document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to " + amount +".\n\n";
       ChangePlayer();
     }
   }
@@ -315,6 +317,8 @@ function Board({players} : roomSize) {
       newBanks[currentPlayer - 1] -= currentBet;
       setPlayerBanks(newBanks);
       setPot(pot + currentBet);
+      document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " bet " + currentBet + ".\n\n";
+      document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
       ChangePlayer();
     }
   }
@@ -323,6 +327,7 @@ function Board({players} : roomSize) {
     let newFoldedPlayers = foldedPlayers;
     newFoldedPlayers[currentPlayer - 1] = 1;
     setFoldedPlayers(newFoldedPlayers);
+    document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " folded.\n\n";
     ChangePlayer();
   }
 
@@ -332,7 +337,8 @@ function Board({players} : roomSize) {
   }
 
   function DisplayWinner(playerNum: number) {
-    document.getElementById("winner-text")!.innerText = "Player " + playerNum + " wins the pot!";
+    document.getElementById("play-text")!.innerText += "Player " + playerNum + " wins the pot!";
+    document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     document.getElementById("reset-button")!.hidden = false;
     document.getElementById("full-reset-button")!.hidden = false;
     document.getElementById("bet-button")!.hidden = true;
@@ -346,6 +352,8 @@ function Board({players} : roomSize) {
 
   return (
     <>
+      <div id="warning-reporter">
+      </div>
       <div id="table">
         <button onClick={() => HoleDeal(cards.slice(2 * (currentPlayer - 1), 2))} className="spaced-button" id="start-button" type="button">
           Start Game
@@ -403,19 +411,24 @@ function Board({players} : roomSize) {
         <h1 id="p8-stats" className=".player-stats" hidden={playerBanks.length < 8}>
           Player 8: £{playerBanks[7]}
         </h1>
-        <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
-          Bet
-        </button>
-        <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
-          Raise
-        </button>
-        <button id="fold-button" className="spaced-button" type="button" onClick={() => Fold()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
-          Fold
-        </button>
+        <div id="decision-buttons">
+          <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+            Bet
+          </button>
+          <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+            Raise
+          </button>
+          <button id="fold-button" className="spaced-button" type="button" onClick={() => Fold()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+            Fold
+          </button>  
+        </div>
         <h1 id="winner-text" hidden={true} style={{display:"inline-block", position:"absolute", left:"50px", bottom:"50px"}}/>
         <h1 id="pot">Pot = {pot}</h1>
       </div>
-      <h1 id="best-hand">{bestHandText}</h1>
+      <div id="play-reporter">
+        <h1 id="play-text"></h1>
+      </div>
+      <h1 id="best-hand" style={{color: "#f5f8e7"}}>{bestHandText}</h1>
     </>
   );
 }
