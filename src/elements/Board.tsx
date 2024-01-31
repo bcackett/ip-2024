@@ -12,7 +12,7 @@ function Board({players} : roomSize) {
   deck.Shuffle();
   const STARTBANK = 200;
   // const [cards, setCards] = useState(deck.Deal(players));
-  const [cards, setCards] = useState(deck.Deal(players));
+  const [cards, setCards] = useState([10, 11, 46, 47, 12, 13, 1, 38, 58]);
   const [startingPlayer, setStartingPlayer] = useState(1);
   const [currentPlayer, setCurrentPlayer] = useState(1);
   const[playerBanks, setPlayerBanks] = useState(Array.from({length: players}).map(bank=>STARTBANK));
@@ -20,6 +20,7 @@ function Board({players} : roomSize) {
   const [bestHandText, setBestHandText] = useState("");
   const [foldedPlayers, setFoldedPlayers] = useState(new Array(players).fill(0));
   const [pot, setPot] = useState(0);
+  const [bestHands, setBestHands] = useState(new Array(players).fill([0]));
 
   function HoleDeal(cards: number[]) {
     document.getElementById("hole-card-one")!.hidden = false;
@@ -79,8 +80,14 @@ function Board({players} : roomSize) {
   }
   
   function CheckForConsecutivity(cards: number[]) {
-    cards = cards.sort(c => c % 15); 
-    let cardValues: number[] = cards.map(c => c % 15); //Checks only for card value, not suit.
+    let aceHighCards = cards;
+    cards.forEach(card => {
+      if (card % 15 === 1) {
+        aceHighCards = aceHighCards.concat(card + 13);
+      }
+    });
+    aceHighCards = aceHighCards.sort((a, b) => (a % 15) - (b % 15)); 
+    let cardValues: number[] = aceHighCards.map(c => c % 15); //Checks only for card value, not suit.
     let nonConsecutiveCount: number = 0;
     let consecutiveCards: number[] = [0, cards[0]];
     for (let i = 0; i < cardValues.length; i++) {
@@ -91,15 +98,15 @@ function Board({players} : roomSize) {
         } else {
           // console.log(cards[i + 1]);
           nonConsecutiveCount++;
-          consecutiveCards = [0, cards[i + 1]];
+          consecutiveCards = [0, aceHighCards[i + 1]];
         }
 
-        if (nonConsecutiveCount > 2) {
+        if (nonConsecutiveCount > aceHighCards.length - 5) {
           consecutiveCards = [0].concat(cards); //Zero added first to mark that the cards returned are not consecutive.
           return consecutiveCards;
         }
       } else {
-        consecutiveCards = consecutiveCards.concat(cards[i + 1])
+        consecutiveCards = consecutiveCards.concat(aceHighCards[i + 1])
       }
     }
     if (consecutiveCards.length >= 6) {
@@ -111,7 +118,13 @@ function Board({players} : roomSize) {
   }
   
   function CheckHighestCard(cards: number[]) {
-    return cards.sort(c => c % 15)[cards.length - 1];
+    let aceHighCards = cards;
+    cards.forEach(card => {
+      if (card % 15 === 1) {
+        aceHighCards = aceHighCards.concat(card + 13);
+      }
+    });
+    return aceHighCards.sort((a, b) => (b % 15) - (a % 15))[0];
   }
   
   function CheckMatchingValues(cards: number[]) {
@@ -191,7 +204,9 @@ function Board({players} : roomSize) {
     setBestHandText(bestHand.toString())
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
     // setBestHandText(hands[bestHand[0]]);
-    return bestHand.splice(1, 5);
+    let newBestHands = bestHands;
+    newBestHands[currentPlayer - 1] = bestHand;
+    setBestHands(newBestHands);
   }
   
   function Reset() {
@@ -260,6 +275,7 @@ function Board({players} : roomSize) {
         } else if (document.getElementById("river-card")!.hidden === true) {
           RiverDeal(cards.slice(0, 2).concat(cards.slice(-5, cards.length)))
         } else {
+          CalculateWinner();
           DisplayWinner(1);
         }
       } else {
@@ -272,6 +288,7 @@ function Board({players} : roomSize) {
         } else {
           FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)))
         }
+        document.getElementById("p" + firstPlayer + "-stats")
         setCurrentPlayer(newPlayerNum);
       }
     }
@@ -307,6 +324,11 @@ function Board({players} : roomSize) {
     newFoldedPlayers[currentPlayer - 1] = 1;
     setFoldedPlayers(newFoldedPlayers);
     ChangePlayer();
+  }
+
+  function CalculateWinner() {
+    let finalBestHands = bestHands.sort();
+    return bestHands.indexOf(finalBestHands[finalBestHands.length -1]) -1;
   }
 
   function DisplayWinner(playerNum: number) {
