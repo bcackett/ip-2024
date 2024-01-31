@@ -2,6 +2,7 @@ import { table } from "console";
 import Card from "./Card";
 import Deck from "./Deck";
 import { useState } from "react";
+import { fireEvent } from "@testing-library/react";
 
 type roomSize = {
   players: number;
@@ -22,43 +23,43 @@ function Board({players} : roomSize) {
   const [pot, setPot] = useState(0);
   const [bestHands, setBestHands] = useState(new Array(players).fill([0]));
 
-  function HoleDeal(cards: number[]) {
+  function HoleDeal(cards: number[], playerNum: number) {
     document.getElementById("hole-card-one")!.hidden = false;
     document.getElementById("hole-card-two")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
     document.getElementById("start-button")!.hidden = true;
-    let bestHand = FindBestHand(cards);
+    let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(10);
   }
   
-  function FlopDeal(cards: number[]) {
+  function FlopDeal(cards: number[], playerNum: number) {
     document.getElementById("flop-card-one")!.hidden = false;
     document.getElementById("flop-card-two")!.hidden = false;
     document.getElementById("flop-card-three")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
-    let bestHand = FindBestHand(cards);
+    let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(10);
   }
   
-  function TurnDeal(cards: number[]) {
+  function TurnDeal(cards: number[], playerNum: number) {
     document.getElementById("turn-card")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
-    let bestHand = FindBestHand(cards);
+    let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(10);
   }
   
-  function RiverDeal(cards:number[]) {
+  function RiverDeal(cards:number[], playerNum: number) {
     document.getElementById("river-card")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
-    let bestHand = FindBestHand(cards);
+    let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(10);
   }
   
@@ -96,7 +97,6 @@ function Board({players} : roomSize) {
           consecutiveCards[0] = 1;
           return consecutiveCards;
         } else {
-          // console.log(cards[i + 1]);
           nonConsecutiveCount++;
           consecutiveCards = [0, aceHighCards[i + 1]];
         }
@@ -139,7 +139,7 @@ function Board({players} : roomSize) {
     return valueMap;
   }
   
-  function FindBestHand(cards: number[]) {
+  function FindBestHand(cards: number[], playerNum: number) {
     /*Returns value of best hand (0 for high card -> 9 for royal flush), followed by values of cards in best hand.
     Eg: [9, 59, 58, 57, 56, 55] = royal flush with spades. */
     let bestHand: number[] = [];
@@ -205,7 +205,7 @@ function Board({players} : roomSize) {
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
     // setBestHandText(hands[bestHand[0]]);
     let newBestHands = bestHands;
-    newBestHands[currentPlayer - 1] = bestHand;
+    newBestHands[playerNum - 1] = bestHand;
     setBestHands(newBestHands);
   }
   
@@ -213,7 +213,6 @@ function Board({players} : roomSize) {
     deck.Shuffle();
     setCards(deck.Deal(players));
     setFoldedPlayers(new Array(players).fill(0));
-    HoleDeal(cards.slice(2 * (currentPlayer - 1), 2));
     document.getElementById("reset-button")!.hidden = true;
     document.getElementById("full-reset-button")!.hidden = true;
     document.getElementById("winner-text")!.innerText = "";
@@ -235,6 +234,7 @@ function Board({players} : roomSize) {
     if (newStartingPlayer > players) {
       newStartingPlayer = 1;
     }
+    HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), newStartingPlayer);
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
   }
@@ -256,6 +256,10 @@ function Board({players} : roomSize) {
 
       if (newPlayerNum === players + 1) {
         newPlayerNum = firstPlayer;
+        if (firstPlayer >= startingPlayer) {
+          newCard = true;
+        }
+      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedPlayers[startingPlayer - 1] === 1)) {
         newCard = true;
       }
 
@@ -263,34 +267,41 @@ function Board({players} : roomSize) {
         newPlayerNum++;
         if (newPlayerNum === players + 1) {
           newPlayerNum = firstPlayer;
+          if (firstPlayer >= startingPlayer) {
+            newCard = true;
+          }
+        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedPlayers[startingPlayer - 1] === 1)) {
           newCard = true;
         }
       }
 
       if (newCard === true) {
+        document.getElementById("p" + firstPlayer +"-stats")!.classList.add("glow");
+        document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         setCurrentPlayer(firstPlayer);
         if (document.getElementById("flop-card-one")!.hidden === true) {
-          FlopDeal(cards.slice(0, 2).concat(cards.slice(-5, -2)))
+          FlopDeal(cards.slice(0, 2).concat(cards.slice(-5, -2)), firstPlayer)
         } else if (document.getElementById("turn-card")!.hidden === true) {
-          TurnDeal(cards.slice(0, 2).concat(cards.slice(-5, -1)))
+          TurnDeal(cards.slice(0, 2).concat(cards.slice(-5, -1)), firstPlayer)
         } else if (document.getElementById("river-card")!.hidden === true) {
-          RiverDeal(cards.slice(0, 2).concat(cards.slice(-5, cards.length)))
+          RiverDeal(cards.slice(0, 2).concat(cards.slice(-5, cards.length)), firstPlayer)
         } else {
-          CalculateWinner();
-          DisplayWinner(1);
+          DisplayWinner(CalculateWinner());
         }
       } else {
+        setCurrentPlayer(newPlayerNum);
         if (document.getElementById("flop-card-one")!.hidden === true) {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2))
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2), newPlayerNum)
         } else if (document.getElementById("turn-card")!.hidden === true) {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)))
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)), newPlayerNum)
         } else if (document.getElementById("river-card")!.hidden === true) {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)))
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum)
         } else {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)))
+          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
         }
         document.getElementById("p" + firstPlayer + "-stats")
-        setCurrentPlayer(newPlayerNum);
+        document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
+        document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
       }
     }
   }
@@ -332,18 +343,25 @@ function Board({players} : roomSize) {
   }
 
   function CalculateWinner() {
-    let finalBestHands = bestHands.sort();
-    return bestHands.indexOf(finalBestHands[finalBestHands.length -1]) -1;
+    let finalBestHands = bestHands.filter(()=>true);
+    finalBestHands.sort((a, b) => b[0] - a[0]);
+    return bestHands.indexOf(finalBestHands[0]) + 1;
   }
 
   function DisplayWinner(playerNum: number) {
-    document.getElementById("play-text")!.innerText += "Player " + playerNum + " wins the pot!";
+    document.getElementById("play-text")!.innerText += "Player " + playerNum + " wins the pot!\n";
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     document.getElementById("reset-button")!.hidden = false;
     document.getElementById("full-reset-button")!.hidden = false;
     document.getElementById("bet-button")!.hidden = true;
     document.getElementById("raise-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
+    for (let i = 1; i <= players; i++) {
+      document.getElementById("p" + i +"-stats")!.classList.remove("glow");
+      if (i === playerNum) {
+        document.getElementById("p" + i +"-stats")!.classList.add("winner-glow");
+      }
+    }
     let newBanks = playerBanks;
     newBanks[playerNum - 1] += pot;
     setPlayerBanks(newBanks);
@@ -355,7 +373,7 @@ function Board({players} : roomSize) {
       <div id="warning-reporter">
       </div>
       <div id="table">
-        <button onClick={() => HoleDeal(cards.slice(2 * (currentPlayer - 1), 2))} className="spaced-button" id="start-button" type="button">
+        <button onClick={() => HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer)} className="spaced-button" id="start-button" type="button">
           Start Game
         </button>
         <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>

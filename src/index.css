@@ -88,6 +88,14 @@ h1 {
   text-align: left;
 }
 
+#table > .glow {
+  text-shadow: 0px 0px 10px whitesmoke;
+}
+
+#table > .winner-glow {
+  text-shadow: 0px 0px 10px gold;
+}
+
 #table > #pot {
   position: absolute;
   bottom: 50%;
