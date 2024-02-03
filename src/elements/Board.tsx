@@ -1,8 +1,6 @@
-import { table } from "console";
 import Card from "./Card";
 import Deck from "./Deck";
 import { useState } from "react";
-import { fireEvent } from "@testing-library/react";
 
 type roomSize = {
   players: number;
@@ -10,13 +8,14 @@ type roomSize = {
 
 function Board({players} : roomSize) {
   var deck: Deck = new Deck;
+  const HANDS = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
   deck.Shuffle();
   const STARTBANK = 200;
   const BIGBLIND = 10;
   const [cards, setCards] = useState(deck.Deal(players));
   const [startingPlayer, setStartingPlayer] = useState(1);
   const [currentPlayer, setCurrentPlayer] = useState(1);
-  const[playerBanks, setPlayerBanks] = useState(Array.from({length: players}).map(bank=>STARTBANK));
+  const [playerBanks, setPlayerBanks] = useState(Array.from({length: players}).map(bank=>STARTBANK));
   const [currentBet, setCurrentBet] = useState(0);
   const [bestHandText, setBestHandText] = useState("");
   const [foldedPlayers, setFoldedPlayers] = useState(new Array(players).fill(0));
@@ -31,7 +30,6 @@ function Board({players} : roomSize) {
     document.getElementById("fold-button")!.hidden = false;
     document.getElementById("start-button")!.hidden = true;
     let bestHand = FindBestHand(cards, playerNum);
-    setCurrentBet(10);
   }
   
   function FlopDeal(cards: number[], playerNum: number) {
@@ -42,7 +40,7 @@ function Board({players} : roomSize) {
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards, playerNum);
-    setCurrentBet(10);
+    setCurrentBet(0);
   }
   
   function TurnDeal(cards: number[], playerNum: number) {
@@ -51,7 +49,7 @@ function Board({players} : roomSize) {
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards, playerNum);
-    setCurrentBet(10);
+    setCurrentBet(0);
   }
   
   function RiverDeal(cards:number[], playerNum: number) {
@@ -60,7 +58,7 @@ function Board({players} : roomSize) {
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards, playerNum);
-    setCurrentBet(10);
+    setCurrentBet(0);
   }
   
   function CheckForSameSuit(cards: number[]) {
@@ -87,12 +85,12 @@ function Board({players} : roomSize) {
         aceHighCards = aceHighCards.concat(card + 13);
       }
     });
-    aceHighCards = aceHighCards.sort((a, b) => (a % 15) - (b % 15)); 
+    aceHighCards = aceHighCards.sort((a, b) => (b % 15) - (a % 15)); 
     let cardValues: number[] = aceHighCards.map(c => c % 15); //Checks only for card value, not suit.
     let nonConsecutiveCount: number = 0;
     let consecutiveCards: number[] = [0, cards[0]];
     for (let i = 0; i < cardValues.length; i++) {
-      if (cardValues[i + 1] != cardValues[i] + 1) {
+      if (cardValues[i + 1] != cardValues[i] - 1) {
         if (consecutiveCards.length >= 6) { // 5 cards + result indicator
           consecutiveCards[0] = 1;
           return consecutiveCards;
@@ -164,6 +162,7 @@ function Board({players} : roomSize) {
         bestHand = [4].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Straight
       } else {
         consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
+        consecutiveCards.map(card => {if (card % 15 === 1 ) {card = card + 13}})
         let valueArray = Array.from(CheckMatchingValues(cards));
         if (valueArray.map(p => p[1]).includes(4)) {
           let fourOfAKindValue = valueArray[valueArray.map(p => p[1]).indexOf(4)][0];
@@ -199,11 +198,10 @@ function Board({players} : roomSize) {
         }
       }
     }
-    let hands = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
     // document.getElementById("best-hand")!.innerText = bestHand.toString();
     setBestHandText(bestHand.toString())
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
-    // setBestHandText(hands[bestHand[0]]);
+    // setBestHandText(HANDS[bestHand[0]]);
     let newBestHands = bestHands;
     newBestHands[playerNum - 1] = bestHand;
     setBestHands(newBestHands);
@@ -234,21 +232,20 @@ function Board({players} : roomSize) {
     if (newStartingPlayer > players) {
       newStartingPlayer = 1;
     }
+    for (let i = 1; i <= players; i++) {
+      document.getElementById("p" + i + "-stats")?.classList.remove("glow");
+      document.getElementById("p" + i + "-stats")?.classList.remove("winner-glow");
+    }
     HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), newStartingPlayer);
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
-  }
-
-  function FullReset() {
-    document.getElementById("full-reset-button")!.hidden = true;
-    setPlayerBanks(Array.from({length: players}).map(bank=>STARTBANK));
-    Reset();
+    SmallAndBigBlind(newStartingPlayer);
   }
 
   function ChangePlayer() {
     if (foldedPlayers.filter(p => p === 0).length === 1) {
       let winner = foldedPlayers.indexOf(0) + 1;
-      DisplayWinner(winner);
+      DisplayWinner([winner]);
     } else {
       let newPlayerNum = currentPlayer + 1;
       let firstPlayer = foldedPlayers.indexOf(0) + 1;
@@ -276,20 +273,18 @@ function Board({players} : roomSize) {
       }
 
       if (newCard === true) {
-        document.getElementById("p" + firstPlayer +"-stats")!.classList.add("glow");
+        document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
-        setCurrentPlayer(firstPlayer);
         if (document.getElementById("flop-card-one")!.hidden === true) {
-          FlopDeal(cards.slice(0, 2).concat(cards.slice(-5, -2)), firstPlayer)
+          FlopDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)), newPlayerNum)
         } else if (document.getElementById("turn-card")!.hidden === true) {
-          TurnDeal(cards.slice(0, 2).concat(cards.slice(-5, -1)), firstPlayer)
+          TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum)
         } else if (document.getElementById("river-card")!.hidden === true) {
-          RiverDeal(cards.slice(0, 2).concat(cards.slice(-5, cards.length)), firstPlayer)
+          RiverDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
         } else {
           DisplayWinner(CalculateWinner());
         }
       } else {
-        setCurrentPlayer(newPlayerNum);
         if (document.getElementById("flop-card-one")!.hidden === true) {
           FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2), newPlayerNum)
         } else if (document.getElementById("turn-card")!.hidden === true) {
@@ -299,17 +294,17 @@ function Board({players} : roomSize) {
         } else {
           FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
         }
-        document.getElementById("p" + firstPlayer + "-stats")
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
       }
+      setCurrentPlayer(newPlayerNum);
     }
   }
 
   function Raise() {
     if (playerBanks[currentPlayer - 1] !== 0) {
       let amount = Number(window.prompt("How much would you like to bet?"));
-      while (amount <= 0 || amount > playerBanks[currentPlayer - 1]) {
+      while (amount <= BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayer - 1]) {
         amount = Number(window.prompt("Invalid input. How much would you like to bet?"))
       }
       let newBanks = playerBanks;
@@ -324,11 +319,15 @@ function Board({players} : roomSize) {
 
   function Bet() {
     if (playerBanks[currentPlayer - 1] !== 0) {
-      let newBanks = playerBanks;
-      newBanks[currentPlayer - 1] -= currentBet;
-      setPlayerBanks(newBanks);
-      setPot(pot + currentBet);
-      document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " bet " + currentBet + ".\n\n";
+      if (currentBet === 0) {
+        document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " checked.\n\n";
+      } else {
+        let newBanks = playerBanks;
+        newBanks[currentPlayer - 1] -= currentBet;
+        setPlayerBanks(newBanks);
+        setPot(pot + currentBet);
+        document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " bet " + currentBet + ".\n\n";
+      }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
       ChangePlayer();
     }
@@ -336,20 +335,87 @@ function Board({players} : roomSize) {
 
   function Fold() {
     let newFoldedPlayers = foldedPlayers;
+    let newBestHands = bestHands;
     newFoldedPlayers[currentPlayer - 1] = 1;
+    newBestHands[currentPlayer - 1] = new Array(6).fill(0);
     setFoldedPlayers(newFoldedPlayers);
+    setBestHands(newBestHands);
     document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " folded.\n\n";
     ChangePlayer();
   }
 
-  function CalculateWinner() {
-    let finalBestHands = bestHands.filter(()=>true);
-    finalBestHands.sort((a, b) => b[0] - a[0]);
-    return bestHands.indexOf(finalBestHands[0]) + 1;
+  function SmallAndBigBlind(nextPlayer: number) {
+    document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
+    let newBanks = playerBanks;
+    document.getElementById("play-text")!.innerText += "Player " + nextPlayer + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
+    newBanks[nextPlayer - 1] -= BIGBLIND / 2;
+    nextPlayer += 1;
+    if (nextPlayer > players) {
+      nextPlayer = 1;
+    }
+    document.getElementById("play-text")!.innerText += "Player " + nextPlayer + " bet " + BIGBLIND + " as the big blind.\n\n"
+    newBanks[nextPlayer - 1] -= BIGBLIND;
+    nextPlayer += 1;
+    if (nextPlayer > players) {
+      nextPlayer = 1;
+    }
+    document.getElementById("p" + nextPlayer + "-stats")?.classList.add("glow");
+    setCurrentPlayer(nextPlayer);
+    setPlayerBanks(newBanks);
+    setCurrentBet(BIGBLIND);
+    setPot(pot + BIGBLIND + BIGBLIND);
   }
 
-  function DisplayWinner(playerNum: number) {
-    document.getElementById("play-text")!.innerText += "Player " + playerNum + " wins the pot!\n";
+  function HandsSearch(finalBestHand: number[][]) {
+    for (let i = 0; i < bestHands.length; i++) {
+      let isAMatch = true;
+      for (let j = 0; j < bestHands[0].length; j++) {
+        if (bestHands[i][j] !== finalBestHand[j]) {
+          isAMatch = false;
+          break;
+        }
+      }
+      if (isAMatch) {
+        return i + 1;
+      }
+    }
+    return -1;
+  }
+  
+  function CalculateWinner() {
+    let finalBestHands = bestHands.map(function(hand) { return hand.slice(); });
+    for (let i = 0; i < bestHands[0].length; i++) {
+      finalBestHands.sort((a, b) => (b[i] % 15) - (a[i] % 15));
+      let bestHandValue = finalBestHands[0][i] % 15;
+      finalBestHands = finalBestHands.filter(h => h[i] % 15 === bestHandValue);
+      if (finalBestHands.length === 1) {
+        return [HandsSearch(finalBestHands[0])];
+      }
+    }
+    let handIndices: number[] = [];
+    finalBestHands.forEach(hand => {
+      handIndices = handIndices.concat(HandsSearch(hand));
+    });
+    return handIndices;
+  }
+
+  function DisplayWinner(playerNums: number[]) {
+    if (playerNums.length === 1) {
+      document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
+    } else {
+      let winnersString = "Players ";
+      for (let i = 0; i < playerNums.length; i++) {
+        if (i === playerNums.length - 1) {
+          winnersString += "& " + playerNums[i] + " split the pot with a " +  HANDS[bestHands[playerNums[0] - 1][0]] + " tie!\n"
+        } else if (i === playerNums.length - 2) {
+          winnersString += playerNums[i] + " ";
+        } else {
+          winnersString += playerNums[i] + ", ";
+        }
+      }
+      document.getElementById("play-text")!.innerText += winnersString;
+    }
+   
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     document.getElementById("reset-button")!.hidden = false;
     document.getElementById("full-reset-button")!.hidden = false;
@@ -358,14 +424,32 @@ function Board({players} : roomSize) {
     document.getElementById("fold-button")!.hidden = true;
     for (let i = 1; i <= players; i++) {
       document.getElementById("p" + i +"-stats")!.classList.remove("glow");
-      if (i === playerNum) {
+      if (playerNums.includes(i)) {
         document.getElementById("p" + i +"-stats")!.classList.add("winner-glow");
       }
     }
     let newBanks = playerBanks;
-    newBanks[playerNum - 1] += pot;
+    playerNums.forEach(playerNum => {
+      newBanks[playerNum - 1] += pot/playerNums.length;
+    });
     setPlayerBanks(newBanks);
     setPot(0);
+  }
+
+  function betButtonText(): import("react").ReactNode {
+    if (currentBet === 0) {
+      return "Check";
+    } else {
+      return "Call";
+    }
+  }
+
+  function raiseButtonText(): import("react").ReactNode {
+    if (currentBet === 0) {
+      return "Bet";
+    } else {
+      return "Raise";
+    }
   }
 
   return (
@@ -373,13 +457,13 @@ function Board({players} : roomSize) {
       <div id="warning-reporter">
       </div>
       <div id="table">
-        <button onClick={() => HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer)} className="spaced-button" id="start-button" type="button">
+        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer);}} className="spaced-button" id="start-button" type="button">
           Start Game
         </button>
         <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
           Reset
         </button>
-        <button onClick={() => FullReset()} className="spaced-button" id="full-reset-button" type="button" hidden={true}>
+        <button onClick={() => window.location.reload()} className="spaced-button" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
         <div id="hole-card-one" hidden={true}>
@@ -405,7 +489,7 @@ function Board({players} : roomSize) {
             <Card val={cards[cards.length - 1]}/>
           </div>
         </div>
-        <h1 id="p1-stats" className=".player-stats">
+        <h1 id="p1-stats" className="glow .player-stats">
           Player 1: £{playerBanks[0]}
         </h1>
         <h1 id="p2-stats" className=".player-stats">
@@ -431,10 +515,10 @@ function Board({players} : roomSize) {
         </h1>
         <div id="decision-buttons">
           <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
-            Bet
+            {betButtonText()}
           </button>
           <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
-            Raise
+            {raiseButtonText()}
           </button>
           <button id="fold-button" className="spaced-button" type="button" onClick={() => Fold()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
             Fold
@@ -446,6 +530,15 @@ function Board({players} : roomSize) {
       <div id="play-reporter">
         <h1 id="play-text"></h1>
       </div>
+      <h1 style={{color: "#f5f8e7"}}>{cards.map(card => {if (Math.floor(card / 15) === 0) {
+    return card%15 + "H"; //Hearts
+  } else if (Math.floor(card / 15) === 1) {
+    return card%15 + "D"; //Diamonds
+  } else if (Math.floor(card / 15) === 2) {
+    return card%15 + "C"; //Clubs
+  } else {
+    return card%15 + "S"; //Spades
+  }}).toString()}</h1>
       <h1 id="best-hand" style={{color: "#f5f8e7"}}>{bestHandText}</h1>
     </>
   );
