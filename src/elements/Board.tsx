@@ -1,3 +1,4 @@
+import { start } from "repl";
 import Card from "./Card";
 import Deck from "./Deck";
 import { useState } from "react";
@@ -21,6 +22,7 @@ function Board({players} : roomSize) {
   const [foldedPlayers, setFoldedPlayers] = useState(new Array(players).fill(0));
   const [pot, setPot] = useState(0);
   const [bestHands, setBestHands] = useState(new Array(players).fill([0]));
+  const [blindStage, setBlindStage] = useState(true);
 
   function HoleDeal(cards: number[], playerNum: number) {
     document.getElementById("hole-card-one")!.hidden = false;
@@ -239,7 +241,8 @@ function Board({players} : roomSize) {
     HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), newStartingPlayer);
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
-    SmallAndBigBlind(newStartingPlayer);
+    setBlindStage(true);
+    SmallAndBigBlind(newStartingPlayer - 1);
   }
 
   function ChangePlayer() {
@@ -275,16 +278,30 @@ function Board({players} : roomSize) {
       if (newCard === true) {
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
-        if (document.getElementById("flop-card-one")!.hidden === true) {
-          FlopDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)), newPlayerNum)
-        } else if (document.getElementById("turn-card")!.hidden === true) {
-          TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum)
-        } else if (document.getElementById("river-card")!.hidden === true) {
-          RiverDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
+        if (blindStage === true) {
+          console.log("here1");
+          setBlindStage(false);
+          setCurrentBet(0);
         } else {
-          DisplayWinner(CalculateWinner());
+          if (blindStage === false) {
+            if (document.getElementById("flop-card-one")!.hidden === true && currentBet === 0) {
+              console.log("here2");
+              FlopDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)), newPlayerNum)
+            } else if (document.getElementById("turn-card")!.hidden === true) {
+              console.log("here3")
+              TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum)
+            } else if (document.getElementById("river-card")!.hidden === true) {
+              console.log("here4")
+              RiverDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
+            } else {
+              DisplayWinner(CalculateWinner());
+            }
+          }
         }
       } else {
+        if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === 8 && startingPlayer === 1)) && blindStage === true) {
+          setCurrentBet(currentBet - BIGBLIND / 2);
+        }
         if (document.getElementById("flop-card-one")!.hidden === true) {
           FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2), newPlayerNum)
         } else if (document.getElementById("turn-card")!.hidden === true) {
@@ -344,10 +361,17 @@ function Board({players} : roomSize) {
     ChangePlayer();
   }
 
+  function HideCards() {
+    
+  }
+
   function SmallAndBigBlind(nextPlayer: number) {
+    if (nextPlayer <= 0) {
+      nextPlayer = players;
+    }
     document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
     let newBanks = playerBanks;
-    document.getElementById("play-text")!.innerText += "Player " + nextPlayer + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
+    document.getElementById("play-text")!.innerText += "Player " + (nextPlayer) + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND / 2;
     nextPlayer += 1;
     if (nextPlayer > players) {
@@ -457,7 +481,7 @@ function Board({players} : roomSize) {
       <div id="warning-reporter">
       </div>
       <div id="table">
-        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer);}} className="spaced-button" id="start-button" type="button">
+        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="spaced-button" id="start-button" type="button">
           Start Game
         </button>
         <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
@@ -489,7 +513,7 @@ function Board({players} : roomSize) {
             <Card val={cards[cards.length - 1]}/>
           </div>
         </div>
-        <h1 id="p1-stats" className="glow .player-stats">
+        <h1 id="p1-stats" className=".player-stats">
           Player 1: £{playerBanks[0]}
         </h1>
         <h1 id="p2-stats" className=".player-stats">
