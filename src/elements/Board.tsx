@@ -201,9 +201,9 @@ function Board({players} : roomSize) {
       }
     }
     // document.getElementById("best-hand")!.innerText = bestHand.toString();
-    setBestHandText(bestHand.toString())
+    // setBestHandText(bestHand.toString())
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
-    // setBestHandText(HANDS[bestHand[0]]);
+    setBestHandText(HANDS[bestHand[0]]);
     let newBestHands = bestHands;
     newBestHands[playerNum - 1] = bestHand;
     setBestHands(newBestHands);
@@ -329,7 +329,7 @@ function Board({players} : roomSize) {
       setCurrentBet(amount);
       setPlayerBanks(newBanks);
       setPot(pot + currentBet);
-      document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to " + amount +".\n\n";
+      document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to £" + amount +".\n\n";
       ChangePlayer();
     }
   }
@@ -343,7 +343,7 @@ function Board({players} : roomSize) {
         newBanks[currentPlayer - 1] -= currentBet;
         setPlayerBanks(newBanks);
         setPot(pot + currentBet);
-        document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " bet " + currentBet + ".\n\n";
+        document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " bet £" + currentBet + ".\n\n";
       }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
       ChangePlayer();
@@ -481,13 +481,13 @@ function Board({players} : roomSize) {
       <div id="warning-reporter">
       </div>
       <div id="table">
-        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="spaced-button" id="start-button" type="button">
-          Start Game
+        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="reset-spaced-button" id="start-button" type="button">
+          Start
         </button>
-        <button onClick={() => Reset()} className="spaced-button" id="reset-button" type="button" hidden={true}>
-          Reset
+        <button onClick={() => Reset()} className="reset-spaced-button" id="reset-button" type="button" hidden={true}>
+          Next Round
         </button>
-        <button onClick={() => window.location.reload()} className="spaced-button" id="full-reset-button" type="button" hidden={true}>
+        <button onClick={() => window.location.reload()} className="reset-spaced-button" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
         <div id="hole-card-one" hidden={true}>
@@ -549,12 +549,12 @@ function Board({players} : roomSize) {
           </button>  
         </div>
         <h1 id="winner-text" hidden={true} style={{display:"inline-block", position:"absolute", left:"50px", bottom:"50px"}}/>
-        <h1 id="pot">Pot = {pot}</h1>
+        <h1 id="pot">Pot = £{pot}</h1>
       </div>
       <div id="play-reporter">
         <h1 id="play-text"></h1>
       </div>
-      <h1 style={{color: "#f5f8e7"}}>{cards.map(card => {if (Math.floor(card / 15) === 0) {
+      {/* <h1 style={{color: "#f5f8e7"}}>{cards.map(card => {if (Math.floor(card / 15) === 0) {
     return card%15 + "H"; //Hearts
   } else if (Math.floor(card / 15) === 1) {
     return card%15 + "D"; //Diamonds
@@ -562,7 +562,7 @@ function Board({players} : roomSize) {
     return card%15 + "C"; //Clubs
   } else {
     return card%15 + "S"; //Spades
-  }}).toString()}</h1>
+  }}).toString()}</h1> */}
       <h1 id="best-hand" style={{color: "#f5f8e7"}}>{bestHandText}</h1>
     </>
   );
