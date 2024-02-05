@@ -47,6 +47,14 @@ h1 {
   margin: 0px;
 }
 
+.navbar {
+  padding: 20px;
+  display: flex;
+  background-color: rgba(125, 2, 2, 1);
+  align-items: center;
+  margin: 0 auto;
+}
+
 #card-face {
   position: relative;
   display: inline-block;
