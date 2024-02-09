@@ -279,7 +279,6 @@ function Board({players} : roomSize) {
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         if (blindStage === true) {
-          console.log("here1");
           setBlindStage(false);
           setCurrentBet(0);
         } else {
@@ -299,7 +298,7 @@ function Board({players} : roomSize) {
           }
         }
       } else {
-        if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === 8 && startingPlayer === 1)) && blindStage === true) {
+        if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === players && startingPlayer === 1)) && blindStage === true) {
           setCurrentBet(currentBet - BIGBLIND / 2);
         }
         if (document.getElementById("flop-card-one")!.hidden === true) {
@@ -321,14 +320,14 @@ function Board({players} : roomSize) {
   function Raise() {
     if (playerBanks[currentPlayer - 1] !== 0) {
       let amount = Number(window.prompt("How much would you like to bet?"));
-      while (amount <= BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayer - 1]) {
+      while (amount < BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayer - 1]) {
         amount = Number(window.prompt("Invalid input. How much would you like to bet?"))
       }
       let newBanks = playerBanks;
       newBanks[currentPlayer - 1] -= amount;
       setCurrentBet(amount);
       setPlayerBanks(newBanks);
-      setPot(pot + currentBet);
+      setPot(pot + amount);
       document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to £" + amount +".\n\n";
       ChangePlayer();
     }
@@ -369,6 +368,7 @@ function Board({players} : roomSize) {
     if (nextPlayer <= 0) {
       nextPlayer = players;
     }
+    let smallBlindPlayer = nextPlayer;
     document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
     let newBanks = playerBanks;
     document.getElementById("play-text")!.innerText += "Player " + (nextPlayer) + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
@@ -386,8 +386,12 @@ function Board({players} : roomSize) {
     document.getElementById("p" + nextPlayer + "-stats")?.classList.add("glow");
     setCurrentPlayer(nextPlayer);
     setPlayerBanks(newBanks);
-    setCurrentBet(BIGBLIND);
-    setPot(pot + BIGBLIND + BIGBLIND);
+    if (nextPlayer === smallBlindPlayer) {
+      setCurrentBet(BIGBLIND/2);
+    } else {
+      setCurrentBet(BIGBLIND);
+    }
+    setPot(pot + BIGBLIND/2 + BIGBLIND);
   }
 
   function HandsSearch(finalBestHand: number[][]) {
