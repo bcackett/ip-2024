@@ -47,8 +47,10 @@ h1 {
   margin: 0px;
 }
 
-.navbar {
+.nav-bar {
   padding: 20px;
+  border: 2px solid rgba(4, 0, 26, 1);
+  margin-bottom: 0.25vw;
   display: flex;
   background-color: rgba(125, 2, 2, 1);
   align-items: center;
@@ -165,5 +167,13 @@ h1 {
   border-radius: 10px;
   justify-content: center;
   text-align: center;
+}
+
+.lesson-grid {
+  display: inline-grid;
+  grid-template-columns: 15vw 15vw 15vw 15vw;
+  grid-template-rows: 15vw;
+  margin-bottom: 5vw;
+  margin-top: 2vw;
 }
 

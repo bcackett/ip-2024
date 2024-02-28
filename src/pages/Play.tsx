@@ -1,25 +1,12 @@
-import Card from "../elements/Card";
+import Board from "../elements/Board";
 
 function Play() {
+  let amount = Number(window.prompt("How many players are participaing? Minimum 2, maximum 8."));
+  while (amount < 2 || amount > 8) {
+    amount = Number(window.prompt("How many players are participaing? Minimum 2, maximum 8."))
+  }
   return (
-    <>
-      {/* <Card
-        suit="S"
-        rank="1"
-      />
-      <Card
-        suit="D"
-        rank="7"
-      />
-      <Card
-        suit="C"
-        rank="K"
-      />
-      <Card
-        suit="S"
-        rank="6"
-      /> */}
-    </>
+    <Board totalPlayers={amount} computerPlayers={0}/>
   );
 }
 export default Play;

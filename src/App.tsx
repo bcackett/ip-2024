@@ -7,11 +7,13 @@ import NotFound from "./pages/NotFound";
 import Training from "./pages/Training";
 import Play from "./pages/Play";
 import { useNavigate } from "react-router-dom";
+import TrainingScenario from './pages/TrainingScenario';
 
 function App() {
   return (
     <Routes>
       <Route path="/train" element={<Training />} />
+      <Route path="/train?id=[0-9]+" element={<TrainingScenario />} />
       <Route path="/play" element={<Play />} />
       <Route path="/" element={<Home />} />
       <Route path="/*" element={<NotFound />} />

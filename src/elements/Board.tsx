@@ -2,26 +2,30 @@ import { start } from "repl";
 import Card from "./Card";
 import Deck from "./Deck";
 import { useState } from "react";
+import Calculations from "./Calculations"
 
 type roomSize = {
-  players: number;
+  totalPlayers: number;
+  computerPlayers: number;
+  playerProfiles?: number[][];
 }
 
-function Board({players} : roomSize) {
+function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   var deck: Deck = new Deck;
+  var calcs: Calculations = new Calculations;
   const HANDS = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
   deck.Shuffle();
   const STARTBANK = 200;
   const BIGBLIND = 10;
-  const [cards, setCards] = useState(deck.Deal(players));
+  const [cards, setCards] = useState(deck.Deal(totalPlayers));
   const [startingPlayer, setStartingPlayer] = useState(1);
   const [currentPlayer, setCurrentPlayer] = useState(1);
-  const [playerBanks, setPlayerBanks] = useState(Array.from({length: players}).map(bank=>STARTBANK));
+  const [playerBanks, setPlayerBanks] = useState(Array.from({length: totalPlayers}).map(bank=>STARTBANK));
   const [currentBet, setCurrentBet] = useState(0);
   const [bestHandText, setBestHandText] = useState("");
-  const [foldedPlayers, setFoldedPlayers] = useState(new Array(players).fill(0));
+  const [foldedtotalPlayers, setFoldedtotalPlayers] = useState(new Array(totalPlayers).fill(0));
   const [pot, setPot] = useState(0);
-  const [bestHands, setBestHands] = useState(new Array(players).fill([0]));
+  const [bestHands, setBestHands] = useState(new Array(totalPlayers).fill([0]));
   const [blindStage, setBlindStage] = useState(true);
 
   function HoleDeal(cards: number[], playerNum: number) {
@@ -63,146 +67,14 @@ function Board({players} : roomSize) {
     setCurrentBet(0);
   }
   
-  function CheckForSameSuit(cards: number[]) {
-    let cardsOfSameSuit: number[] = [];
-    let hearts = cards.filter(function(card) {return Math.floor(card / 15) === 0});
-    let diamonds = cards.filter(function(card) {return Math.floor(card / 15) === 1});
-    let clubs = cards.filter(function(card) {return Math.floor(card / 15) === 2});
-    let spades = cards.filter(function(card) {return Math.floor(card / 15) === 3});
-    let allSortedSuits = [hearts, diamonds, clubs, spades];
-    let sortedSuitLengths = allSortedSuits.map(suit => suit.length);
-    if (sortedSuitLengths[sortedSuitLengths.indexOf(Math.max(hearts.length, diamonds.length, clubs.length, spades.length))] >= 5) {
-      cardsOfSameSuit = [1].concat(allSortedSuits[sortedSuitLengths.indexOf(Math.max(hearts.length, diamonds.length, clubs.length, spades.length))]);
-      //One added first to mark that the cards returned are the same suit.
-    } else {
-      cardsOfSameSuit = [0].concat(cards); //Zero added first to mark that the cards returned are not the same suit.
-    }
-    return cardsOfSameSuit;
-  }
-  
-  function CheckForConsecutivity(cards: number[]) {
-    let aceHighCards = cards;
-    cards.forEach(card => {
-      if (card % 15 === 1) {
-        aceHighCards = aceHighCards.concat(card + 13);
-      }
-    });
-    aceHighCards = aceHighCards.sort((a, b) => (b % 15) - (a % 15)); 
-    let cardValues: number[] = aceHighCards.map(c => c % 15); //Checks only for card value, not suit.
-    let nonConsecutiveCount: number = 0;
-    let consecutiveCards: number[] = [0, cards[0]];
-    for (let i = 0; i < cardValues.length; i++) {
-      if (cardValues[i + 1] != cardValues[i] - 1) {
-        if (consecutiveCards.length >= 6) { // 5 cards + result indicator
-          consecutiveCards[0] = 1;
-          return consecutiveCards;
-        } else {
-          nonConsecutiveCount++;
-          consecutiveCards = [0, aceHighCards[i + 1]];
-        }
-
-        if (nonConsecutiveCount > aceHighCards.length - 5) {
-          consecutiveCards = [0].concat(cards); //Zero added first to mark that the cards returned are not consecutive.
-          return consecutiveCards;
-        }
-      } else {
-        consecutiveCards = consecutiveCards.concat(aceHighCards[i + 1])
-      }
-    }
-    if (consecutiveCards.length >= 6) {
-      consecutiveCards[0] = 1;
-    } else {
-      consecutiveCards = [0].concat(cards);
-    }
-    return consecutiveCards;
-  }
-  
-  function CheckHighestCard(cards: number[]) {
-    let aceHighCards = cards;
-    cards.forEach(card => {
-      if (card % 15 === 1) {
-        aceHighCards = aceHighCards.concat(card + 13);
-      }
-    });
-    return aceHighCards.sort((a, b) => (b % 15) - (a % 15))[0];
-  }
-  
-  function CheckMatchingValues(cards: number[]) {
-    let valueMap = new Map<number, number>();
-    cards.forEach(card => {
-      if (Array.from(valueMap.keys()).includes(card % 15)) {
-        valueMap.set(card % 15, valueMap.get(card % 15)! + 1);
-      } else {
-        valueMap.set(card % 15, 1);
-      }
-    });
-    return valueMap;
-  }
-  
   function FindBestHand(cards: number[], playerNum: number) {
     /*Returns value of best hand (0 for high card -> 9 for royal flush), followed by values of cards in best hand.
     Eg: [9, 59, 58, 57, 56, 55] = royal flush with spades. */
-    let bestHand: number[] = [];
-    let sameSuitCards = CheckForSameSuit(cards);
-    if (sameSuitCards[0] === 1) {
-      let consecutiveCards = CheckForConsecutivity(sameSuitCards.slice(1, sameSuitCards.length));
-      if(consecutiveCards[0] === 1) {
-        consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
-        if (CheckHighestCard(consecutiveCards) % 15 === 14) {
-          bestHand = [9].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Royal Flush
-        } else {
-          bestHand = [8].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Straight Flush
-        }
-      } else {
-        sameSuitCards = sameSuitCards.slice(1, sameSuitCards.length).sort();
-        bestHand = [5].concat(sameSuitCards.slice(sameSuitCards.length - 5, sameSuitCards.length)); //Flush
-      }
-    } else {
-      let consecutiveCards = CheckForConsecutivity(cards);
-      if (consecutiveCards[0] === 1) {
-        consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
-        bestHand = [4].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Straight
-      } else {
-        consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
-        consecutiveCards.map(card => {if (card % 15 === 1 ) {card = card + 13}})
-        let valueArray = Array.from(CheckMatchingValues(cards));
-        if (valueArray.map(p => p[1]).includes(4)) {
-          let fourOfAKindValue = valueArray[valueArray.map(p => p[1]).indexOf(4)][0];
-          let fourOfAKind = cards.filter(c => c % 15 === fourOfAKindValue);
-          let highestOtherCard = cards.filter(c => c % 15 != fourOfAKindValue).sort((a, b) => (b % 15) - (a % 15))[0];
-          bestHand = [7].concat(fourOfAKind, [highestOtherCard]); //Four of a Kind
-        } else if (valueArray.map(p => p[1]).includes(3)) {
-          let threeOfAKindValues = valueArray.filter(p => p[1] === 3).map(p => p[0]).sort();
-          let threeOfAKind = cards.filter(c => c % 15 === threeOfAKindValues[threeOfAKindValues.length - 1]);
-          if (valueArray.map(p => p[1]).includes(2)) {
-            let pairValues = valueArray.filter(p => p[1] === 2).map(p => p[0]).sort();
-            let pair = cards.filter(c => c % 15 === pairValues[pairValues.length - 1]);
-            bestHand = [6].concat(threeOfAKind, pair); //Full House
-          } else {
-            let highestOtherCards = cards.filter(c => c % 15 != threeOfAKindValues[threeOfAKindValues.length - 1]).sort((a, b) => (b % 15) - (a % 15)).slice(0, 2);
-            bestHand = [3].concat(threeOfAKind, highestOtherCards); //Three of a Kind
-          }
-        } else if (valueArray.map(p => p[1]).includes(2)) {
-          let pairValues = valueArray.filter(p => p[1] === 2).map(p => p[0]).sort();
-          let pair = cards.filter(c => c % 15 === pairValues[pairValues.length - 1]);
-          if (pairValues.length > 1) {
-            let pairTwo = cards.filter(c => c % 15 === pairValues[pairValues.length - 2]);
-            let otherCards = cards.filter(c => c % 15 != pairValues[pairValues.length - 1] && c % 15 != pairValues[pairValues.length - 2]);
-            let highestOtherCard = otherCards.sort((a, b) => (b % 15) - (a % 15))[0];
-            bestHand = [2].concat(pair, pairTwo, highestOtherCard); //Two Pair
-          } else {
-            let highestOtherCards = cards.filter(c => c % 15 != pairValues[pairValues.length - 1]).sort((a, b) => (b % 15) - (a % 15)).slice(0, 3);
-            bestHand = [1].concat(pair, highestOtherCards);
-          }
-        } else {
-          bestHand = [0].concat(cards.sort((a, b) => (b % 15) - (a % 15)).splice(0, 5).reverse()); //High Card
-  
-        }
-      }
-    }
+
     // document.getElementById("best-hand")!.innerText = bestHand.toString();
     // setBestHandText(bestHand.toString())
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
+    let bestHand = calcs.FindBestHand(cards);
     setBestHandText(HANDS[bestHand[0]]);
     let newBestHands = bestHands;
     newBestHands[playerNum - 1] = bestHand;
@@ -211,8 +83,8 @@ function Board({players} : roomSize) {
   
   function Reset() {
     deck.Shuffle();
-    setCards(deck.Deal(players));
-    setFoldedPlayers(new Array(players).fill(0));
+    setCards(deck.Deal(totalPlayers));
+    setFoldedtotalPlayers(new Array(totalPlayers).fill(0));
     document.getElementById("reset-button")!.hidden = true;
     document.getElementById("full-reset-button")!.hidden = true;
     document.getElementById("winner-text")!.innerText = "";
@@ -231,10 +103,10 @@ function Board({players} : roomSize) {
     document.getElementById("play-text")!.innerText = "";
     setBestHandText("");
     let newStartingPlayer = startingPlayer + 1;
-    if (newStartingPlayer > players) {
+    if (newStartingPlayer > totalPlayers) {
       newStartingPlayer = 1;
     }
-    for (let i = 1; i <= players; i++) {
+    for (let i = 1; i <= totalPlayers; i++) {
       document.getElementById("p" + i + "-stats")?.classList.remove("glow");
       document.getElementById("p" + i + "-stats")?.classList.remove("winner-glow");
     }
@@ -246,35 +118,36 @@ function Board({players} : roomSize) {
   }
 
   function ChangePlayer() {
-    if (foldedPlayers.filter(p => p === 0).length === 1) {
-      let winner = foldedPlayers.indexOf(0) + 1;
+    if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
+      let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
     } else {
       let newPlayerNum = currentPlayer + 1;
-      let firstPlayer = foldedPlayers.indexOf(0) + 1;
+      let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
       let newCard = false;
 
-      if (newPlayerNum === players + 1) {
+      if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
         if (firstPlayer >= startingPlayer) {
           newCard = true;
         }
-      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedPlayers[startingPlayer - 1] === 1)) {
+      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1)) {
         newCard = true;
       }
 
-      while (foldedPlayers[newPlayerNum - 1] === 1) {
+      while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
         newPlayerNum++;
-        if (newPlayerNum === players + 1) {
+        if (newPlayerNum === totalPlayers + 1) {
           newPlayerNum = firstPlayer;
           if (firstPlayer >= startingPlayer) {
             newCard = true;
           }
-        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedPlayers[startingPlayer - 1] === 1)) {
+        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1)) {
           newCard = true;
         }
       }
 
+      let knownCards: number[] = [];
       if (newCard === true) {
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
@@ -284,53 +157,82 @@ function Board({players} : roomSize) {
         } else {
           if (blindStage === false) {
             if (document.getElementById("flop-card-one")!.hidden === true && currentBet === 0) {
-              console.log("here2");
-              FlopDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)), newPlayerNum)
+              knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
+              FlopDeal(knownCards, newPlayerNum);
             } else if (document.getElementById("turn-card")!.hidden === true) {
-              console.log("here3")
-              TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum)
+              knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
+              TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
             } else if (document.getElementById("river-card")!.hidden === true) {
-              console.log("here4")
-              RiverDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
+              knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
+              RiverDeal(knownCards, newPlayerNum);
             } else {
               DisplayWinner(CalculateWinner());
             }
           }
         }
       } else {
-        if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === players && startingPlayer === 1)) && blindStage === true) {
+        if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === totalPlayers && startingPlayer === 1)) && blindStage === true) {
           setCurrentBet(currentBet - BIGBLIND / 2);
         }
         if (document.getElementById("flop-card-one")!.hidden === true) {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2), newPlayerNum)
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
         } else if (document.getElementById("turn-card")!.hidden === true) {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2)), newPlayerNum)
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
         } else if (document.getElementById("river-card")!.hidden === true) {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum)
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
         } else {
-          FindBestHand(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length)), newPlayerNum)
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
         }
+        FindBestHand(knownCards, newPlayerNum);
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
       }
       setCurrentPlayer(newPlayerNum);
+      if (newPlayerNum > totalPlayers - computerPlayers) {
+        let computerDecision = computerCalc(playerProfiles![(newPlayerNum + 1) - computerPlayers], knownCards);
+        if (computerDecision === 0) {
+          Fold();
+        } else if (computerDecision === 1) {
+          Bet();
+        } else {
+          Raise(currentBet + 10);
+        }
+      }
     }
   }
 
-  function Raise() {
-    if (playerBanks[currentPlayer - 1] !== 0) {
-      let amount = Number(window.prompt("How much would you like to bet?"));
-      while (amount < BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayer - 1]) {
-        amount = Number(window.prompt("Invalid input. How much would you like to bet?"))
+  function computerCalc(playerProfile: number[], cards: number[]) {
+    let playerCards = [cards[0], cards[1]];
+    let communalCards: number[] = [];
+    if (cards.length > 2) {
+      for (let i = 2; i < cards.length; i++) {
+        communalCards.concat(cards[i]);
       }
-      let newBanks = playerBanks;
-      newBanks[currentPlayer - 1] -= amount;
-      setCurrentBet(amount);
-      setPlayerBanks(newBanks);
-      setPot(pot + amount);
-      document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to £" + amount +".\n\n";
-      ChangePlayer();
     }
+    // let effectiveHandScore = Calculations.ehs(playerCards, communalCards);
+    // let nashEquilibrium = Calculations.nashEq(cards);
+    return 0;
+  }
+
+  function Raise(raise?: number) {
+    let newBanks = playerBanks;
+    let amount = 0
+    if (!raise) {
+      if (playerBanks[currentPlayer - 1] !== 0) {
+        amount = Number(window.prompt("How much would you like to bet?"));
+        while (amount < BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayer - 1]) {
+          amount = Number(window.prompt("Invalid input. How much would you like to bet?"))
+        }
+      }
+    } else {
+      amount = raise
+    }
+    newBanks[currentPlayer - 1] -= amount;
+    setCurrentBet(amount);
+    setPlayerBanks(newBanks);
+    setPot(pot + amount);
+    document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to £" + amount +".\n\n";
+    ChangePlayer();
   }
 
   function Bet() {
@@ -350,23 +252,19 @@ function Board({players} : roomSize) {
   }
 
   function Fold() {
-    let newFoldedPlayers = foldedPlayers;
+    let newFoldedtotalPlayers = foldedtotalPlayers;
     let newBestHands = bestHands;
-    newFoldedPlayers[currentPlayer - 1] = 1;
+    newFoldedtotalPlayers[currentPlayer - 1] = 1;
     newBestHands[currentPlayer - 1] = new Array(6).fill(0);
-    setFoldedPlayers(newFoldedPlayers);
+    setFoldedtotalPlayers(newFoldedtotalPlayers);
     setBestHands(newBestHands);
     document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " folded.\n\n";
     ChangePlayer();
   }
 
-  function HideCards() {
-    
-  }
-
   function SmallAndBigBlind(nextPlayer: number) {
     if (nextPlayer <= 0) {
-      nextPlayer = players;
+      nextPlayer = totalPlayers;
     }
     let smallBlindPlayer = nextPlayer;
     document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
@@ -374,13 +272,13 @@ function Board({players} : roomSize) {
     document.getElementById("play-text")!.innerText += "Player " + (nextPlayer) + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND / 2;
     nextPlayer += 1;
-    if (nextPlayer > players) {
+    if (nextPlayer > totalPlayers) {
       nextPlayer = 1;
     }
     document.getElementById("play-text")!.innerText += "Player " + nextPlayer + " bet " + BIGBLIND + " as the big blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND;
     nextPlayer += 1;
-    if (nextPlayer > players) {
+    if (nextPlayer > totalPlayers) {
       nextPlayer = 1;
     }
     document.getElementById("p" + nextPlayer + "-stats")?.classList.add("glow");
@@ -450,7 +348,7 @@ function Board({players} : roomSize) {
     document.getElementById("bet-button")!.hidden = true;
     document.getElementById("raise-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
-    for (let i = 1; i <= players; i++) {
+    for (let i = 1; i <= totalPlayers; i++) {
       document.getElementById("p" + i +"-stats")!.classList.remove("glow");
       if (playerNums.includes(i)) {
         document.getElementById("p" + i +"-stats")!.classList.add("winner-glow");

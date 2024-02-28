@@ -9,7 +9,7 @@ function NavBar() {
       {
         <div className="links">
           <Link reloadDocument to="/play">
-            Play Online
+            Play Locally
           </Link>
           <Link reloadDocument to="/train">
             Practice Lessons

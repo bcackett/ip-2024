@@ -23,7 +23,7 @@ function Welcome() {
           Training Lessons
         </button>
         <button className="spaced-button" type="button" onClick={goToPlay}>
-          Play Online
+          Play Locally
         </button>
       </div>
     </>
