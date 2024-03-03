@@ -117,12 +117,17 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     SmallAndBigBlind(newStartingPlayer - 1);
   }
 
-  function ChangePlayer() {
+  function ChangePlayer(nestedCurrentPlayer?: number) {
     if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
     } else {
-      let newPlayerNum = currentPlayer + 1;
+      let newPlayerNum: number;
+      if (nestedCurrentPlayer) {
+        newPlayerNum = nestedCurrentPlayer + 1;
+      } else {
+        newPlayerNum = currentPlayer + 1;
+      }
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
       let newCard = false;
 
@@ -150,7 +155,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       let knownCards: number[] = [];
       if (newCard === true) {
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-        document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
+        if (nestedCurrentPlayer) {
+          document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
+        } else {
+          document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
+        }
         if (blindStage === true) {
           setBlindStage(false);
           setCurrentBet(0);
@@ -185,23 +194,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         }
         FindBestHand(knownCards, newPlayerNum);
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-        document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
+        if (nestedCurrentPlayer) {
+          document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
+        } else {
+          document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
+        }
       }
       setCurrentPlayer(newPlayerNum);
       if (newPlayerNum > totalPlayers - computerPlayers) {
-        let computerDecision = computerCalc(playerProfiles![(newPlayerNum + 1) - computerPlayers], knownCards);
-        if (computerDecision === 0) {
-          Fold();
-        } else if (computerDecision === 1) {
-          Bet();
-        } else {
-          Raise(currentBet + 10);
-        }
+        computerCalc(playerProfiles![(newPlayerNum + 1) - computerPlayers], knownCards, newPlayerNum);
       }
     }
   }
 
-  function computerCalc(playerProfile: number[], cards: number[]) {
+  function computerCalc(playerProfile: number[], cards: number[], playerNum: number) {
+    console.log(currentPlayer.toString);
     let playerCards = [cards[0], cards[1]];
     let communalCards: number[] = [];
     if (cards.length > 2) {
@@ -209,57 +216,99 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         communalCards.concat(cards[i]);
       }
     }
-    // let effectiveHandScore = Calculations.ehs(playerCards, communalCards);
+    let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
     // let nashEquilibrium = Calculations.nashEq(cards);
-    return 0;
+    if (effectiveHandScore < 0.1) {
+      Fold(playerNum);
+    } else if (effectiveHandScore > 0.75) {
+      Raise(currentBet + 10, playerNum);
+    } else {
+      Bet(playerNum);
+    }
   }
 
-  function Raise(raise?: number) {
+  function Raise(raise?: number, playerNum?: number) {
+    let currentPlayerNum: number;
+    if (playerNum) {
+      currentPlayerNum = playerNum;
+    } else {
+      currentPlayerNum = currentPlayer;
+    }
     let newBanks = playerBanks;
     let amount = 0
     if (!raise) {
-      if (playerBanks[currentPlayer - 1] !== 0) {
+      if (playerBanks[currentPlayerNum - 1] !== 0) {
         amount = Number(window.prompt("How much would you like to bet?"));
-        while (amount < BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayer - 1]) {
+        while (amount < BIGBLIND || amount <= currentBet || amount > playerBanks[currentPlayerNum - 1]) {
           amount = Number(window.prompt("Invalid input. How much would you like to bet?"))
         }
       }
     } else {
       amount = raise
     }
-    newBanks[currentPlayer - 1] -= amount;
+    newBanks[currentPlayerNum - 1] -= amount;
+    document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " raised the bet to £" + amount +".\n\n";
     setCurrentBet(amount);
     setPlayerBanks(newBanks);
     setPot(pot + amount);
-    document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " raised the bet to £" + amount +".\n\n";
-    ChangePlayer();
-  }
-
-  function Bet() {
-    if (playerBanks[currentPlayer - 1] !== 0) {
-      if (currentBet === 0) {
-        document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " checked.\n\n";
-      } else {
-        let newBanks = playerBanks;
-        newBanks[currentPlayer - 1] -= currentBet;
-        setPlayerBanks(newBanks);
-        setPot(pot + currentBet);
-        document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " bet £" + currentBet + ".\n\n";
-      }
-      document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
+    if (playerNum) {
+      ChangePlayer(playerNum);
+      console.log(playerNum);
+    } else {
       ChangePlayer();
+      console.log(currentPlayer);
     }
   }
 
-  function Fold() {
+  function Bet(playerNum?: number) {
+    let currentPlayerNum: number;
+    if (playerNum) {
+      currentPlayerNum = playerNum;
+    } else {
+      currentPlayerNum = currentPlayer;
+    }
+    if (playerBanks[currentPlayerNum - 1] !== 0) {
+      if (currentBet === 0) {
+        document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " checked.\n\n";
+      } else {
+        let newBanks = playerBanks;
+        newBanks[currentPlayerNum - 1] -= currentBet;
+        setPlayerBanks(newBanks);
+        setPot(pot + currentBet);
+        document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentBet + ".\n\n";
+      }
+      document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
+      if (playerNum) {
+        ChangePlayer(playerNum);
+        console.log(playerNum);
+      } else {
+        ChangePlayer();
+        console.log(currentPlayer);
+      }
+    }
+  }
+
+  function Fold(playerNum?: number) {
+    let currentPlayerNum: number;
+    if (playerNum) {
+      currentPlayerNum = playerNum;
+    } else {
+      currentPlayerNum = currentPlayer;
+    }
     let newFoldedtotalPlayers = foldedtotalPlayers;
     let newBestHands = bestHands;
-    newFoldedtotalPlayers[currentPlayer - 1] = 1;
-    newBestHands[currentPlayer - 1] = new Array(6).fill(0);
+    newFoldedtotalPlayers[currentPlayerNum - 1] = 1;
+    newBestHands[currentPlayerNum - 1] = new Array(6).fill(0);
     setFoldedtotalPlayers(newFoldedtotalPlayers);
     setBestHands(newBestHands);
-    document.getElementById("play-text")!.innerText += "Player " + currentPlayer + " folded.\n\n";
-    ChangePlayer();
+    document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " folded.\n\n";
+    if (playerNum) {
+      ChangePlayer(playerNum);
+      console.log(playerNum);
+    } else {
+      ChangePlayer();
+      console.log(currentPlayer);
+    }
   }
 
   function SmallAndBigBlind(nextPlayer: number) {
@@ -290,6 +339,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       setCurrentBet(BIGBLIND);
     }
     setPot(pot + BIGBLIND/2 + BIGBLIND);
+    if (nextPlayer > totalPlayers - computerPlayers) {
+      computerCalc(playerProfiles![(nextPlayer + 1) - computerPlayers], cards.slice(2 * (nextPlayer - 1), 2 * (nextPlayer - 1) + 2), nextPlayer);
+    }
   }
 
   function HandsSearch(finalBestHand: number[][]) {

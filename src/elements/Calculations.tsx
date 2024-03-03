@@ -141,30 +141,71 @@ class Calculations {
     return aceHighCards.sort((a, b) => (b % 15) - (a % 15))[0];
   }
 
-  oneHandIHR (playerBestHand: number[], oppHand: number[]) {
-    let oppBestHand = this.FindBestHand(oppHand);
-    if (playerBestHand[0] - oppBestHand[0] > 0) {
+  PreFlopBet(playerCards: number[]) {
+    console.log("preflop");
+    let cardValues = playerCards.map(c => {if (c % 15 === 1) {return 14} else {return c % 15}}).sort();
+    let cardSuits = playerCards.map(c => c / 15);
+    if ((cardValues[0] >= 10 && cardValues[1] >= 10)
+      || (cardValues[0] >= 10 && cardValues[1] >= 8 && cardSuits[0] === cardSuits[1])
+      || (cardValues[0] >= 8 && cardValues[1] >= 10 && cardSuits[0] === cardSuits[1])) {
+        return 0;
+    } else if (cardValues[0] === 14 || cardValues[1] === 14) {
       return 0;
-    } else if (playerBestHand[0] === oppBestHand[0]) {
+    } else if (cardValues[0] === cardValues[1]) {
+      return 1;
+    } else if (cardValues.includes(13) && cardSuits[0] === cardSuits[1]) {
+      return 1;
+    } else if (cardSuits[0] === cardSuits[1] && cardValues[0] === cardValues[1] - 1 && cardValues[0] >= 4) {
+      return 1;
+    } else if (cardSuits[0] === cardSuits[1] && cardValues[0] === cardValues[1] - 2 && cardValues[0] >= 5) {
+      return 1;
+    } else if (cardValues.includes(9) && (cardValues[0] >= 12 || cardValues[1] >= 12)) {
       return 1;
     } else {
       return 2;
     }
   }
 
+  oneHandIHR (playerBestHand: number[], oppHand: number[]) {
+    let oppBestHand = this.FindBestHand(oppHand);
+    if (playerBestHand[0] - oppBestHand[0] > 0) {
+      return 0;
+    } else if (playerBestHand[0] === oppBestHand[0]) {
+      return 0.5;
+    } else {
+      return 1;
+    }
+  }
+
+  ihr(playerCards: number[], communalCards: number[]) {
+    let ihrArray = [0, 0, 0];
+    let playerBestHand = this.FindBestHand(playerCards.concat(communalCards));
+    let possibleOpponentCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
+    for (let i = 0; i < possibleOpponentCards.length; i++) {
+      console.log("ihr");
+      for (let j = 0; j < possibleOpponentCards.length; j++) {
+        if (i !== j) {
+          ihrArray[this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]])] += 1;
+        }
+      }
+    }
+    return (ihrArray[0] + ihrArray[1]/2) / (ihrArray[0] + ihrArray[1] + ihrArray[2]);
+  }
+
   ehs (playerCards: number[], communalCards: number[]) {
-    let hsArray = [0, 0, 0];
+    let ihrArray = [0, 0, 0];
     let ehsArray = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
     let playerBestHand = this.FindBestHand(playerCards.concat(communalCards));
     let oppBestHand: number[] = [];
     let possibleOpponentCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
     for (let i = 0; i < possibleOpponentCards.length; i++) {
+      console.log("ehs");
       for (let j = 0; j < possibleOpponentCards.length; j++) {
         if (i !== j) {
-          let ihrIndex = this.oneHandIHR(playerCards, [possibleOpponentCards[i], possibleOpponentCards[j]].concat(communalCards))
-          hsArray[ihrIndex] += 1;
+          let ihrIndex = this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]].concat(communalCards))
+          ihrArray[ihrIndex] += 1;
           if (communalCards.length < 5) {
-            let possibleRiverCards = possibleOpponentCards.filter(c => !(c === i || c === j));
+            let possibleRiverCards = possibleOpponentCards.filter(c => !(c === possibleOpponentCards[i] || c === possibleOpponentCards[j]));
             for (let c1 = 0; c1 < possibleRiverCards.length; c1++) {
               if (communalCards.length < 4) {
                 let possibleTurnCards = possibleRiverCards.filter(c => c !== possibleRiverCards[c1]);
@@ -172,8 +213,9 @@ class Calculations {
                   if (communalCards.length === 0) {
                     let possibleFlopCards = possibleTurnCards.filter(c => c !== possibleTurnCards[c2]);
                     for (let c3 = 0; c3 < possibleFlopCards.length; c3++) {
-                      for (let c4 = 0; c3 < possibleFlopCards.length; c3++) {
-                        for (let c5 = 0; c3 < possibleFlopCards.length; c3++) {
+                      for (let c4 = 0; c4 < possibleFlopCards.length; c4++) {
+                        console.log("BOOM!");
+                        for (let c5 = 0; c5 < possibleFlopCards.length; c5++) {
                           if (c3 !== c4 && c4 !== c5 && c3 !== c5) {
                             oppBestHand = this.FindBestHand(
                               [possibleOpponentCards[i], possibleOpponentCards[j], possibleRiverCards[c1], possibleTurnCards[c2], possibleFlopCards[c3], possibleFlopCards[c4], possibleFlopCards[c5]]);
@@ -201,16 +243,71 @@ class Calculations {
         }
       }
     }
-    let handStrength = (hsArray[0] + hsArray[1]/2) / (hsArray[0] + hsArray[1] + hsArray[2]);
+    let handStrength = (ihrArray[0] + ihrArray[1]/2) / (ihrArray[0] + ihrArray[1] + ihrArray[2]);
     if(communalCards.length === 5) {
       return handStrength;
     } else {
-      let posPotential = (ehsArray[2][0] + ehsArray[2][1]/2 + ehsArray[1][0]/2) / (hsArray[2] + hsArray[1]);
-      let negPotential = (ehsArray[0][2] + ehsArray[1][2]/2 + ehsArray[0][1]/2) / (hsArray[0] + hsArray[1]);
+      let posPotential = (ehsArray[2][0] + ehsArray[2][1]/2 + ehsArray[1][0]/2) / (ihrArray[2] + ihrArray[1]);
+      let negPotential = (ehsArray[0][2] + ehsArray[1][2]/2 + ehsArray[0][1]/2) / (ihrArray[0] + ihrArray[1]);
       return handStrength * (1 - negPotential) + (1 - handStrength) * posPotential;
     }
   }
-  
+
+  decisionCalc(playerCards: number[], communalCards: number[]) {
+    let decisionVal = 0;
+    if (communalCards.length === 0) {
+      decisionVal = this.PreFlopBet(playerCards);
+    } else if (communalCards.length === 5) {
+      decisionVal = this.ihr(playerCards, communalCards);
+    // } else if (communalCards.length === 4) {
+    //   decisionVal = this.ehs(playerCards, communalCards);
+    } else {
+      decisionVal = this.ehs(playerCards, communalCards);
+    }
+    return decisionVal;
+  }
+
+  calcPlayground(playerCards: number[], communalCards: number[]) {
+    const distinctCombinations = [1277, 2860, 858, 858, 10, 1277, 156, 156, 9, 1];
+    const totalCombinations = [1302540, 1098240, 123552, 54912, 10200, 5108, 3744, 624, 36, 4];
+    var winDrawLoss = [0, 0, 0];
+    var ehsWinDrawLoss = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+    let playerBestHand = this.FindBestHand(playerCards.concat(communalCards));
+    for (let i = 0; i < distinctCombinations.length; i++) {
+      let ihrIndex: number;
+      if (i < playerBestHand[0]) {
+        ihrIndex = 0;
+      } else if (i === playerBestHand[0]) {
+        ihrIndex = 1;
+      } else {
+        ihrIndex = 2;  
+      }
+      winDrawLoss[ihrIndex] += totalCombinations[i];
+      
+
+      if (communalCards.length < 5) {
+        let possibleRiverCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
+        for (let c1 = 0; c1 < possibleRiverCards.length; c1++) {
+          if (communalCards.length < 4) {
+            let possibleTurnCards = possibleRiverCards.filter(c => c !== possibleRiverCards[c1]);
+            for (let c2 = 0; c2 < possibleTurnCards.length; c2++) {
+              playerBestHand = this.FindBestHand(playerCards.concat(communalCards, possibleRiverCards[c1], possibleTurnCards[c2]));
+              let ehsIndex: number;
+              if (i < playerBestHand[0]) {
+                ehsIndex = 0;
+              } else if (i === playerBestHand[0]) {
+                ehsIndex = 1;
+              } else {
+                ehsIndex = 2;  
+              }
+              ehsWinDrawLoss[ihrIndex][ehsIndex] += totalCombinations[i]
+            }
+          }
+        }
+      }
+    }
+  }  
 }
 
 export default Calculations;
