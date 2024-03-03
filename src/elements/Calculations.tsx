@@ -194,7 +194,7 @@ class Calculations {
 
   ehs (playerCards: number[], communalCards: number[]) {
     let ihrArray = [0, 0, 0];
-    let ehsArray = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    let ehsArray: number[][] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
     let playerBestHand = this.FindBestHand(playerCards.concat(communalCards));
     let oppBestHand: number[] = [];
     let possibleOpponentCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
@@ -202,7 +202,8 @@ class Calculations {
       console.log("ehs");
       for (let j = 0; j < possibleOpponentCards.length; j++) {
         if (i !== j) {
-          let ihrIndex = this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]].concat(communalCards))
+          let ihrIndex = this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]].concat(communalCards)) * 2;
+          console.log(ihrIndex);
           ihrArray[ihrIndex] += 1;
           if (communalCards.length < 5) {
             let possibleRiverCards = possibleOpponentCards.filter(c => !(c === possibleOpponentCards[i] || c === possibleOpponentCards[j]));

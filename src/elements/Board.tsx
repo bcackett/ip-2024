@@ -207,15 +207,17 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     }
   }
 
-  function computerCalc(playerProfile: number[], cards: number[], playerNum: number) {
-    console.log(currentPlayer.toString);
-    let playerCards = [cards[0], cards[1]];
+  function computerCalc(playerProfile: number[], allCards: number[], playerNum: number) {
+    console.log(currentPlayer.toString());
+    console.log(allCards.toString());
+    let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
-    if (cards.length > 2) {
-      for (let i = 2; i < cards.length; i++) {
-        communalCards.concat(cards[i]);
+    if (allCards.length > 2) {
+      for (let i = 2; i < allCards.length; i++) {
+        communalCards = communalCards.concat(allCards[i]);
       }
     }
+    console.log(communalCards.toString());
     let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
     // let nashEquilibrium = Calculations.nashEq(cards);
     if (effectiveHandScore < 0.1) {
