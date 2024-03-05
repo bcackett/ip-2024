@@ -40,11 +40,11 @@ function TrainingScenario() {
       );
     case ("07"): //Aggressive opponents lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[100, 0, 0]]}/>
       );
     case ("08"): //Unpredictable lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 100]]}/>
       );
     case ("09"): //Known opponents lesson
       return (
