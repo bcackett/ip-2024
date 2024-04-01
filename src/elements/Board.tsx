@@ -119,12 +119,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number) {
     let knownCards: number[];
-    document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
     if (nestedCurrentPlayer) {
       document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
     } else {
       document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
     }
+    document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
     if (blindStage === true) {
       setBlindStage(false);
       setCurrentBet(0);
@@ -146,7 +146,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     }
   }
 
-  function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number, raisedLastTurn?: boolean) {
+  function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
     if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
@@ -168,10 +168,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
 
       if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
-        if (firstPlayer >= startingPlayer && !raisedLastTurn) {
+        if (firstPlayer >= startingPlayer && (newCurrentBet === 0 || blindStage)) {
           newCard = true;
         }
-      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1) && !raisedLastTurn) {
+      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1) && (newCurrentBet === 0 || blindStage)) {
         newCard = true;
       }
 
@@ -179,10 +179,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         newPlayerNum++;
         if (newPlayerNum === totalPlayers + 1) {
           newPlayerNum = firstPlayer;
-          if (firstPlayer >= startingPlayer && !raisedLastTurn) {
+          if (firstPlayer >= startingPlayer && (newCurrentBet === 0 || blindStage)) {
             newCard = true;
           }
-        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1) && !raisedLastTurn) {
+        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1) && (newCurrentBet === 0 || blindStage)) {
           newCard = true;
         }
       }
@@ -272,16 +272,19 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       currentPlayerNum = currentPlayer;
     }
     let newBanks = playerBanks;
-    let amount = 0
+    let newRaise = 0;
+    let amount = 0;
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
-        amount = currentBet + Number(window.prompt("How much would you like to raise the bet?"));
+        newRaise = Number(window.prompt("How much would you like to raise the bet?"));
         while (amount > playerBanks[currentPlayerNum - 1]) {
-          amount = currentBet + Number(window.prompt("Invalid input. How much would you like to raise the bet?"))
+          newRaise = Number(window.prompt("Invalid input. How much would you like to raise the bet?"));
         }
+        amount = currentBet + newRaise;
       }
     } else {
-      amount = nestedCurrentBet! + raise
+      newRaise = raise;
+      amount = nestedCurrentBet! + newRaise;
     }
     newBanks[currentPlayerNum - 1] -= amount;
     document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " raised the bet to £" + amount +".\n\n";
@@ -289,10 +292,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     setPlayerBanks(newBanks);
     setPot(pot + amount);
     if (playerNum) {
-      ChangePlayer(playerNum, undefined, true);
+      ChangePlayer(playerNum, amount);
       console.log(playerNum);
     } else {
-      ChangePlayer(undefined, undefined, true);
+      ChangePlayer(undefined, amount);
       console.log(currentPlayer);
     }
   }
