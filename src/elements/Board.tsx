@@ -117,7 +117,36 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     SmallAndBigBlind(newStartingPlayer - 1);
   }
 
-  function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
+  function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number) {
+    let knownCards: number[];
+    document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
+    if (nestedCurrentPlayer) {
+      document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
+    } else {
+      document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
+    }
+    if (blindStage === true) {
+      setBlindStage(false);
+      setCurrentBet(0);
+    } else {
+      if (blindStage === false) {
+        if (document.getElementById("flop-card-one")!.hidden === true) {
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
+          FlopDeal(knownCards, newPlayerNum);
+        } else if (document.getElementById("turn-card")!.hidden === true) {
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
+          TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
+        } else if (document.getElementById("river-card")!.hidden === true) {
+          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
+          RiverDeal(knownCards, newPlayerNum);
+        } else {
+          DisplayWinner(CalculateWinner());
+        }
+      }
+    }
+  }
+
+  function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number, raisedLastTurn?: boolean) {
     if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
@@ -139,10 +168,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
 
       if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
-        if (firstPlayer >= startingPlayer) {
+        if (firstPlayer >= startingPlayer && !raisedLastTurn) {
           newCard = true;
         }
-      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1)) {
+      } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1) && !raisedLastTurn) {
         newCard = true;
       }
 
@@ -150,41 +179,17 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         newPlayerNum++;
         if (newPlayerNum === totalPlayers + 1) {
           newPlayerNum = firstPlayer;
-          if (firstPlayer >= startingPlayer) {
+          if (firstPlayer >= startingPlayer && !raisedLastTurn) {
             newCard = true;
           }
-        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1)) {
+        } else if (newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1) && !raisedLastTurn) {
           newCard = true;
         }
       }
 
       let knownCards: number[] = [];
       if (newCard === true) {
-        document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-        if (nestedCurrentPlayer) {
-          document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
-        } else {
-          document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
-        }
-        if (blindStage === true) {
-          setBlindStage(false);
-          setCurrentBet(0);
-        } else {
-          if (blindStage === false) {
-            if (document.getElementById("flop-card-one")!.hidden === true && currentBet === 0) {
-              knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
-              FlopDeal(knownCards, newPlayerNum);
-            } else if (document.getElementById("turn-card")!.hidden === true) {
-              knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
-              TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
-            } else if (document.getElementById("river-card")!.hidden === true) {
-              knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
-              RiverDeal(knownCards, newPlayerNum);
-            } else {
-              DisplayWinner(CalculateWinner());
-            }
-          }
-        }
+        ImmediateNewCard(newPlayerNum);
       } else {
         if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === totalPlayers && startingPlayer === 1)) && blindStage === true) {
           newCurrentBet = newCurrentBet - BIGBLIND / 2;
@@ -284,10 +289,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     setPlayerBanks(newBanks);
     setPot(pot + amount);
     if (playerNum) {
-      ChangePlayer(playerNum);
+      ChangePlayer(playerNum, undefined, true);
       console.log(playerNum);
     } else {
-      ChangePlayer();
+      ChangePlayer(undefined, undefined, true);
       console.log(currentPlayer);
     }
   }
@@ -313,7 +318,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
       }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-      if (playerNum) {
+      if (currentPlayerNum === startingPlayer && currentPlayerBet > 0) {
+        ImmediateNewCard(currentPlayerNum);
+      } else if (playerNum) {
         ChangePlayer(playerNum);
         console.log(playerNum);
       } else {
