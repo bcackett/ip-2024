@@ -203,7 +203,6 @@ class Calculations {
       for (let j = 0; j < possibleOpponentCards.length; j++) {
         if (i !== j) {
           let ihrIndex = this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]].concat(communalCards)) * 2;
-          console.log(ihrIndex);
           ihrArray[ihrIndex] += 1;
           if (communalCards.length < 5) {
             let possibleRiverCards = possibleOpponentCards.filter(c => !(c === possibleOpponentCards[i] || c === possibleOpponentCards[j]));

@@ -28,7 +28,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   const [foldedtotalPlayers, setFoldedtotalPlayers] = useState(new Array(totalPlayers).fill(0));
   const [pot, setPot] = useState(0);
   const [bestHands, setBestHands] = useState(new Array(totalPlayers).fill([0]));
-  const [blindStage, setBlindStage] = useState(true);
+  // const [blindStage, setBlindStage] = useState(true);
 
   function HoleDeal(cards: number[], playerNum: number) {
     document.getElementById("hole-card-one")!.hidden = false;
@@ -76,7 +76,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     // document.getElementById("best-hand")!.innerText = bestHand.toString();
     // setBestHandText(bestHand.toString())
     // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
-    let bestHand = calcs.FindBestHand(cards);
+    let cardsCopy: number[] = [];
+    cards.forEach(card => {
+      cardsCopy.push(card);
+    });
+    let bestHand = calcs.FindBestHand(cardsCopy);
     setBestHandText(HANDS[bestHand[0]]);
     let newBestHands = bestHands;
     newBestHands[playerNum - 1] = bestHand;
@@ -116,7 +120,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), newStartingPlayer);
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
-    setBlindStage(true);
+    // setBlindStage(true);
     SmallAndBigBlind(newStartingPlayer - 1);
   }
 
@@ -129,25 +133,25 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
     }
     document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-    if (blindStage === true) {
-      setBlindStage(false);
-      setCurrentBet(0);
+    // if (blindStage === true) {
+    //   setBlindStage(false);
+    //   setCurrentBet(0);
+    // } else {
+    // if (blindStage === false) {
+    if (document.getElementById("flop-card-one")!.hidden === true) {
+      knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
+      FlopDeal(knownCards, newPlayerNum);
+    } else if (document.getElementById("turn-card")!.hidden === true) {
+      knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
+      TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
+    } else if (document.getElementById("river-card")!.hidden === true) {
+      knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
+      RiverDeal(knownCards, newPlayerNum);
     } else {
-      if (blindStage === false) {
-        if (document.getElementById("flop-card-one")!.hidden === true) {
-          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
-          FlopDeal(knownCards, newPlayerNum);
-        } else if (document.getElementById("turn-card")!.hidden === true) {
-          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
-          TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
-        } else if (document.getElementById("river-card")!.hidden === true) {
-          knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
-          RiverDeal(knownCards, newPlayerNum);
-        } else {
-          DisplayWinner(CalculateWinner());
-        }
-      }
+      DisplayWinner(CalculateWinner());
     }
+    // }
+    // }
   }
 
   function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
@@ -155,6 +159,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
     } else {
+      setPot(playerBets.reduce((x,y) => x + y));
       let newPlayerNum: number;
       let newCurrentBet: number;
       if (nestedCurrentBet) {
@@ -169,9 +174,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       }
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
       let newCard = false;
-      console.log("Player Bets = " + playerBets.toString());
       let uniqueBets = Array.from(new Set(playerBets));
-      console.log("Unique Bets = " + uniqueBets.toString());
       if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
         // if (firstPlayer >= startingPlayer && (newCurrentBet === 0 || (newCurrentBet <= BIGBLIND && blindStage))) {
@@ -205,15 +208,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         //   setCurrentBet(newCurrentBet);
         // }
         if (document.getElementById("flop-card-one")!.hidden === true) {
+          console.log("flop hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
         } else if (document.getElementById("turn-card")!.hidden === true) {
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
+          console.log("turn hidden");
         } else if (document.getElementById("river-card")!.hidden === true) {
+          console.log("river hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
         } else {
+          console.log("none hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
         }
+        console.log("Known cards 1: " + knownCards.toString());
         FindBestHand(knownCards, newPlayerNum);
+        console.log("Known cards 2: " + knownCards.toString());
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         if (nestedCurrentPlayer) {
           document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
@@ -221,24 +230,27 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         }
       }
+      console.log("Known cards 3: " + knownCards.toString());
       setCurrentPlayer(newPlayerNum);
+      console.log("Known cards 4: " + knownCards.toString());
       if (newPlayerNum > totalPlayers - computerPlayers) {
+        console.log("Known cards 5: " + knownCards.toString());
         computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
       }
     }
   }
 
   function computerCalc(playerProfile: number[], allCards: number[], playerNum: number, newCurrentBet: number) {
-    console.log(currentPlayer.toString());
-    console.log(playerProfile.toString());
-    console.log(allCards.toString());
+    console.log("I made it here");
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
       for (let i = 2; i < allCards.length; i++) {
+        console.log(i + ", " + allCards[i]);
         communalCards = communalCards.concat(allCards[i]);
       }
     }
+    console.log(allCards.toString());
     console.log(communalCards.toString());
     let randomDecisionValue = Math.random() * 100;
     if (randomDecisionValue < playerProfile[2]) {
@@ -248,9 +260,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       } else if (randomDecisionValue < (10 - playerProfile[0]/10)) {
         Bet(playerNum);
       } else if (randomDecisionValue < (10 - playerProfile[0]/10)) {
-        Raise(Math.min(currentBet + 10, playerBanks[playerNum - 1]), playerNum);
+        Raise(Math.min(newCurrentBet + 10, playerBanks[playerNum - 1]), playerNum);
       } else {
-        Raise(Math.min(currentBet + 10 + (randomDecisionValue - 70), playerBanks[playerNum - 1]), playerNum);
+        Raise(Math.min(newCurrentBet + 10 + (randomDecisionValue - 70), playerBanks[playerNum - 1]), playerNum);
       }
     } else {
       let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
@@ -259,22 +271,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         if (randomDecisionValue >= playerProfile[1]) {
           Fold(playerNum);
         } else {
-          Raise(Math.min(currentBet + 30 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
+          Raise(Math.min(newCurrentBet + 30 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         }
       } else if (effectiveHandScore > (0.75 - playerProfile[0] / 1000)) {
-        Raise(Math.min(currentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
+        Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
       } else {
         if (randomDecisionValue >= playerProfile[1]) {
           Bet(playerNum);
         } else {
-          Raise(Math.min(currentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
+          Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         }
       }
     }
   }
 
   function Raise(raise?: number, playerNum?: number, nestedCurrentBet?: number) {
-    console.log("Current Bet = " + currentBet);
     let currentPlayerNum: number;
     let newCurrentBet: number;
     if (playerNum) {
@@ -282,24 +293,30 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     } else {
       currentPlayerNum = currentPlayer;
     }
+    if (nestedCurrentBet) {
+      newCurrentBet = nestedCurrentBet;
+    } else {
+      newCurrentBet = currentBet;
+    }
     let newBanks = playerBanks;
     let newBets = playerBets
     let newRaise = 0;
     let amount = 0;
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
-        newRaise = Number(window.prompt("How much would you like to raise the bet?"));
-        while (amount > playerBanks[currentPlayerNum - 1]) {
-          newRaise = Number(window.prompt("Invalid input. How much would you like to raise the bet?"));
+        amount = Number(window.prompt("What would you like to raise the bet to?"));
+        while (amount > playerBanks[currentPlayerNum - 1] || amount <= newCurrentBet) {
+          amount = Number(window.prompt("Invalid input. What would you like to raise the bet to?"));
         }
-        amount = currentBet + newRaise;
+        // amount = currentBet + newRaise;
       }
     } else {
-      newRaise = raise;
-      amount = nestedCurrentBet! + newRaise;
+      amount = raise;
+      // amount = nestedCurrentBet! + newRaise;
     }
-    newBanks[currentPlayerNum - 1] -= amount;
-    newBets[currentPlayerNum - 1] += amount;
+    // amount = newCurrentBet + newRaise;
+    newBanks[currentPlayerNum - 1] -= (amount - newBets[currentPlayerNum - 1]);
+    newBets[currentPlayerNum - 1] += (amount - newBets[currentPlayerNum - 1]);
     document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " raised the bet to £" + amount +".\n\n";
     setCurrentBet(amount);
     setPlayerBanks(newBanks);
@@ -332,12 +349,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       } else {
         let newBanks = playerBanks;
         let newBets = playerBets;
-        console.log("Current Bet = " + currentPlayerBet);
         let betDiff = currentPlayerBet - newBets[currentPlayerNum - 1];
         // if (blindStage && (currentPlayerNum === startingPlayer || totalPlayers === 2 && currentPlayerNum !== startingPlayer)) {
         //   currentPlayerBet -= BIGBLIND/2;  
         // }
-        console.log("Bet Diff = " + betDiff);
         newBanks[currentPlayerNum - 1] -= betDiff;
         newBets[currentPlayerNum - 1] += betDiff;
         setPlayerBanks(newBanks);
@@ -412,8 +427,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     let newPot = 0;
     newPot += pot + BIGBLIND + BIGBLIND/2;
     setPot((pot) => {return pot + BIGBLIND + BIGBLIND/2});
-    console.log(newPot);
-    console.log("KABOOM");
     if (nextPlayer > totalPlayers - computerPlayers) {
       computerCalc(playerProfiles![nextPlayer - (computerPlayers + 1)], cards.slice(2 * (nextPlayer - 1), 2 * (nextPlayer - 1) + 2), nextPlayer, BIGBLIND);
     }
