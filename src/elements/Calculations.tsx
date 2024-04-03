@@ -215,7 +215,6 @@ class Calculations {
                     let possibleFlopCards = possibleTurnCards.filter(c => c !== possibleTurnCards[c2]);
                     for (let c3 = 0; c3 < possibleFlopCards.length; c3++) {
                       for (let c4 = 0; c4 < possibleFlopCards.length; c4++) {
-                        console.log("BOOM!");
                         for (let c5 = 0; c5 < possibleFlopCards.length; c5++) {
                           if (c3 !== c4 && c4 !== c5 && c3 !== c5) {
                             oppBestHand = this.FindBestHand(
@@ -264,6 +263,7 @@ class Calculations {
     //   decisionVal = this.ehs(playerCards, communalCards);
     } else {
       decisionVal = this.ehs(playerCards, communalCards);
+      console.log(decisionVal);
     }
     return decisionVal;
   }
