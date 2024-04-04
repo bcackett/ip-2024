@@ -2,6 +2,7 @@
   --height: 40vw;
   --reporter-width: 20vw;
   --players-font-size: 2vw;
+  --links-font-size: 1vw;
   --pot-font-size: 3vw;
   --reporter-font-size: 1.5vw;
 }
@@ -23,7 +24,7 @@ code {
 
 .name-frame {
   padding: 20px 20px 20px 20px;
-  background-color: rgba(125, 2, 2, 1);
+  /* background-color: rgba(125, 2, 2, 1); */
 }
 
 .spaced-button {
@@ -48,13 +49,33 @@ h1 {
 }
 
 .nav-bar {
-  padding: 20px;
+  padding: 15px;
   border: 2px solid rgba(4, 0, 26, 1);
   margin-bottom: 0.25vw;
   display: flex;
   background-color: rgba(125, 2, 2, 1);
   align-items: center;
+  justify-content: center;
   margin: 0 auto;
+}
+
+.title {
+  font-size: var(--players-font-size);
+  font-weight: bolder;
+  margin: 0 10vw 0 10vw;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.links {
+  font-size: var(--links-font-size);
+  font-weight: bold;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.links:hover, .title:hover {
+  color: rgb(248, 245, 231);
 }
 
 #card-face {

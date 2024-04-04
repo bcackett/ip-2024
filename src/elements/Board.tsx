@@ -135,11 +135,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
     }
     document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-    // if (blindStage === true) {
-    //   setBlindStage(false);
-    //   setCurrentBet(0);
-    // } else {
-    // if (blindStage === false) {
     if (document.getElementById("flop-card-one")!.hidden === true) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
       FlopDeal(knownCards, newPlayerNum);
@@ -152,8 +147,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     } else {
       DisplayWinner(CalculateWinner());
     }
-    // }
-    // }
   }
 
   function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
@@ -190,17 +183,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       let uniqueBets = Array.from(new Set(betsNoFoldedPlayers));
       if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
-        // if (firstPlayer >= startingPlayer && (newCurrentBet === 0 || (newCurrentBet <= BIGBLIND && blindStage))) {
         if (uniqueBets.length === 1 && (firstPlayer >= startingPlayer || uniqueBets[0] !== 0)) {
           newCard = true;
         }
-      // } else if ((newPlayerNum === startingPlayer || (newPlayerNum > startingPlayer && foldedtotalPlayers[startingPlayer - 1] === 1)) && (newCurrentBet === 0  || (newCurrentBet <= BIGBLIND && blindStage))) {
       } else if (uniqueBets.length === 1 && (newPlayerNum === startingPlayer || uniqueBets[0] !== 0)) {
         newCard = true;
       }
 
       while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
-        console.log("Made it here!");
         newPlayerNum++;
         if (newPlayerNum === totalPlayers + 1) {
           newPlayerNum = firstPlayer;
@@ -225,26 +215,16 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         console.log("Next Round Starting Pot: " + potStartOfRound);
         ImmediateNewCard(newPlayerNum);
       } else {
-        // if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === totalPlayers && startingPlayer === 1)) && blindStage === true) {
-        //   newCurrentBet = newCurrentBet - BIGBLIND / 2;
-        //   setCurrentBet(newCurrentBet);
-        // }
         if (document.getElementById("flop-card-one")!.hidden === true) {
-          // console.log("flop hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
         } else if (document.getElementById("turn-card")!.hidden === true) {
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
-          // console.log("turn hidden");
         } else if (document.getElementById("river-card")!.hidden === true) {
-          // console.log("river hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
         } else {
-          // console.log("none hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
         }
-        // console.log("Known cards 1: " + knownCards.toString());
         FindBestHand(knownCards, newPlayerNum);
-        // console.log("Known cards 2: " + knownCards.toString());
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         if (nestedCurrentPlayer) {
           document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
@@ -252,11 +232,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         }
       }
-      // console.log("Known cards 3: " + knownCards.toString());
       setCurrentPlayer(newPlayerNum);
-      // console.log("Known cards 4: " + knownCards.toString());
       if (newPlayerNum > totalPlayers - computerPlayers) {
-        // console.log("Known cards 5: " + knownCards.toString());
         computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
       }
     }
@@ -270,8 +247,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         communalCards = communalCards.concat(allCards[i]);
       }
     }
-    // console.log(allCards.toString());
-    // console.log(communalCards.toString());
     let randomDecisionValue = Math.random() * 100;
     if (randomDecisionValue < playerProfile[2]) {
       randomDecisionValue = Math.floor(Math.random() * 100);

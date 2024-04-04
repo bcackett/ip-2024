@@ -2,20 +2,16 @@ import { Link } from "react-router-dom"
 
 function NavBar() {
   return (
-    <nav className="nav-bar">
+    <nav className="nav-bar" style={{marginBottom: "1vw"}}>
+      <Link reloadDocument to="/play">
+        <button className="links">Play Locally</button>
+      </Link>
       <Link reloadDocument to="/">
-        <h1>I.Poker</h1>
+        <button className="title">I.Poker</button>
       </Link> 
-      {
-        <div className="links">
-          <Link reloadDocument to="/play">
-            Play Locally
-          </Link>
-          <Link reloadDocument to="/train">
-            Practice Lessons
-          </Link>
-        </div>
-      }
+      <Link className="links" reloadDocument to="/train">
+        <button className="links">Practice Lessons</button>
+      </Link>
     </nav>
   )
 }

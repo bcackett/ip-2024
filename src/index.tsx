@@ -17,7 +17,7 @@ import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.render(
   <BrowserRouter>
-    {/* <NavBar /> */}
+    <NavBar />
     <App />
   </BrowserRouter>,
   document.getElementById("root")

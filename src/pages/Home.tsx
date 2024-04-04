@@ -12,9 +12,7 @@ function Welcome() {
   }
   return (
     <>
-      <div className="name-frame">
-        <h1>Welcome to I.Poker!</h1>
-      </div>
+      <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to I.Poker!</h1>
       <div>
         <label style={{color: "#f5f8e7"}}>I.Poker is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
       </div>
