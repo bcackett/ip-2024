@@ -27,6 +27,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   const [bestHandText, setBestHandText] = useState("");
   const [foldedtotalPlayers, setFoldedtotalPlayers] = useState(new Array(totalPlayers).fill(0));
   const [pot, setPot] = useState(0);
+  const [potStartOfRound, setPotStartOfRound] = useState(0);
   const [bestHands, setBestHands] = useState(new Array(totalPlayers).fill([0]));
   // const [blindStage, setBlindStage] = useState(true);
 
@@ -120,6 +121,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), newStartingPlayer);
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
+    setPotStartOfRound(0);
     // setBlindStage(true);
     SmallAndBigBlind(newStartingPlayer - 1);
   }
@@ -159,8 +161,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
     } else {
-      setPot(playerBets.reduce((x,y) => x + y));
       let newPlayerNum: number;
+      let oldPlayerNum: number;
       let newCurrentBet: number;
       if (nestedCurrentBet) {
         newCurrentBet = nestedCurrentBet;
@@ -168,13 +170,24 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         newCurrentBet = currentBet;
       }
       if (nestedCurrentPlayer) {
+        oldPlayerNum = nestedCurrentPlayer;
         newPlayerNum = nestedCurrentPlayer + 1;
       } else {
+        oldPlayerNum = currentPlayer;
         newPlayerNum = currentPlayer + 1;
       }
+      console.log("Player Bet Sum: " + playerBets.reduce((x,y) => x + y));
+      console.log("Starting Pot: " + potStartOfRound);
+      setPot(potStartOfRound + playerBets.reduce((x,y) => x + y));
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
       let newCard = false;
-      let uniqueBets = Array.from(new Set(playerBets));
+      let betsNoFoldedPlayers = [];
+      for (let i = 0; i < foldedtotalPlayers.length; i++) {
+        if (foldedtotalPlayers[i] === 0) {
+          betsNoFoldedPlayers.push(playerBets[i]);
+        }
+      }
+      let uniqueBets = Array.from(new Set(betsNoFoldedPlayers));
       if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
         // if (firstPlayer >= startingPlayer && (newCurrentBet === 0 || (newCurrentBet <= BIGBLIND && blindStage))) {
@@ -187,13 +200,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       }
 
       while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
+        console.log("Made it here!");
         newPlayerNum++;
         if (newPlayerNum === totalPlayers + 1) {
           newPlayerNum = firstPlayer;
           if (uniqueBets.length === 1 && (firstPlayer >= startingPlayer || uniqueBets[0] !== 0)) {
             newCard = true;
           }
-        } else if (uniqueBets.length === 1 && (firstPlayer >= startingPlayer || uniqueBets[0] !== 0)) {
+        } else if (uniqueBets.length === 1 && (newPlayerNum === startingPlayer || uniqueBets[0] !== 0)) {
           newCard = true;
         }
       }
@@ -201,6 +215,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       let knownCards: number[] = [];
       if (newCard === true) {
         newPlayerNum = startingPlayer;
+        while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
+          newPlayerNum++;
+          if (newPlayerNum === totalPlayers + 1) {
+            newPlayerNum = firstPlayer;
+          }
+        }
+        setPotStartOfRound(potStartOfRound + playerBets.reduce((x,y) => x + y));
+        console.log("Next Round Starting Pot: " + potStartOfRound);
         ImmediateNewCard(newPlayerNum);
       } else {
         // if ((newPlayerNum === startingPlayer - 1 || (newPlayerNum === totalPlayers && startingPlayer === 1)) && blindStage === true) {
@@ -208,21 +230,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         //   setCurrentBet(newCurrentBet);
         // }
         if (document.getElementById("flop-card-one")!.hidden === true) {
-          console.log("flop hidden");
+          // console.log("flop hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
         } else if (document.getElementById("turn-card")!.hidden === true) {
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
-          console.log("turn hidden");
+          // console.log("turn hidden");
         } else if (document.getElementById("river-card")!.hidden === true) {
-          console.log("river hidden");
+          // console.log("river hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
         } else {
-          console.log("none hidden");
+          // console.log("none hidden");
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
         }
-        console.log("Known cards 1: " + knownCards.toString());
+        // console.log("Known cards 1: " + knownCards.toString());
         FindBestHand(knownCards, newPlayerNum);
-        console.log("Known cards 2: " + knownCards.toString());
+        // console.log("Known cards 2: " + knownCards.toString());
         document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
         if (nestedCurrentPlayer) {
           document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
@@ -230,28 +252,26 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         }
       }
-      console.log("Known cards 3: " + knownCards.toString());
+      // console.log("Known cards 3: " + knownCards.toString());
       setCurrentPlayer(newPlayerNum);
-      console.log("Known cards 4: " + knownCards.toString());
+      // console.log("Known cards 4: " + knownCards.toString());
       if (newPlayerNum > totalPlayers - computerPlayers) {
-        console.log("Known cards 5: " + knownCards.toString());
+        // console.log("Known cards 5: " + knownCards.toString());
         computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
       }
     }
   }
 
   function computerCalc(playerProfile: number[], allCards: number[], playerNum: number, newCurrentBet: number) {
-    console.log("I made it here");
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
       for (let i = 2; i < allCards.length; i++) {
-        console.log(i + ", " + allCards[i]);
         communalCards = communalCards.concat(allCards[i]);
       }
     }
-    console.log(allCards.toString());
-    console.log(communalCards.toString());
+    // console.log(allCards.toString());
+    // console.log(communalCards.toString());
     let randomDecisionValue = Math.random() * 100;
     if (randomDecisionValue < playerProfile[2]) {
       randomDecisionValue = Math.floor(Math.random() * 100);
@@ -321,7 +341,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     setCurrentBet(amount);
     setPlayerBanks(newBanks);
     setPlayerBets(newBets);
-    setPot(pot + amount);
+    // setPot(pot + amount);
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     if (playerNum) {
       ChangePlayer(playerNum, amount);
@@ -357,7 +377,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         newBets[currentPlayerNum - 1] += betDiff;
         setPlayerBanks(newBanks);
         setPlayerBets(newBets);
-        setPot(pot + currentPlayerBet);
+        // setPot(pot + currentPlayerBet);
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
       }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
