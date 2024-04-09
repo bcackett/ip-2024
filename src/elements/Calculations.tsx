@@ -152,17 +152,17 @@ class Calculations {
     } else if (cardValues[0] === 14 || cardValues[1] === 14) {
       return 0;
     } else if (cardValues[0] === cardValues[1]) {
-      return 1;
+      return 0.5;
     } else if (cardValues.includes(13) && cardSuits[0] === cardSuits[1]) {
-      return 1;
+      return 0.5;
     } else if (cardSuits[0] === cardSuits[1] && cardValues[0] === cardValues[1] - 1 && cardValues[0] >= 4) {
-      return 1;
+      return 0.5;
     } else if (cardSuits[0] === cardSuits[1] && cardValues[0] === cardValues[1] - 2 && cardValues[0] >= 5) {
-      return 1;
+      return 0.5;
     } else if (cardValues.includes(9) && (cardValues[0] >= 12 || cardValues[1] >= 12)) {
-      return 1;
+      return 0.5;
     } else {
-      return 2;
+      return 1;
     }
   }
 

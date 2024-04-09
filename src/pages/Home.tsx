@@ -6,10 +6,6 @@ type UserDetails = {
 }
 
 function Welcome(id: UserDetails) {
-  const [user, setUser] = useState(null);
-  if (id) {
-    console.log("made it");
-  } 
 
   const nav = useNavigate();
 

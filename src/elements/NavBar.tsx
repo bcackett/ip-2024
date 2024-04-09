@@ -14,17 +14,17 @@ function NavBar() {
   var loggedInText = "Log In/Register"
   return (
     <nav className="nav-bar" style={{marginBottom: "1vw"}}>
-      <Link reloadDocument to="/play">
-        <button className="links">Play Locally</button>
-      </Link>
       <Link reloadDocument to="/">
         <button className="title">I.Poker</button>
+      </Link>
+      <Link reloadDocument to="/play">
+        <button className="links">Play Locally</button>
       </Link> 
       <Link reloadDocument to="/train">
         <button className="links">Practice Lessons</button>
       </Link>
       <Link reloadDocument to="/login">
-        <button className="links" id="login">{logInButtonText()}</button>
+        <button className="links">{logInButtonText()}</button>
       </Link>
     </nav>
   )

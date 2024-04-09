@@ -191,7 +191,15 @@ h1 {
   border: 10px solid rgba(125, 2, 2, 1);
   border-radius: 10px;
   justify-content: center;
-  text-align: center;
+  text-align: left;
+  overflow-y: auto;
+}
+
+#warning-reporter > #warning-text {
+  color: rgb(255, 60, 0);;
+  font-weight: 700;
+  font-size: var(--reporter-font-size);
+  margin: 0px;
 }
 
 .lesson-grid {
