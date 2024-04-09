@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Training from "./pages/Training";
 import Play from "./pages/Play";
+import Login from "./pages/Login";
+import Register from './pages/Register';
 import { useNavigate } from "react-router-dom";
 import TrainingScenario from './pages/TrainingScenario';
 
@@ -17,6 +19,8 @@ function App() {
       <Route path={`/lessons/:id`} element={<TrainingScenario />} />
       <Route path="/play" element={<Play />} />
       <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/*" element={<NotFound />} />
     </Routes>
   );

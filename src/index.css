@@ -74,7 +74,11 @@ h1 {
   border-color: transparent;
 }
 
-.links:hover, .title:hover {
+#login {
+  float: right;
+}
+
+.links:hover, .title:hover, .login {
   color: rgb(248, 245, 231);
 }
 

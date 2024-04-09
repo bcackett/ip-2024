@@ -1,6 +1,16 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Welcome() {
+type UserDetails = {
+  userID?: number;
+}
+
+function Welcome(id: UserDetails) {
+  const [user, setUser] = useState(null);
+  if (id) {
+    console.log("made it");
+  } 
+
   const nav = useNavigate();
 
   const goToPlay = () => {
@@ -10,6 +20,7 @@ function Welcome() {
   const goToTrain = () => {
     nav("/train")
   }
+
   return (
     <>
       <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to I.Poker!</h1>
