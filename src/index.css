@@ -1,5 +1,5 @@
 :root {
-  --height: 40vw;
+  --height: 37vw;
   --reporter-width: 20vw;
   --players-font-size: 2vw;
   --links-font-size: 1vw;
@@ -193,6 +193,7 @@ h1 {
   justify-content: center;
   text-align: left;
   overflow-y: auto;
+  z-index: 999;
 }
 
 #warning-reporter > #warning-text {
