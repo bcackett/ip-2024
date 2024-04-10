@@ -25,6 +25,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   const [currentPlayer, setCurrentPlayer] = useState(1);
   const [playerBanks, setPlayerBanks] = useState(Array.from({length: totalPlayers}).map(bank=>STARTBANK));
   const [playerBets, setPlayerBets] = useState(new Array(totalPlayers).fill(0));
+  const [playerPrompts, setPlayerPrompts] = useState(new Array(totalPlayers - computerPlayers).fill(""));
   const [currentBet, setCurrentBet] = useState(0);
   const [bestHandText, setBestHandText] = useState("");
   const [foldedtotalPlayers, setFoldedtotalPlayers] = useState(new Array(totalPlayers).fill(0));
@@ -34,6 +35,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   const [humanPredictedResults, setHumanPredictedResults] = useState(new Array(totalPlayers - computerPlayers).fill(0));
   const [pastPlayerPerformance, setPastPlayerPerformance] = useState(0);
   const [currentPlayerPrediction, setCurrentPlayerPrediction] = useState(0);
+  const [gameState, setGameState] = useState(0);
   // const [blindStage, setBlindStage] = useState(true);
 
   async function getPastPlayerPerformance() {
@@ -54,6 +56,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     document.getElementById("fold-button")!.hidden = false;
     document.getElementById("start-button")!.hidden = true;
     let bestHand = FindBestHand(cards, playerNum);
+    setGameState(0);
   }
   
   function FlopDeal(cards: number[], playerNum: number) {
@@ -65,6 +68,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(0);
+    setGameState(1);
   }
   
   function TurnDeal(cards: number[], playerNum: number) {
@@ -74,6 +78,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(0);
+    setGameState(2);
   }
   
   function RiverDeal(cards:number[], playerNum: number) {
@@ -83,6 +88,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     document.getElementById("fold-button")!.hidden = false;
     let bestHand = FindBestHand(cards, playerNum);
     setCurrentBet(0);
+    setGameState(3);
   }
   
   function FindBestHand(cards: number[], playerNum: number) {
@@ -254,6 +260,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
       } else {
         setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
+        hideCards(newPlayerNum);
       }
     }
   }
@@ -335,44 +342,45 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           amount = Number(window.prompt("Invalid input. What would you like to raise the bet to?"));
         }
         if (currentPlayerNum <= totalPlayers - computerPlayers) {
-          document.getElementById("warning-text")!.innerText += "Player " + currentPlayerNum + ": ";
-          if (pastPlayerPerformance < 0) {
+          if (document.getElementById("flop-card-one")!.hidden) {
+            if (currentPlayerPrediction === 0) {
+              document.getElementById("warning-text")!.innerText += "Are you sure about this? It might be safer to fold on this hand.\n\n";
+            } else if (currentPlayerPrediction === 0.5) {
+              document.getElementById("warning-text")!.innerText += "Raising could be risky here. Just calling might be safer.\n\n";
+            } else {
+              document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
+            }
+          } else if (pastPlayerPerformance < 0) {
             if (currentPlayerPrediction < 0.3) {
               document.getElementById("warning-text")!.innerText += "Are you sure about this? It might be safer to fold on this hand.\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
             } else if (currentPlayerPrediction < 0.8) {
-              document.getElementById("warning-text")!.innerText += "Are you sure about this? It might be safer to " + betButtonText() + ".\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
+              document.getElementById("warning-text")!.innerText += "Are you sure about this? It might be safer to " + betButtonText()!.toString().toLowerCase() + ".\n\n";
             } else {
               document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
             }
           } else if (pastPlayerPerformance >= 50) {
             if (currentPlayerPrediction < 0.1) {
               document.getElementById("warning-text")!.innerText += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
             } else if (currentPlayerPrediction < 0.5 && newCurrentBet > BIGBLIND) {
-              document.getElementById("warning-text")!.innerText += "The bet has already gone up. Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText() + "\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
+              document.getElementById("warning-text")!.innerText += "The bet has already gone up. Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText()!.toString().toLowerCase() + "\n\n";
             } else if (currentPlayerPrediction < 0.7 && newCurrentBet > 3*BIGBLIND) {
               document.getElementById("warning-text")!.innerText += "The bet is already quite high. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
+              
             } else {
               document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
             }
           } else {
             if (currentPlayerPrediction < 0.2) {
               document.getElementById("warning-text")!.innerText += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
             } else if (currentPlayerPrediction < 0.5) {
-              document.getElementById("warning-text")!.innerText += "Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText() + "\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
+              document.getElementById("warning-text")!.innerText += "Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText()!.toString().toLowerCase() + "\n\n";
             } else if (currentPlayerPrediction < 0.7 && newCurrentBet > BIGBLIND) {
               document.getElementById("warning-text")!.innerText += "The bet has already gone up. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
-              document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
             } else {
               document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
             }
           }
+          document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
         }
         // amount = currentBet + newRaise;
       }
@@ -413,13 +421,19 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       console.log("Current Player Num: " + currentPlayerNum.toString())
       if (currentPlayerNum <= totalPlayers - computerPlayers) {
         document.getElementById("warning-text")!.innerText += "Player " + currentPlayerNum + ": ";
-        if (pastPlayerPerformance < 0) {
+        if (document.getElementById("flop-card-one")!.hidden) {
+          if (currentPlayerPrediction === 0) {
+            document.getElementById("warning-text")!.innerText += "Are you sure about this? It might be safer to fold on this hand.\n\n";
+          } else if (currentPlayerPrediction === 1) {
+            document.getElementById("warning-text")!.innerText += "Are you sure you don't want to raise? This is a very strong start.\n\n";
+          } else {
+            document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
+          }
+        } else if (pastPlayerPerformance < 0) {
           if (currentPlayerPrediction < 0.2) {
             document.getElementById("warning-text")!.innerText += "Are you sure about this? It might be safer to fold on this hand.\n\n";
-            document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
           } else if (currentPlayerPrediction >= 0.8) {
-            document.getElementById("warning-text")!.innerText += "Are you sure about this? You have a good hand, so you could " + raiseButtonText() + ".\n\n";
-            document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
+            document.getElementById("warning-text")!.innerText += "Are you sure about this? You have a good hand, so you could " + raiseButtonText()!.toString().toLowerCase() + ".\n\n";
           } else {
             document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
           }
@@ -428,9 +442,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           if (currentPlayerPrediction < 0.1) {
             document.getElementById("warning-text")!.innerText += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
           } else if (currentPlayerPrediction >= 0.7 && currentPlayerBet <= 1.5*BIGBLIND) {
-            document.getElementById("warning-text")!.innerText += "You have a very strong hand with an opportunity to " + raiseButtonText() + " big and put a lot of pressure on the other players. Are you sure you don't want to try that?\n\n";
+            document.getElementById("warning-text")!.innerText += "You have a very strong hand with an opportunity to " + raiseButtonText()!.toString().toLowerCase() + " big and put a lot of pressure on the other players. Are you sure you don't want to try that?\n\n";
           } else if (playerBets.find(x => x > 2*BIGBLIND) === -1) {
-            document.getElementById("warning-text")!.innerText += "You have an opportunity to " + raiseButtonText() + " as a bluff here if you want to take it!\n\n";
+            document.getElementById("warning-text")!.innerText += "You have an opportunity to " + raiseButtonText()!.toString().toLowerCase() + " as a bluff here if you want to take it!\n\n";
           } else {
             document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
           }
@@ -440,9 +454,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           } else if (currentPlayerPrediction >= 0.9 && currentPlayerBet <= 1.5*BIGBLIND) {
             document.getElementById("warning-text")!.innerText += "You have a very strong hand with an opportunity to raise big and put a lot of pressure on the other players. Are you sure you don't want to try that?\n\n";
           } else if (currentPlayerPrediction >= 0.7 && currentPlayerBet <= BIGBLIND) {
-            document.getElementById("warning-text")!.innerText += "You could " + raiseButtonText() + " and go for some bigger winnings here. Are you sure you don't want to try that?\n\n";
+            document.getElementById("warning-text")!.innerText += "You could " + raiseButtonText()!.toString().toLowerCase() + " and go for some bigger winnings here. Are you sure you don't want to try that?\n\n";
           } else if (currentPlayerPrediction >= 0.5 && playerBets.find(x => x > 2*BIGBLIND) === -1) {
-            document.getElementById("warning-text")!.innerText += "You have an opportunity to " + raiseButtonText() + " as a bluff here if you want to take it!\n\n";          
+            document.getElementById("warning-text")!.innerText += "You have an opportunity to " + raiseButtonText()!.toString().toLowerCase() + " as a bluff here if you want to take it!\n\n";          
           } else {
             document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
           }
@@ -488,7 +502,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     let newBestHands = bestHands;
     if (currentPlayerNum <= totalPlayers - computerPlayers) {
       document.getElementById("warning-text")!.innerText += "Player " + currentPlayerNum + ": ";
-      if (pastPlayerPerformance < 0) {
+      if (document.getElementById("flop-card-one")!.hidden) {
+        if (currentPlayerPrediction === 0.5) {
+          document.getElementById("warning-text")!.innerText += "Are you sure about this? You could call and see how this plays out.\n\n";
+        } else if (currentPlayerPrediction === 1) {
+          document.getElementById("warning-text")!.innerText += "Are you sure you don't want to raise? This is a very strong start.\n\n";
+        } else {
+          document.getElementById("warning-text")!.innerText += "Good decision!.\n\n";
+        }
+      } else if (pastPlayerPerformance < 0) {
         if (currentPlayerPrediction >= 0.2) {
           document.getElementById("warning-text")!.innerText += "Folding could be a mistake here, you have a reasonable hand.\n\n";
         } else {
@@ -647,6 +669,44 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     }
   }
 
+  function hideCards(nextPlayer: number) {
+    document.getElementById("raise-button")!.hidden = true;
+    document.getElementById("fold-button")!.hidden = true;
+    document.getElementById("bet-button")!.hidden = true;
+    document.getElementById("fold-button")!.hidden = true;
+    document.getElementById("hole-card-one")!.hidden = true;
+    document.getElementById("hole-card-two")!.hidden = true;
+    document.getElementById("flop-card-one")!.hidden = true;
+    document.getElementById("flop-card-two")!.hidden = true;
+    document.getElementById("flop-card-three")!.hidden = true;
+    document.getElementById("turn-card")!.hidden = true;
+    document.getElementById("river-card")!.hidden = true;
+    document.getElementById("ready-button")!.hidden = false;
+    setBestHandText("Player " + nextPlayer + ": Ready?")
+  }
+
+  function showCards() {
+    document.getElementById("raise-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
+    document.getElementById("bet-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
+    document.getElementById("hole-card-one")!.hidden = false;
+    document.getElementById("hole-card-two")!.hidden = false;
+    if (gameState > 0) {
+      document.getElementById("flop-card-one")!.hidden = false;
+      document.getElementById("flop-card-two")!.hidden = false;
+      document.getElementById("flop-card-three")!.hidden = false;
+    }
+    if (gameState > 1) {
+      document.getElementById("turn-card")!.hidden = false;
+    }
+    if (gameState > 2) {
+      document.getElementById("river-card")!.hidden = false;
+    }
+    document.getElementById("ready-button")!.hidden = true;
+    setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
+  }
+
   return (
     <>
       <div id="warning-reporter">
@@ -736,6 +796,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     return card%15 + "S"; //Spades
   }}).toString()}</h1> */}
       <h1 id="best-hand" style={{color: "#f5f8e7"}}>{bestHandText}</h1>
+      <button id="ready-button" hidden={true} className="spaced-button" type="button" onClick={() => showCards()}>Ready</button>
     </>
   );
 }
