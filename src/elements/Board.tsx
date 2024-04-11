@@ -267,9 +267,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       if (newPlayerNum > totalPlayers - computerPlayers) {
         computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
       } else {
+        hideCards(newPlayerNum);
         await sleep(5000);
         setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
-        hideCards(newPlayerNum);
       }
     }
     handleLoading();
@@ -359,7 +359,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
             } else if (currentPlayerPrediction === 0.5) {
               newPlayerPrompts[currentPlayerNum - 1] += "Raising could be risky here. Just calling might be safer.\n\n";
             } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
             }
           } else if (pastPlayerPerformance < 0) {
             if (currentPlayerPrediction < 0.3) {
@@ -367,7 +367,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
             } else if (currentPlayerPrediction < 0.8) {
               newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to " + betButtonText()!.toString().toLowerCase() + ".\n\n";
             } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
             }
           } else if (pastPlayerPerformance >= 50) {
             if (currentPlayerPrediction < 0.1) {
@@ -377,7 +377,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
             } else if (currentPlayerPrediction < 0.7 && newCurrentBet > 3*BIGBLIND) {
               newPlayerPrompts[currentPlayerNum - 1] += "The bet is already quite high. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
             } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
             }
           } else {
             if (currentPlayerPrediction < 0.2) {
@@ -387,7 +387,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
             } else if (currentPlayerPrediction < 0.7 && newCurrentBet > BIGBLIND) {
               newPlayerPrompts[currentPlayerNum - 1] += "The bet has already gone up. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
             } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
             }
           }
           setPlayerPrompts(newPlayerPrompts);
@@ -439,7 +439,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           } else if (currentPlayerPrediction === 1) {
             newPlayerPrompts[currentPlayerNum - 1] += "Are you sure you don't want to raise? This is a very strong start.\n\n";
           } else {
-            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
           }
         } else if (pastPlayerPerformance < 0) {
           if (currentPlayerPrediction < 0.2) {
@@ -447,7 +447,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           } else if (currentPlayerPrediction >= 0.8) {
             newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? You have a good hand, so you could " + raiseButtonText()!.toString().toLowerCase() + ".\n\n";
           } else {
-            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
           }
         } else if (pastPlayerPerformance >= 50) {
           console.log("Prediction: " + currentPlayerPrediction);
@@ -458,7 +458,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           } else if (playerBets.find(x => x > 2*BIGBLIND) === -1) {
             newPlayerPrompts[currentPlayerNum - 1] += "You have an opportunity to " + raiseButtonText()!.toString().toLowerCase() + " as a bluff here if you want to take it!\n\n";
           } else {
-            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
           }
         } else {
           if (currentPlayerPrediction < 0.2) {
@@ -470,7 +470,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
           } else if (currentPlayerPrediction >= 0.5 && playerBets.find(x => x > 2*BIGBLIND) === -1) {
             newPlayerPrompts[currentPlayerNum - 1] += "You have an opportunity to " + raiseButtonText()!.toString().toLowerCase() + " as a bluff here if you want to take it!\n\n";          
           } else {
-            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+            newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
           }
         }
         setPlayerPrompts(newPlayerPrompts);
@@ -521,25 +521,25 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         } else if (currentPlayerPrediction === 1) {
           newPlayerPrompts[currentPlayerNum - 1] += "Are you sure you don't want to raise? This is a very strong start.\n\n";
         } else {
-          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
         }
       } else if (pastPlayerPerformance < 0) {
         if (currentPlayerPrediction >= 0.2) {
           newPlayerPrompts[currentPlayerNum - 1] += "Folding could be a mistake here, you have a reasonable hand.\n\n";
         } else {
-          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
         }
       } else if (pastPlayerPerformance >= 50) {
         if (currentPlayerPrediction >= 0.1) {
           newPlayerPrompts[currentPlayerNum - 1] += "Folding could be a mistake here, you have a reasonable hand.\n\n";
         } else {
-          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
         }
       } else {
         if (currentPlayerPrediction >= 0.2) {
           newPlayerPrompts[currentPlayerNum - 1] += "Folding could be a mistake here, you have a reasonable hand.\n\n";
         } else {
-          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!.\n\n";
+          newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
         }
       }
       setPlayerPrompts(newPlayerPrompts);
