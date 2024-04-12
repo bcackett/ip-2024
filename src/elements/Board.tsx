@@ -1,7 +1,7 @@
 import { start } from "repl";
 import Card from "./Card";
 import Deck from "./Deck";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Calculations from "./Calculations"
 import { supabase } from "../common/supabase";
 import { paste } from "@testing-library/user-event/dist/paste";
@@ -36,9 +36,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   const [humanPredictedResults, setHumanPredictedResults] = useState(new Array(totalPlayers - computerPlayers).fill(0));
   const [pastPlayerPerformance, setPastPlayerPerformance] = useState(0);
   const [currentPlayerPrediction, setCurrentPlayerPrediction] = useState(0);
-  const [gameState, setGameState] = useState(0);
-  const [loadingActive, setLoadingActive] = useState(false)
-  const handleLoading = useCallback(() => setLoadingActive(loading => !loading), [])
+  const [gameState, setGameState] = useState(0); //0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner
+  const [loadingActive, setLoadingActive] = useState(false);
+  const [winner, setWinner] = useState(0);
+  const handleLoading = useCallback(() => setLoadingActive(loading => !loading), []);
+  useEffect(() => {setCurrentPlayer(winner)}, [winner]);
   // const [blindStage, setBlindStage] = useState(true);
 
   async function getPastPlayerPerformance() {
@@ -121,6 +123,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     setCards(deck.Deal(totalPlayers));
     setPlayerBets(new Array(totalPlayers).fill(0));
     setFoldedtotalPlayers(new Array(totalPlayers).fill(0));
+    setPlayerPrompts(new Array(totalPlayers - computerPlayers).fill(""));
     document.getElementById("reset-button")!.hidden = true;
     document.getElementById("full-reset-button")!.hidden = true;
     document.getElementById("winner-text")!.innerText = "";
@@ -158,7 +161,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number) {
     setPlayerBets(new Array(totalPlayers).fill(0));
-    let knownCards: number[];
+    let knownCards: number[] = [];
     if (nestedCurrentPlayer) {
       document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
     } else {
@@ -177,6 +180,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     } else {
       DisplayWinner(CalculateWinner());
     }
+    return knownCards;
   }
 
   async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
@@ -215,9 +219,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
       if (newPlayerNum === totalPlayers + 1) {
         newPlayerNum = firstPlayer;
         if (uniqueBets.length === 1 && (firstPlayer >= startingPlayer || uniqueBets[0] !== 0)) {
+          console.log("First Player: " + firstPlayer);
+          console.log("Starting Player: " + startingPlayer);
+          console.log("Unique Bets: " + uniqueBets.toString());
           newCard = true;
         }
       } else if (uniqueBets.length === 1 && (newPlayerNum === startingPlayer || uniqueBets[0] !== 0)) {
+        console.log("New Player: " + newPlayerNum);
+          console.log("Starting Player: " + startingPlayer);
+          console.log("Unique Bets: " + uniqueBets.toString());
         newCard = true;
       }
 
@@ -244,7 +254,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         }
         setPotStartOfRound(potStartOfRound + playerBets.reduce((x,y) => x + y));
         console.log("Next Round Starting Pot: " + potStartOfRound);
-        ImmediateNewCard(newPlayerNum);
+        knownCards = ImmediateNewCard(newPlayerNum);
       } else {
         if (document.getElementById("flop-card-one")!.hidden === true) {
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
@@ -262,14 +272,20 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         } else {
           document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         }
+        // let glowing = document.getElementsByClassName("glow");
+        // for (let i = 0; 9 < glowing.length; i++) {
+        //   glowing[i].classList.remove("glow");
+        // }
       }
-      setCurrentPlayer(newPlayerNum);
-      if (newPlayerNum > totalPlayers - computerPlayers) {
-        computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
-      } else {
-        hideCards(newPlayerNum);
-        await sleep(5000);
-        setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
+      if (knownCards.length !== 0) {
+        setCurrentPlayer(newPlayerNum);
+        if (newPlayerNum > totalPlayers - computerPlayers) {
+          computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
+        } else {
+          hideCards(newPlayerNum);
+          await sleep(5000);
+          setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
+        }
       }
     }
     handleLoading();
@@ -654,6 +670,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     document.getElementById("bet-button")!.hidden = true;
     document.getElementById("raise-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
+    document.getElementById("ready-button")!.hidden = true;
+    
     for (let i = 1; i <= totalPlayers; i++) {
       document.getElementById("p" + i +"-stats")!.classList.remove("glow");
       if (playerNums.includes(i)) {
@@ -666,6 +684,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     });
     setPlayerBanks(newBanks);
     setPot(0);
+    setWinner(playerNums[0]);
   }
 
   function betButtonText(): import("react").ReactNode {
@@ -685,20 +704,24 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
   }
 
   function hideCards(nextPlayer: number) {
-    document.getElementById("warning-text")!.hidden = true;
+    document.getElementById("warning-text")!.hidden = false;
     document.getElementById("raise-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
     document.getElementById("bet-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
     document.getElementById("hole-card-one")!.hidden = true;
     document.getElementById("hole-card-two")!.hidden = true;
-    document.getElementById("flop-card-one")!.hidden = true;
-    document.getElementById("flop-card-two")!.hidden = true;
-    document.getElementById("flop-card-three")!.hidden = true;
-    document.getElementById("turn-card")!.hidden = true;
-    document.getElementById("river-card")!.hidden = true;
+    // document.getElementById("flop-card-one")!.hidden = true;
+    // document.getElementById("flop-card-two")!.hidden = true;
+    // document.getElementById("flop-card-three")!.hidden = true;
+    // document.getElementById("turn-card")!.hidden = true;
+    // document.getElementById("river-card")!.hidden = true;
     document.getElementById("ready-button")!.hidden = false;
-    setBestHandText("Player " + nextPlayer + ": Ready?")
+    if (nextPlayer <= totalPlayers - computerPlayers) {
+      setBestHandText("Player " + nextPlayer + ": Ready?")
+    } else {
+      setBestHandText("Player " + nextPlayer + "(BOT): Ready?")
+    }
   }
 
   function showCards() {
