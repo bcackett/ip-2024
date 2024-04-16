@@ -759,14 +759,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("fold-button")!.hidden = true;
       if (teachingText.returnTargetPrompt(lessonNum, gameState)) {
         document.getElementById("info-text")!.innerText = teachingText.returnTargetPrompt(lessonNum, gameState);
-        if (lessonNum === 9 && gameState === 0 && playerProfiles![0] === new Array(80, 10, 10)) {
+        if (lessonNum === 9 && gameState === 0 && playerProfiles![0][0] === 80) {
           document.getElementById("info-text")!.innerText += "This player is aggressive."
-        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0] === new Array(10, 80, 10)) {
+        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0][1] === 80) {
           document.getElementById("info-text")!.innerText += "This player is likely to bluff."
-        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0] === new Array(10, 10, 10))  {
-          document.getElementById("info-text")!.innerText += "This player is cautious."
-        } else if (lessonNum === 9 && gameState === 0) {
+        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0][2] === 40)  {
           document.getElementById("info-text")!.innerText += "This player can be unpredictable, but is otherwise honest."
+        } else if (lessonNum === 9 && gameState === 0) {
+          document.getElementById("info-text")!.innerText += "This player is cautious."
         }
       } else {
         document.getElementById("info-text")!.innerText = playerPrompts[playerPrompts.length - 1];
