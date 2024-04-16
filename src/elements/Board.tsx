@@ -6,17 +6,19 @@ import Calculations from "./Calculations"
 import { supabase } from "../common/supabase";
 import { paste } from "@testing-library/user-event/dist/paste";
 import LoadingOverlay from "react-loading-overlay-ts";
+import TeachingText from "./TeachingText";
 
 type roomSize = {
   totalPlayers: number;
   computerPlayers: number;
   playerProfiles?: number[][];
+  lessonNum?: number;
 }
 
-
-function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
+function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : roomSize) {
   var deck: Deck = new Deck;
   var calcs: Calculations = new Calculations;
+  const teachingText: TeachingText = new TeachingText;
   const HANDS = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
   deck.Shuffle();
   const STARTBANK = 200;
@@ -122,6 +124,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     deck.Shuffle();
     setCards(deck.Deal(totalPlayers));
     setPlayerBets(new Array(totalPlayers).fill(0));
+    console.log("Player Bets on Reset:" + playerBets);
     setFoldedtotalPlayers(new Array(totalPlayers).fill(0));
     setPlayerPrompts(new Array(totalPlayers - computerPlayers).fill(""));
     document.getElementById("reset-button")!.hidden = true;
@@ -161,6 +164,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number) {
     setPlayerBets(new Array(totalPlayers).fill(0));
+    console.log("Player Bets on New Card:" + playerBets);
     let knownCards: number[] = [];
     if (nestedCurrentPlayer) {
       document.getElementById("p" + nestedCurrentPlayer +"-stats")!.classList.remove("glow");
@@ -423,6 +427,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     setCurrentBet(amount);
     setPlayerBanks(newBanks);
     setPlayerBets(newBets);
+    console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
     // setPot(pot + amount);
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     if (playerNum) {
@@ -507,6 +512,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
         newBets[currentPlayerNum - 1] += betDiff;
         setPlayerBanks(newBanks);
         setPlayerBets(newBets);
+        console.log("Player Bets on Bet:" + playerBets +". This was for player" + currentPlayerNum);
         // setPot(pot + currentPlayerBet);
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
       }
@@ -601,6 +607,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     setCurrentPlayer(nextPlayer);
     setPlayerBanks(newBanks);
     setPlayerBets(newBets);
+    console.log("Player Bets on Small & Big Blind:" + playerBets);
     if (nextPlayer !== smallBlindPlayer) {
       setCurrentBet(BIGBLIND);
     } else {
@@ -746,11 +753,43 @@ function Board({totalPlayers, computerPlayers, playerProfiles} : roomSize) {
     document.getElementById("ready-button")!.hidden = true;
     setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
     document.getElementById("warning-text")!.innerText = playerPrompts[currentPlayer - 1];
+    if (lessonNum) {
+      document.getElementById("bet-button")!.hidden = true;
+      document.getElementById("raise-button")!.hidden = true;
+      document.getElementById("fold-button")!.hidden = true;
+      if (teachingText.returnTargetPrompt(lessonNum, gameState)) {
+        document.getElementById("info-text")!.innerText = teachingText.returnTargetPrompt(lessonNum, gameState);
+        if (lessonNum === 9 && gameState === 0 && playerProfiles![0] === new Array(80, 10, 10)) {
+          document.getElementById("info-text")!.innerText += "This player is aggressive."
+        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0] === new Array(10, 80, 10)) {
+          document.getElementById("info-text")!.innerText += "This player is likely to bluff."
+        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0] === new Array(10, 10, 10))  {
+          document.getElementById("info-text")!.innerText += "This player is cautious."
+        } else if (lessonNum === 9 && gameState === 0) {
+          document.getElementById("info-text")!.innerText += "This player can be unpredictable, but is otherwise honest."
+        }
+      } else {
+        document.getElementById("info-text")!.innerText = playerPrompts[playerPrompts.length - 1];
+      }  
+      document.getElementById("info-box")!.hidden = false;
+    }
+  }
 
+  function handlePromptBox() {
+    document.getElementById("info-box")!.hidden = true;
+    document.getElementById("bet-button")!.hidden = false;
+    document.getElementById("raise-button")!.hidden = false;
+      document.getElementById("fold-button")!.hidden = false;
   }
 
   return (
     <LoadingOverlay active={loadingActive} text="Loading..." spinner={true}>
+      <div id="info-box" hidden={true}>
+        <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
+        <div>
+          <button id="ok-button" className="spaced-button" type="button" onClick={() => handlePromptBox()}>OK</button>
+        </div>
+      </div>
       <div id="warning-reporter">
         <h1 id="warning-text" style={{padding:"0.5vw"}}/>
       </div>

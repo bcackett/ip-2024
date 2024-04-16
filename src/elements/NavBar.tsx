@@ -15,7 +15,7 @@ function NavBar() {
   return (
     <nav className="nav-bar" style={{marginBottom: "1vw"}}>
       <Link reloadDocument to="/">
-        <button className="title">I.Poker</button>
+        <button className="title">PokerEdu</button>
       </Link>
       <Link reloadDocument to="/play">
         <button className="links">Play Locally</button>

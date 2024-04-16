@@ -211,3 +211,17 @@ h1 {
   margin-top: 2vw;
 }
 
+#info-box {
+  background-color: #000144e1;
+  border-color: rgba(4, 0, 26, 1);
+  border-radius: 10px;
+  z-index: 1000;
+  top: 10vw;
+  left: 32.5vw;
+  position: absolute;
+  height: 20vw;
+  width: 35vw;
+  justify-content: center;
+  vertical-align: center;
+}
+

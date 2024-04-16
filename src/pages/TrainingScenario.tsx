@@ -16,51 +16,51 @@ function TrainingScenario() {
   switch(state.pathname.substring(state.pathname.length - 2, state.pathname.length)) {
     case ("01"): //Technical terms lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={1}/>
       );
     case ("02"): //Poker hands lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={2}/>
       );
     case ("03"): //Betting system lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={3}/>
       );
     case ("04"): //Bluffing lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={4}/>
       );
     case ("05"): //Honest opponents lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[50, 0, 0]]} lessonNum={5}/>
       );
     case ("06"): //Cautious opponents lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={6}/>
       );
     case ("07"): //Aggressive opponents lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[100, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[100, 0, 0]]} lessonNum={7}/>
       );
     case ("08"): //Unpredictable lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 100]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 100]]} lessonNum={8}/>
       );
     case ("09"): //Known opponents lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={9}/>
       );
     case ("10"): //Unknown opponents lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={10}/>
       );
     case ("11"): //Larger table lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={11}/>
       );
     case ("12"): //Custom lesson STILL TO DO
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]}/>
+        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={12}/>
       );
     default: //Any edge cases
       return(<NotFound />);
