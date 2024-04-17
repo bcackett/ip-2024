@@ -318,7 +318,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let randomDecisionValue = Math.random() * 100;
     if (randomDecisionValue < playerProfile[2]) {
       randomDecisionValue = Math.floor(Math.random() * 100);
-      if (randomDecisionValue < (10 - playerProfile[0]/10)) {
+      if (randomDecisionValue < (10 - playerProfile[0]/10) && gameState >= 1) {
         Fold(playerNum);
       } else if (randomDecisionValue < (10 - playerProfile[0]/10)) {
         Bet(playerNum);
@@ -331,7 +331,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
       // let nashEquilibrium = Calculations.nashEq(cards);
       if (effectiveHandScore < (0.1 - playerProfile[0] / 1000)) {
-        if (randomDecisionValue >= playerProfile[1]) {
+        if (randomDecisionValue >= playerProfile[1] && gameState >= 1) {
           Fold(playerNum);
         } else {
           Raise(Math.min(newCurrentBet + 30 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
