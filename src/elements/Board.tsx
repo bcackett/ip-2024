@@ -7,6 +7,7 @@ import { supabase } from "../common/supabase";
 import { paste } from "@testing-library/user-event/dist/paste";
 import LoadingOverlay from "react-loading-overlay-ts";
 import TeachingText from "./TeachingText";
+import StateEncoder from "./StateEncoder";
 
 type roomSize = {
   totalPlayers: number;
@@ -16,9 +17,10 @@ type roomSize = {
 }
 
 function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : roomSize) {
-  var deck: Deck = new Deck;
-  var calcs: Calculations = new Calculations;
+  const deck: Deck = new Deck;
+  const calcs: Calculations = new Calculations;
   const teachingText: TeachingText = new TeachingText;
+  const stateEncoder: StateEncoder = new StateEncoder;
   const HANDS = ["High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"];
   deck.Shuffle();
   const STARTBANK = 200;
@@ -38,11 +40,44 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [humanPredictedResults, setHumanPredictedResults] = useState(new Array(totalPlayers - computerPlayers).fill(0));
   const [pastPlayerPerformance, setPastPlayerPerformance] = useState(0);
   const [currentPlayerPrediction, setCurrentPlayerPrediction] = useState(0);
-  const [gameState, setGameState] = useState(0); //0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner
+  const [gameState, setGameState] = useState(-1); //0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner, -1 = error
   const [loadingActive, setLoadingActive] = useState(false);
   const [winner, setWinner] = useState(0);
+  const [prevStates, setPrevStates] = useState(new Array(totalPlayers).fill(""));
   const handleLoading = useCallback(() => setLoadingActive(loading => !loading), []);
   useEffect(() => {setCurrentPlayer(winner)}, [winner]);
+  useEffect(() => {
+    if (gameState >= 0) {
+      document.getElementById("hole-card-one")!.hidden = false;
+      document.getElementById("hole-card-two")!.hidden = false; 
+    } else {
+      document.getElementById("hole-card-one")!.hidden = true;
+      document.getElementById("hole-card-two")!.hidden = true; 
+    }
+    
+    if (gameState >= 1) {
+      document.getElementById("flop-card-one")!.hidden = false;
+      document.getElementById("flop-card-two")!.hidden = false;
+      document.getElementById("flop-card-three")!.hidden = false;
+    } else {
+      document.getElementById("flop-card-one")!.hidden = true;
+      document.getElementById("flop-card-two")!.hidden = true;
+      document.getElementById("flop-card-three")!.hidden = true;
+    }
+
+    if (gameState >= 2) {
+      document.getElementById("turn-card")!.hidden = false;
+    } else {
+      document.getElementById("turn-card")!.hidden = true;
+    }
+
+    if (gameState >= 3) {
+      document.getElementById("river-card")!.hidden = false;
+    } else {
+      document.getElementById("river-card")!.hidden = true;
+    }
+  }, [gameState]);
+
   // const [blindStage, setBlindStage] = useState(true);
 
   async function getPastPlayerPerformance() {
@@ -172,13 +207,13 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
     }
     document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-    if (document.getElementById("flop-card-one")!.hidden === true) {
+    if (/*document.getElementById("flop-card-one")!.hidden === true*/gameState === 0) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
       FlopDeal(knownCards, newPlayerNum);
-    } else if (document.getElementById("turn-card")!.hidden === true) {
+    } else if (/*document.getElementById("turn-card")!.hidden === true*/gameState === 1) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
       TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
-    } else if (document.getElementById("river-card")!.hidden === true) {
+    } else if (/*document.getElementById("river-card")!.hidden === true*/gameState === 2) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
       RiverDeal(knownCards, newPlayerNum);
     } else {
@@ -249,6 +284,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
       let knownCards: number[] = [];
       if (newCard === true) {
+        console.log("New card dealt!");
         newPlayerNum = startingPlayer;
         while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
           newPlayerNum++;
@@ -284,7 +320,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       if (knownCards.length !== 0) {
         setCurrentPlayer(newPlayerNum);
         if (newPlayerNum > totalPlayers - computerPlayers) {
-          computerCalc(playerProfiles![newPlayerNum - (computerPlayers + 1)], knownCards, newPlayerNum, newCurrentBet);
+          computerCalc(playerProfiles![newPlayerNum - 2], knownCards, newPlayerNum, newCurrentBet);
         } else {
           hideCards(newPlayerNum);
           await sleep(5000);
@@ -308,6 +344,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function computerCalc(playerProfile: number[], allCards: number[], playerNum: number, newCurrentBet: number) {
+    console.log("GameState " + gameState);
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
@@ -320,12 +357,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       randomDecisionValue = Math.floor(Math.random() * 100);
       if (randomDecisionValue < (10 - playerProfile[0]/10) && gameState >= 1) {
         Fold(playerNum);
-      } else if (randomDecisionValue < (10 - playerProfile[0]/10)) {
-        Bet(playerNum);
-      } else if (randomDecisionValue < (10 - playerProfile[0]/10)) {
+      } else if (randomDecisionValue < (50 - playerProfile[0]/10)) {
+        Bet(playerNum, newCurrentBet);
+      } else if (randomDecisionValue < (80 - playerProfile[0]/10)) {
         Raise(Math.min(newCurrentBet + 10, playerBanks[playerNum - 1]), playerNum);
       } else {
-        Raise(Math.min(newCurrentBet + 10 + (randomDecisionValue - 70), playerBanks[playerNum - 1]), playerNum);
+        Raise(Math.min(newCurrentBet + 10 + (randomDecisionValue - 60), playerBanks[playerNum - 1]), playerNum);
       }
     } else {
       let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
@@ -340,7 +377,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
       } else {
         if (randomDecisionValue >= playerProfile[1]) {
-          Bet(playerNum);
+          Bet(playerNum, newCurrentBet);
         } else {
           Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         }
@@ -518,9 +555,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
       if (playerNum) {
-        ChangePlayer(playerNum);
+        ChangePlayer(playerNum, currentPlayerBet);
       } else {
-        ChangePlayer();
+        ChangePlayer(undefined, currentPlayerBet);
       }
     }
   }
@@ -617,7 +654,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     newPot += pot + BIGBLIND + BIGBLIND/2;
     setPot((pot) => {return pot + BIGBLIND + BIGBLIND/2});
     if (nextPlayer > totalPlayers - computerPlayers) {
-      computerCalc(playerProfiles![nextPlayer - (computerPlayers + 1)], cards.slice(2 * (nextPlayer - 1), 2 * (nextPlayer - 1) + 2), nextPlayer, BIGBLIND);
+      computerCalc(playerProfiles![nextPlayer - 2], cards.slice(2 * (nextPlayer - 1), 2 * (nextPlayer - 1) + 2), nextPlayer, BIGBLIND);
     }
   }
 
@@ -726,8 +763,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("ready-button")!.hidden = false;
     if (nextPlayer <= totalPlayers - computerPlayers) {
       setBestHandText("Player " + nextPlayer + ": Ready?")
-    } else {
-      setBestHandText("Player " + nextPlayer + "(BOT): Ready?")
     }
   }
 
@@ -768,8 +803,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         } else if (lessonNum === 9 && gameState === 0) {
           document.getElementById("info-text")!.innerText += "This player is cautious."
         }
+        document.getElementById("revert-button")!.hidden = true;
       } else {
-        document.getElementById("info-text")!.innerText = playerPrompts[playerPrompts.length - 1];
+        let currentPlayerText = playerPrompts[0].split("\n\n");
+        document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 2];
+        document.getElementById("revert-button")!.hidden = false;
       }  
       document.getElementById("info-box")!.hidden = false;
     }
@@ -779,14 +817,63 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("info-box")!.hidden = true;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
-      document.getElementById("fold-button")!.hidden = false;
+    document.getElementById("fold-button")!.hidden = false;
+    let newPrevStates = prevStates;
+    newPrevStates[gameState] = stateEncoder.encode(cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer)
+    setPrevStates(newPrevStates);
+    let knownCards = cards.slice(2 * (currentPlayer - 1), 2 * (currentPlayer - 1) + 2)
+    if (gameState === 1) {
+      knownCards.concat(cards.slice(-5, -2));
+    } else if (gameState === 2) {
+      knownCards.concat(cards.slice(-5, -1));
+    } else if (gameState === 3) {
+      knownCards.concat(cards.slice(-5, cards.length));
+    }
+    let bestHand = calcs.FindBestHand(knownCards);
+    setBestHandText(HANDS[bestHand[0]]);
+  }
+
+  function revertGameState() {
+    console.log(prevStates[gameState - 1]);
+    if (prevStates.filter(x => x !== "").length > 0) {
+      stateEncoder.decode(prevStates[gameState - 1]);
+      document.getElementById("info-box")!.hidden = true;
+      setCards(stateEncoder.getCards());
+      setFoldedtotalPlayers(stateEncoder.getFoldedPlayers());
+      setPot(stateEncoder.getPot());
+      setPotStartOfRound(stateEncoder.getPotStartOfRound());
+      setPlayerBanks(stateEncoder.getPlayerBanks());
+      setPlayerBets(stateEncoder.getPlayerBets());
+      setGameState(stateEncoder.getGameState());
+      setStartingPlayer(stateEncoder.getStartingPlayer());
+      setCurrentPlayer(stateEncoder.getCurrentPlayer());
+      setCurrentBet(stateEncoder.getPlayerBets().reduce((x, y) => {if (x >= y) {return x} else {return y}}));
+      // if (stateEncoder.getGameState() === 0) {
+      //   HoleDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
+      // } else if (stateEncoder.getGameState() === 1) {
+      //   FlopDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
+      // } else if (stateEncoder.getGameState() === 2) {
+      //   TurnDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
+      // } else {
+      //   RiverDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
+      // }
+      // if (stateEncoder.getGameState() === 0) {
+      //   let newStartingPlayer = stateEncoder.getStartingPlayer() + 1;
+      //   if (newStartingPlayer > totalPlayers) {
+      //     newStartingPlayer = 1;
+      //   }
+      //   SmallAndBigBlind(newStartingPlayer);
+      // }
+      hideCards(currentPlayer);
+    }
   }
 
   return (
-    <LoadingOverlay active={loadingActive} text="Loading..." spinner={true}>
+    <LoadingOverlay active={loadingActive} text="The other players are making their decisions..." spinner={true}>
       <div id="info-box" hidden={true}>
         <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
         <div>
+          <button id="revert-button" className="spaced-button" type="button" hidden={true} onClick={() => revertGameState()}>Go back</button>
           <button id="ok-button" className="spaced-button" type="button" onClick={() => handlePromptBox()}>OK</button>
         </div>
       </div>

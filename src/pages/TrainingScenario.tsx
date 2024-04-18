@@ -65,7 +65,7 @@ function TrainingScenario() {
       );
     case ("11"): //Larger table lesson
       return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[generateRandomTraits(), generateRandomTraits(), generateRandomTraits()]} lessonNum={11}/>
+        <Board totalPlayers={4} computerPlayers={3} playerProfiles={[generateRandomTraits(), generateRandomTraits(), generateRandomTraits()]} lessonNum={11}/>
       );
     case ("12"): //Custom lesson STILL TO DO
       return (
