@@ -85,13 +85,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       const {data, error} = await supabase.from("results").select("result").eq("userID", Number(sessionStorage.getItem("userID"))); //TODO: CHANGE THIS SO IT SELECTS THE USERID OF THE CURRENTLY LOGGED IN USER
       if (error) throw error;
       if (data.length !== 0) {
-       setPastPlayerPerformance(data.map(x => x.result).reduce((x,y) => x + y));
-      } else {
-        setPastPlayerPerformance(0);
+        setPastPlayerPerformance(data.map(x => x.result).reduce((x,y) => x + y));
       }
       console.log("Logged In!");
-    } else {
-      setPastPlayerPerformance(0);
     }
   }
 
