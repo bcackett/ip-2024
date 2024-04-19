@@ -34,10 +34,12 @@ export type Json =
         };
         results: {
           Row: {
+            userID: number;
             gameID: number;
             result: number;
           };
           Insert: {
+            userID: number;
             gameID: number;
             result: number;
           };

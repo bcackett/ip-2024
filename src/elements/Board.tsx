@@ -43,7 +43,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [gameState, setGameState] = useState(-1); //0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner, -1 = error
   const [loadingActive, setLoadingActive] = useState(false);
   const [winner, setWinner] = useState(0);
-  const [prevStates, setPrevStates] = useState(new Array(totalPlayers).fill(""));
+  const [p1InitialBank, setP1InitialBank] = useState(200)
+  const [prevStates, setPrevStates] = useState(new Array(5).fill(""));
   const handleLoading = useCallback(() => setLoadingActive(loading => !loading), []);
   useEffect(() => {setCurrentPlayer(winner)}, [winner]);
   useEffect(() => {
@@ -160,6 +161,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   
   function Reset() {
     deck.Shuffle();
+    setP1InitialBank(playerBanks[0]);
     setCards(deck.Deal(totalPlayers));
     setPlayerBets(new Array(totalPlayers).fill(0));
     console.log("Player Bets on Reset:" + playerBets);
@@ -694,7 +696,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     return handIndices;
   }
 
-  function DisplayWinner(playerNums: number[]) {
+  async function DisplayWinner(playerNums: number[]) {
     if (playerNums.length === 1) {
       document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
     } else {
@@ -729,6 +731,19 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     playerNums.forEach(playerNum => {
       newBanks[playerNum - 1] += pot/playerNums.length;
     });
+
+    if (computerPlayers === 0 && sessionStorage.getItem("userID")) {
+      console.log("THIS SHOULD WORK");
+      let e1 = await supabase.from("results").select("gameID").order("gameID", {ascending: false}).limit(1).single();
+      if (e1.error) {
+        throw e1.error;
+      } else {
+        let winnings = newBanks[0] - p1InitialBank;
+        let e2 = await supabase.from("results").insert({userID: Number(sessionStorage.getItem("userID")), gameID:e1.data.gameID + 1, result: winnings});
+        if (e2.error) {throw e2.error};
+      }
+    }
+
     setPlayerBanks(newBanks);
     setPot(0);
     setWinner(playerNums[0]);
