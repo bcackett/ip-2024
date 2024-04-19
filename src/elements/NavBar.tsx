@@ -4,10 +4,10 @@ import { Link } from "react-router-dom"
 function NavBar() {
 
   function logInButtonText() {
-    if (process.env.USER_ID = "-1") {
-      return "Log In/Register";
-    } else {
+    if (sessionStorage.getItem("userID")) {
       return "Log Out";
+    } else {
+      return "Log In/Register";
     }
   }
 

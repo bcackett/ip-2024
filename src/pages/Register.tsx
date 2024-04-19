@@ -12,6 +12,8 @@ function Register() {
     nav("/");
   }
 
+  sessionStorage.clear();
+
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (username === "" || password === "") {
@@ -23,13 +25,19 @@ function Register() {
         console.log(data.toString);
         alert("This username already exists. Please try again.");
       } else {
-        const e = await supabase.from("logins").insert({userID: 1, username: username, password: password});
-        if (e.error) {
-          throw e.error;
+        const e1 = await supabase.from("logins").select("userID").order("userID", {ascending: false}).limit(1).single();
+        if (e1.error) {
+          throw e1.error;
         } else {
-          alert("Account creation successful.");
-          process.env.USER_ID = "1";
-          goToHome();
+          let newUserID = e1.data.userID + 1;
+          const e2 = await supabase.from("logins").insert({userID: newUserID, username: username, password: password});
+          if (e2.error) {
+            throw e2.error;
+          } else {
+            alert("Account creation successful.");
+            sessionStorage.setItem("userID", newUserID.toString());
+            goToHome();
+          }
         }
       }
     }

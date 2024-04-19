@@ -7,12 +7,11 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const nav = useNavigate();
+  sessionStorage.clear();
 
   const goToHome = () => {
     nav("/");
   }
-
-  process.env.USER_ID = "-1"; 
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,7 +22,7 @@ function Login() {
       if (error) throw error;
       if (data.length !== 0) {
         alert("Login successful.")
-        process.env.USER_ID = "1"; 
+        sessionStorage.setItem("userID", data.map(x => x.userID).toString()); 
         goToHome();
       } else {
         alert("Invalid username/password combination. Remember: passwords are case-sensitive!");
