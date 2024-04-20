@@ -45,7 +45,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [winner, setWinner] = useState(0);
   const [p1InitialBank, setP1InitialBank] = useState(200)
   const [prevStates, setPrevStates] = useState(new Array(5).fill(""));
-  const handleLoading = useCallback(() => setLoadingActive(loading => !loading), []);
+  const handleLoadingFalse = useCallback(() => setLoadingActive(false), []);
+  const handleLoadingTrue = useCallback(() => setLoadingActive(true), []);
   useEffect(() => {setCurrentPlayer(winner)}, [winner]);
   useEffect(() => {
     if (gameState >= 0) {
@@ -228,7 +229,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
-    handleLoading();
+    handleLoadingTrue();
     if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
@@ -328,12 +329,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           computerCalc(playerProfiles![newPlayerNum - 2], knownCards, newPlayerNum, newCurrentBet);
         } else {
           hideCards(newPlayerNum);
-          await sleep(5000);
+          await sleep(3000);
           setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
         }
       }
     }
-    handleLoading();
+    handleLoadingFalse();
   }
 
   function humanSimCalc(playerNum: number, allCards: number[], newCurrentBet: number) {
@@ -472,10 +473,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
     // setPot(pot + amount);
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (playerNum) {
-      ChangePlayer(playerNum, amount);
+    if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+      handleLoadingTrue();
+      reversionPrompt();
     } else {
-      ChangePlayer(undefined, amount);
+      if (playerNum) {
+        ChangePlayer(playerNum);
+      } else {
+        ChangePlayer();
+      }
     }
   }
 
@@ -559,10 +565,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
       }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-      if (playerNum) {
-        ChangePlayer(playerNum, currentPlayerBet);
+      if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+        handleLoadingTrue();
+        reversionPrompt();
       } else {
-        ChangePlayer(undefined, currentPlayerBet);
+        if (playerNum) {
+          ChangePlayer(playerNum);
+        } else {
+          ChangePlayer();
+        }
       }
     }
   }
@@ -616,10 +627,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setBestHands(newBestHands);
     document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " folded.\n\n";
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (playerNum) {
-      ChangePlayer(playerNum);
+    if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+      handleLoadingTrue();
+      reversionPrompt();
     } else {
-      ChangePlayer();
+      if (playerNum) {
+        ChangePlayer(playerNum);
+      } else {
+        ChangePlayer();
+      }
     }
   }
 
@@ -806,33 +822,35 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("ready-button")!.hidden = true;
     setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
     document.getElementById("warning-text")!.innerText = playerPrompts[currentPlayer - 1];
-    if (lessonNum) {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, gameState)) {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
-      if (teachingText.returnTargetPrompt(lessonNum, gameState)) {
-        document.getElementById("info-text")!.innerText = teachingText.returnTargetPrompt(lessonNum, gameState);
-        if (lessonNum === 9 && gameState === 0 && playerProfiles![0][0] === 80) {
-          document.getElementById("info-text")!.innerText += "This player is aggressive."
-        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0][1] === 80) {
-          document.getElementById("info-text")!.innerText += "This player is likely to bluff."
-        } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0][2] === 40)  {
-          document.getElementById("info-text")!.innerText += "This player can be unpredictable, but is otherwise honest."
-        } else if (lessonNum === 9 && gameState === 0) {
-          document.getElementById("info-text")!.innerText += "This player is cautious."
-        }
-        document.getElementById("revert-button")!.hidden = true;
-      } else {
-        let currentPlayerText = playerPrompts[0].split("\n\n");
-        document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 2];
-        document.getElementById("revert-button")!.hidden = false;
-      }  
+      document.getElementById("info-text")!.innerText = teachingText.returnTargetPrompt(lessonNum, gameState);
+      if (lessonNum === 9 && gameState === 0 && playerProfiles![0][0] === 80) {
+        document.getElementById("info-text")!.innerText += "This player is aggressive."
+      } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0][1] === 80) {
+        document.getElementById("info-text")!.innerText += "This player is likely to bluff."
+      } else if (lessonNum === 9 && gameState === 0 && playerProfiles![0][2] === 40)  {
+        document.getElementById("info-text")!.innerText += "This player can be unpredictable, but is otherwise honest."
+      } else if (lessonNum === 9 && gameState === 0) {
+        document.getElementById("info-text")!.innerText += "This player is cautious."
+      }
+      document.getElementById("revert-button")!.hidden = true;
       document.getElementById("info-box")!.hidden = false;
     }
   }
 
-  function handlePromptBox() {
+  function reversionPrompt() {
+    let currentPlayerText = playerPrompts[0].split("\n\n");
+    document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 2];
+    document.getElementById("revert-button")!.hidden = false;
+    document.getElementById("info-box")!.hidden = false;
+  }
+
+  async function handlePromptBox() {
     document.getElementById("info-box")!.hidden = true;
+    await sleep(1);
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -848,7 +866,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       knownCards.concat(cards.slice(-5, cards.length));
     }
     let bestHand = calcs.FindBestHand(knownCards);
-    setBestHandText(HANDS[bestHand[0]]);
+    if (!document.getElementById("revert-button")!.hidden) {
+      ChangePlayer(currentPlayer);
+    } else {
+      setBestHandText(HANDS[bestHand[0]]);
+    }
   }
 
   function revertGameState() {
@@ -866,28 +888,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       setStartingPlayer(stateEncoder.getStartingPlayer());
       setCurrentPlayer(stateEncoder.getCurrentPlayer());
       setCurrentBet(stateEncoder.getPlayerBets().reduce((x, y) => {if (x >= y) {return x} else {return y}}));
-      // if (stateEncoder.getGameState() === 0) {
-      //   HoleDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
-      // } else if (stateEncoder.getGameState() === 1) {
-      //   FlopDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
-      // } else if (stateEncoder.getGameState() === 2) {
-      //   TurnDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
-      // } else {
-      //   RiverDeal(stateEncoder.getCards(), stateEncoder.getCurrentPlayer());
-      // }
-      // if (stateEncoder.getGameState() === 0) {
-      //   let newStartingPlayer = stateEncoder.getStartingPlayer() + 1;
-      //   if (newStartingPlayer > totalPlayers) {
-      //     newStartingPlayer = 1;
-      //   }
-      //   SmallAndBigBlind(newStartingPlayer);
-      // }
       hideCards(currentPlayer);
+      handleLoadingFalse();
+    }
+  }
+
+  function loadingOverlayText() {
+    if (lessonNum) {
+      return "The other players are making their decisions...";
+    } else {
+      return "Please pass to the next player...";
     }
   }
 
   return (
-    <LoadingOverlay active={loadingActive} text="The other players are making their decisions..." spinner={true}>
+    <LoadingOverlay active={loadingActive} text={loadingOverlayText()} spinner={false}>
       <div id="info-box" hidden={true}>
         <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
         <div>
