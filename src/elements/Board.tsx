@@ -473,7 +473,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
     // setPot(pot + amount);
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+    if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
       handleLoadingTrue();
       reversionPrompt();
     } else {
@@ -565,7 +565,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
       }
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-      if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+      if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
         handleLoadingTrue();
         reversionPrompt();
       } else {
@@ -627,7 +627,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setBestHands(newBestHands);
     document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " folded.\n\n";
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+    if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
       handleLoadingTrue();
       reversionPrompt();
     } else {
