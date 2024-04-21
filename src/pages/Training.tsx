@@ -7,6 +7,10 @@ function Training() {
     return () => {nav("/lessons/" + id.toString().padStart(2, "0"))};
   }
 
+  function goToCustomGameSetup() {
+    return () =>{nav("/customgame")};
+  }
+
   return (
     <>
       <h1 style={{color: "rgb(248, 245, 231)"}}>The Basics</h1>
@@ -28,7 +32,7 @@ function Training() {
         <button onClick={goToScenario(9)}>Known Opponents</button>
         <button onClick={goToScenario(10)}>Unknown Opponents</button>
         <button onClick={goToScenario(11)}>A Larger Table</button>
-        <button onClick={goToScenario(12)}>Custom Game</button>
+        <button onClick={goToCustomGameSetup()}>Custom Game</button>
       </div>
     </>
   )

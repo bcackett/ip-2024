@@ -67,10 +67,6 @@ function TrainingScenario() {
       return (
         <Board totalPlayers={4} computerPlayers={3} playerProfiles={[generateRandomTraits(), generateRandomTraits(), generateRandomTraits()]} lessonNum={11}/>
       );
-    case ("12"): //Custom lesson STILL TO DO
-      return (
-        <Board totalPlayers={2} computerPlayers={1} playerProfiles={[[0, 0, 0]]} lessonNum={12}/>
-      );
     default: //Any edge cases
       return(<NotFound />);
   }

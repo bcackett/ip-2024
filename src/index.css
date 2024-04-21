@@ -5,6 +5,9 @@
   --links-font-size: 1vw;
   --pot-font-size: 3vw;
   --reporter-font-size: 1.5vw;
+  --red-suit: rgba(125, 2, 2, 1);
+  --black-suit: rgba(4, 0, 26, 1);
+  --off-white: rgb(248, 245, 231);
 }
 
 body {
@@ -42,7 +45,7 @@ code {
 }
 
 h1 {
-  color: rgba(4, 0, 26, 1);
+  color: var(--black-suit);
   font-weight: 700;
   font-size: var(--players-font-size);
   margin: 0px;
@@ -50,10 +53,10 @@ h1 {
 
 .nav-bar {
   padding: 15px;
-  border: 2px solid rgba(4, 0, 26, 1);
+  border: 2px solid var(--black-suit);
   margin-bottom: 0.25vw;
   display: flex;
-  background-color: rgba(125, 2, 2, 1);
+  background-color: var(--red-suit);
   align-items: center;
   justify-content: center;
   margin: 0 auto;
@@ -61,6 +64,7 @@ h1 {
 
 .title {
   font-size: var(--players-font-size);
+  color: var(--off-white);
   font-weight: bolder;
   margin: 0 10vw 0 10vw;
   background-color: transparent;
@@ -69,6 +73,7 @@ h1 {
 
 .links {
   font-size: var(--links-font-size);
+  color: var(--off-white);
   font-weight: bold;
   background-color: transparent;
   border-color: transparent;
@@ -79,7 +84,7 @@ h1 {
 }
 
 .links:hover, .title:hover, .login {
-  color: rgb(248, 245, 231);
+  color: grey;
 }
 
 #card-face {
@@ -87,11 +92,11 @@ h1 {
   display: inline-block;
   height: 7.5vw;
   width: 4.5vw;
-  background-color: rgb(248, 245, 231);
+  background-color: var(--off-white);
   text-align: center;
   font-size: 3.5vw;
   border-radius: 0.25vw;
-  border: 2px solid rgba(4, 0, 26, 1);
+  border: 2px solid var(--black-suit);
   margin-left: 0.25vw;
   margin-right: 0.25vw
 }
@@ -109,7 +114,7 @@ h1 {
   height: var(--height);
   width:var(--height);
   background-color:darkgreen;
-  border: 10px solid rgba(4, 0, 26, 1);
+  border: 10px solid var(--black-suit);
   border-radius: 10px;
   justify-content: center;
   text-align: left;
@@ -167,7 +172,7 @@ h1 {
   vertical-align: top;
   height: var(--height);
   width: var(--reporter-width);
-  border: 10px solid rgba(125, 2, 2, 1);
+  border: 10px solid var(--red-suit);
   border-radius: 10px;
   justify-content: center;
   text-align: left;
@@ -175,7 +180,7 @@ h1 {
 }
 
 #play-reporter > #play-text {
-  color: rgb(248, 245, 231);
+  color: var(--off-white);
   font-weight: 700;
   font-size: var(--reporter-font-size);
   margin: 0px;
@@ -187,8 +192,8 @@ h1 {
   vertical-align: top;
   height: var(--height);
   width: var(--reporter-width);
-  background-color: rgba(4, 0, 26, 1);
-  border: 10px solid rgba(125, 2, 2, 1);
+  background-color: var(--black-suit);
+  border: 10px solid var(--red-suit);
   border-radius: 10px;
   justify-content: center;
   text-align: left;
@@ -213,7 +218,7 @@ h1 {
 
 #info-box {
   background-color: #000144e1;
-  border-color: rgba(4, 0, 26, 1);
+  border-color: var(--black-suit);
   border-radius: 10px;
   z-index: 1000;
   top: 10vw;
@@ -223,5 +228,53 @@ h1 {
   width: 35vw;
   justify-content: center;
   vertical-align: center;
+}
+
+.slider {
+  width: 20vw;
+  max-width: 250px;
+  margin: auto;
+  margin-top: 1vw;
+}
+
+.sub-slider {
+  width: 20vw;
+  max-width: 250px;
+  margin: auto;
+}
+
+.slider-track {
+  top: 6px;
+  height: 8px;
+  background: grey;
+  border-radius: 25px;
+  border: 3px solid var(--black-suit);
+}
+
+.slider-track.slider-track-0 {
+  background: var(--red-suit);
+  border-radius: 25px; 
+}
+
+.sub-slider-track {
+  top: 6px;
+  height: 8px;
+  background: grey;
+  border-radius: 25px;
+  border: 3px solid var(--black-suit);
+}
+
+.sub-slider-track.sub-slider-track-0 {
+  background: var(--off-white);
+  border-radius: 25px; 
+}
+
+.slider-thumb {
+  cursor: pointer;
+  background: var(--off-white);
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  border: 2px solid var(--black-suit);
 }
 

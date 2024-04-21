@@ -17,6 +17,7 @@
     "react-loading-overlay-ts": "^2.0.2",
     "react-router-dom": "^6.21.1",
     "react-scripts": "5.0.1",
+    "react-slider": "^2.0.6",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
@@ -43,5 +44,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-slider": "^1.3.6"
   }
 }
