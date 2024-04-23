@@ -19,9 +19,9 @@ function Welcome(id: UserDetails) {
 
   return (
     <>
-      <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to PokerEdu!</h1>
+      <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
       <div>
-        <label style={{color: "#f5f8e7"}}>PokerEdu is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
+        <label style={{color: "#f5f8e7"}}>GetPokerEd is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
       </div>
       <div>
         <button className="spaced-button" type="button" onClick={goToTrain}>
