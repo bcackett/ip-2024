@@ -1,13 +1,14 @@
 import { start } from "repl";
 import Card from "./Card";
 import Deck from "./Deck";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useReducer } from "react";
 import Calculations from "./Calculations"
 import { supabase } from "../common/supabase";
 import { paste } from "@testing-library/user-event/dist/paste";
 import LoadingOverlay from "react-loading-overlay-ts";
 import TeachingText from "./TeachingText";
 import StateEncoder from "./StateEncoder";
+import { findSourceMap } from "module";
 
 type roomSize = {
   totalPlayers: number;
@@ -79,6 +80,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("river-card")!.hidden = true;
     }
   }, [gameState]);
+  const resetBets = useCallback(() => {console.log("MADE IT TO THE USEEFFECT!"); setPlayerBets(new Array(totalPlayers).fill(0))}, []); 
+  const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   // const [blindStage, setBlindStage] = useState(true);
 
@@ -89,7 +92,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       if (data.length !== 0) {
         setPastPlayerPerformance(data.map(x => x.result).reduce((x,y) => x + y));
       }
-      console.log("Logged In!");
     }
   }
 
@@ -99,14 +101,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   
   getPastPlayerPerformance();
 
-  function HoleDeal(cards: number[], playerNum: number) {
+  function HoleDeal(visibleCards: number[], playerNum: number) {
+    console.log(cards.toString());
     document.getElementById("hole-card-one")!.hidden = false;
     document.getElementById("hole-card-two")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
     document.getElementById("start-button")!.hidden = true;
-    let bestHand = FindBestHand(cards, playerNum);
+    let bestHand = FindBestHand(visibleCards, playerNum);
     setGameState(0);
   }
   
@@ -186,7 +189,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("play-text")!.innerText = "";
     document.getElementById("warning-text")!.innerText = "";
     setBestHandText("");
-    let newStartingPlayer = startingPlayer + 1;
+    let newStartingPlayer = startingPlayer.valueOf() + 1;
     if (newStartingPlayer > totalPlayers) {
       newStartingPlayer = 1;
     }
@@ -194,17 +197,23 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("p" + i + "-stats")?.classList.remove("glow");
       document.getElementById("p" + i + "-stats")?.classList.remove("winner-glow");
     }
-    HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), newStartingPlayer);
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
     setPotStartOfRound(0);
-    // setBlindStage(true);
-    SmallAndBigBlind(newStartingPlayer - 1);
     getPastPlayerPerformance();
   }
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number) {
-    setPlayerBets(new Array(totalPlayers).fill(0));
+    // if (newPlayerNum > totalPlayers - computerPlayers) {
+    //   console.log("MADE IT HERE");
+    //   resetBets += 1;
+    // } else {
+    //   setPlayerBets(new Array(totalPlayers).fill(0));
+    // }
+    // setPlayerBets(new Array(totalPlayers).fill(0));
+    // resetBets += 1;
+    resetBets();
+    forceUpdate();
     console.log("Player Bets on New Card:" + playerBets);
     let knownCards: number[] = [];
     if (nestedCurrentPlayer) {
@@ -228,7 +237,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     return knownCards;
   }
 
-  async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
+  async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number, lastPlayer?: number) {
     handleLoadingTrue();
     if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
@@ -253,7 +262,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       console.log("Starting Pot: " + potStartOfRound);
       setPot(potStartOfRound + playerBets.reduce((x,y) => x + y));
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
+      let orderedFoldedPlayers = foldedtotalPlayers.slice(startingPlayer - 1).concat(foldedtotalPlayers.slice(0, startingPlayer - 2))
+      let trueStartingPlayer = orderedFoldedPlayers.indexOf(0) + 1;
       let newCard = false;
+      let cycleComplete = false;
       let betsNoFoldedPlayers = [];
       for (let i = 0; i < foldedtotalPlayers.length; i++) {
         if (foldedtotalPlayers[i] === 0) {
@@ -262,28 +274,20 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       let uniqueBets = Array.from(new Set(betsNoFoldedPlayers));
       if (newPlayerNum === totalPlayers + 1) {
+        cycleComplete = true;
         newPlayerNum = firstPlayer;
-        if (uniqueBets.length === 1 && (firstPlayer >= startingPlayer || uniqueBets[0] !== 0)) {
-          console.log("First Player: " + firstPlayer);
-          console.log("Starting Player: " + startingPlayer);
-          console.log("Unique Bets: " + uniqueBets.toString());
-          newCard = true;
-        }
-      } else if (uniqueBets.length === 1 && (newPlayerNum === startingPlayer || uniqueBets[0] !== 0)) {
-        console.log("New Player: " + newPlayerNum);
-          console.log("Starting Player: " + startingPlayer);
-          console.log("Unique Bets: " + uniqueBets.toString());
-        newCard = true;
       }
 
       while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
         newPlayerNum++;
         if (newPlayerNum === totalPlayers + 1) {
+          cycleComplete = true;
           newPlayerNum = firstPlayer;
-          if (uniqueBets.length === 1 && (firstPlayer >= startingPlayer || uniqueBets[0] !== 0)) {
-            newCard = true;
-          }
-        } else if (uniqueBets.length === 1 && (newPlayerNum === startingPlayer || uniqueBets[0] !== 0)) {
+        }
+      }
+
+      if (((newPlayerNum === trueStartingPlayer && uniqueBets[0] === 0 && cycleComplete === true) || uniqueBets[0] !== 0)  && uniqueBets.length === 1) {
+        if (!(lastPlayer && lastPlayer === newPlayerNum)) {
           newCard = true;
         }
       }
@@ -325,20 +329,25 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       if (knownCards.length !== 0) {
         setCurrentPlayer(newPlayerNum);
-        if (newPlayerNum > totalPlayers - computerPlayers) {
-          computerCalc(playerProfiles![newPlayerNum - 2], knownCards, newPlayerNum, newCurrentBet);
-        } else {
-          hideCards(newPlayerNum);
+        hideCards(newPlayerNum);
+        if (newPlayerNum <= totalPlayers - computerPlayers) {
           await sleep(3000);
           setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
         }
+        // if (newPlayerNum > totalPlayers - computerPlayers) {
+        //   computerCalc(playerProfiles![newPlayerNum - 2], knownCards, newPlayerNum, newCurrentBet);
+        // } else {
+        //   hideCards(newPlayerNum);
+        //   await sleep(3000);
+        //   setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
+        // }
       }
     }
     handleLoadingFalse();
   }
 
   function humanSimCalc(playerNum: number, allCards: number[], newCurrentBet: number) {
-    console.log(pastPlayerPerformance);
+    console.log("Human player past performance: " + pastPlayerPerformance);
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
@@ -363,13 +372,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       randomDecisionValue = Math.floor(Math.random() * 100);
       if (randomDecisionValue < (10 - playerProfile[0]/10) && gameState >= 1) {
         Fold(playerNum);
-      } else if (randomDecisionValue < (50 - playerProfile[0]/10)) {
+      } else if (randomDecisionValue < (50 - playerProfile[0]/10) || playerBanks[playerNum - 1] === 0) {
         Bet(playerNum, newCurrentBet);
       } else if (randomDecisionValue < (80 - playerProfile[0]/10)) {
-        Raise(Math.min(newCurrentBet + 10, playerBanks[playerNum - 1]), playerNum);
+        Raise(Math.min(newCurrentBet + 10, playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
       } else {
-        Raise(Math.min(newCurrentBet + 10 + (randomDecisionValue - 60), playerBanks[playerNum - 1]), playerNum);
+        Raise(Math.min(newCurrentBet + 10 + (randomDecisionValue - 60), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
       }
+    } else if (playerBanks[playerNum - 1] === 0) {
+      Bet(playerNum, newCurrentBet);
     } else {
       let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
       // let nashEquilibrium = Calculations.nashEq(cards);
@@ -377,15 +388,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         if (randomDecisionValue >= playerProfile[1] && gameState >= 1) {
           Fold(playerNum);
         } else {
-          Raise(Math.min(newCurrentBet + 30 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
+          Raise(Math.min(newCurrentBet + 30 + Math.floor(playerProfile[0] / 5), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         }
       } else if (effectiveHandScore > (0.75 - playerProfile[0] / 1000)) {
-        Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
+        Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
       } else {
         if (randomDecisionValue >= playerProfile[1]) {
           Bet(playerNum, newCurrentBet);
         } else {
-          Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBanks[playerNum - 1]), playerNum, newCurrentBet);
+          Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         }
       }
     }
@@ -406,7 +417,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
     let newBanks = playerBanks;
     let newBets = playerBets
-    let newRaise = 0;
     let amount = 0;
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
@@ -477,11 +487,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       handleLoadingTrue();
       reversionPrompt();
     } else {
-      if (playerNum) {
-        ChangePlayer(playerNum);
-      } else {
-        ChangePlayer();
-      }
+      // if (playerNum) {
+      //   ChangePlayer(playerNum, amount);
+      // } else {
+      //   ChangePlayer();
+      // }
+      ChangePlayer(currentPlayerNum, amount);
     }
   }
 
@@ -564,17 +575,20 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         // setPot(pot + currentPlayerBet);
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
       }
-      document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-      if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
-        handleLoadingTrue();
-        reversionPrompt();
-      } else {
-        if (playerNum) {
-          ChangePlayer(playerNum);
-        } else {
-          ChangePlayer();
-        }
-      }
+    } else {
+      document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " checked.\n\n";
+    }
+    document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
+    if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
+      handleLoadingTrue();
+      reversionPrompt();
+    } else {
+      // if (playerNum) {
+      //   ChangePlayer(playerNum, currentPlayerBet);
+      // } else {
+      //   ChangePlayer();
+      // }
+      ChangePlayer(currentPlayerNum, currentPlayerBet);
     }
   }
 
@@ -674,9 +688,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let newPot = 0;
     newPot += pot + BIGBLIND + BIGBLIND/2;
     setPot((pot) => {return pot + BIGBLIND + BIGBLIND/2});
-    if (nextPlayer > totalPlayers - computerPlayers) {
-      computerCalc(playerProfiles![nextPlayer - 2], cards.slice(2 * (nextPlayer - 1), 2 * (nextPlayer - 1) + 2), nextPlayer, BIGBLIND);
-    }
+    console.log("Player Banks on Small & Big Blind: " + playerBanks.toString());
+    hideCards(nextPlayer);
   }
 
   function HandsSearch(finalBestHand: number[][]) {
@@ -713,8 +726,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function DisplayWinner(playerNums: number[]) {
-    if (playerNums.length === 1) {
+    if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) { //TODO Change this
       document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
+    } else if (playerNums.length === 1) {
+      let cardsCopy: number[] = [];
+      cards.forEach(card => {
+        cardsCopy.push(card);
+      });
+      let bestHand = HANDS[calcs.FindBestHand(cardsCopy.slice(2 * (playerNums[0] - 1), 2 * (playerNums[0] - 1) + 2))[0]];
+      document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + bestHand + "!\n";
     } else {
       let winnersString = "Players ";
       for (let i = 0; i < playerNums.length; i++) {
@@ -744,12 +764,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
     }
     let newBanks = playerBanks;
+    console.log("Final Banks: " + newBanks.toString());
     playerNums.forEach(playerNum => {
       newBanks[playerNum - 1] += pot/playerNums.length;
     });
 
     if (computerPlayers === 0 && sessionStorage.getItem("userID")) {
-      console.log("THIS SHOULD WORK");
       let e1 = await supabase.from("results").select("gameID").order("gameID", {ascending: false}).limit(1).single();
       if (e1.error) {
         throw e1.error;
@@ -797,6 +817,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("ready-button")!.hidden = false;
     if (nextPlayer <= totalPlayers - computerPlayers) {
       setBestHandText("Player " + nextPlayer + ": Ready?")
+    } else {
+      setBestHandText("Player " + nextPlayer + " (BOT): Ready?")
     }
   }
 
@@ -808,21 +830,25 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("fold-button")!.hidden = false;
     document.getElementById("hole-card-one")!.hidden = false;
     document.getElementById("hole-card-two")!.hidden = false;
+    let knownCards = cards.slice(2 * (currentPlayer - 1), 2 * (currentPlayer - 1) + 2);;
     if (gameState > 0) {
       document.getElementById("flop-card-one")!.hidden = false;
       document.getElementById("flop-card-two")!.hidden = false;
       document.getElementById("flop-card-three")!.hidden = false;
+      knownCards.concat(cards.slice(-5, -2));
     }
     if (gameState > 1) {
       document.getElementById("turn-card")!.hidden = false;
+      knownCards.concat(cards[-1]);
     }
     if (gameState > 2) {
       document.getElementById("river-card")!.hidden = false;
+      knownCards.concat(cards[cards.length]);
     }
     document.getElementById("ready-button")!.hidden = true;
     setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
     document.getElementById("warning-text")!.innerText = playerPrompts[currentPlayer - 1];
-    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, gameState)) {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, gameState) && currentPlayer <= totalPlayers - computerPlayers) {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
@@ -838,6 +864,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       document.getElementById("revert-button")!.hidden = true;
       document.getElementById("info-box")!.hidden = false;
+    } else if (currentPlayer > totalPlayers - computerPlayers) {
+      computerCalc(playerProfiles![currentPlayer - 2], knownCards, currentPlayer, currentBet);
     }
   }
 
@@ -874,7 +902,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function revertGameState() {
-    console.log(prevStates[gameState - 1]);
+    console.log("Previous state" + prevStates[gameState - 1]);
     if (prevStates.filter(x => x !== "").length > 0) {
       stateEncoder.decode(prevStates[gameState - 1]);
       document.getElementById("info-box")!.hidden = true;
@@ -895,7 +923,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   function loadingOverlayText() {
     if (lessonNum) {
-      return "The other players are making their decisions...";
+      return "Next Player: Player " + currentPlayer;
     } else {
       return "Please pass to the next player...";
     }
@@ -971,7 +999,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           Player 8: £{playerBanks[7]}
         </h1>
         <div id="decision-buttons">
-          <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+          <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} hidden={true}>
             {betButtonText()}
           </button>
           <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
