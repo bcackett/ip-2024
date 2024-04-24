@@ -18,6 +18,10 @@ function Welcome() {
     nav("/login");
   }
 
+  const goToSettings = () => {
+    nav("/settings");
+  }
+
   function isLoggedIn() {
     if (sessionStorage.getItem("userID")) {
       return true;
@@ -45,7 +49,7 @@ function Welcome() {
       <div className="dividing-line" />
       <div>
         <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to practice as a group?</h1>
-        <button className="hollow-button" type="button" onClick={goToTrain}>
+        <button className="hollow-button" type="button" onClick={goToPlay}>
           Local Multiplayer
         </button>
       </div>
@@ -54,6 +58,12 @@ function Welcome() {
         <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to save your progress?</h1>
         <button className="hollow-button" type="button" onClick={goToLogin}>
           Login/Register
+        </button>
+      </div>
+      <div hidden={!isLoggedIn()}>
+        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to configure your personal settings?</h1>
+        <button className="hollow-button" type="button" onClick={goToSettings}>
+          Change Settings
         </button>
       </div>
     </>

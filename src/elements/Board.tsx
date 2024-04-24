@@ -863,7 +863,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("ready-button")!.hidden = true;
     setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
     document.getElementById("warning-text")!.innerText = playerPrompts[currentPlayer - 1];
-    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, gameState) && currentPlayer <= totalPlayers - computerPlayers) {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, gameState) && currentPlayer <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
@@ -887,7 +887,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   function reversionPrompt() {
     let currentPlayerText = playerPrompts[0].split("\n\n");
     document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 2];
-    document.getElementById("revert-button")!.hidden = false;
+    if (sessionStorage.getItem("moveRetracing") === "true") {
+      document.getElementById("revert-button")!.hidden = false;
+    }
     document.getElementById("info-box")!.hidden = false;
   }
 
@@ -909,7 +911,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       knownCards.concat(cards.slice(-5, cards.length));
     }
     let bestHand = calcs.FindBestHand(knownCards);
-    if (!document.getElementById("revert-button")!.hidden) {
+    if (!document.getElementById("revert-button")!.hidden || sessionStorage.getItem("moveRetracing") === "false") {
       ChangePlayer(currentPlayer);
     } else {
       setBestHandText(HANDS[bestHand[0]]);

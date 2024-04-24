@@ -41,6 +41,9 @@ function Register() {
             } else {
               alert("Account creation successful.");
               sessionStorage.setItem("userID", newUserID.toString());
+              sessionStorage.setItem("fasterCalcs", "false"); 
+              sessionStorage.setItem("lessonText", "true"); 
+              sessionStorage.setItem("moveRetracing", "true"); 
               if (firstName.length > 0) {
                 const e4 = await supabase.from("logins").update({firstName: firstName}).eq("userID", newUserID);
                 if (e4.error) {throw e4.error};

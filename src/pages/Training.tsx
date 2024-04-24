@@ -13,14 +13,16 @@ function Training() {
   }
 
   async function getCompletedLessonData() {
-    let {data, error} = await supabase.from("lessons").select("completedLessons").eq("userID", Number(sessionStorage.getItem("userID"))).limit(1).single();
-    if (error) {
-      throw error;
-    } else if (data) {
-      data.completedLessons.forEach(lessonNum => {
-        document.getElementById("lesson-" + lessonNum.toString())!.innerText += "\n\nCompleted! \u2713";
-        document.getElementById("lesson-" + lessonNum.toString())!.classList.add("complete-lesson");
-      });
+    if (sessionStorage.getItem("userID")) {
+      let {data, error} = await supabase.from("lessons").select("completedLessons").eq("userID", Number(sessionStorage.getItem("userID"))).limit(1).single();
+      if (error) {
+        throw error;
+      } else if (data) {
+        data.completedLessons.forEach(lessonNum => {
+          document.getElementById("lesson-" + lessonNum.toString())!.innerText += "\n\nCompleted! \u2713";
+          document.getElementById("lesson-" + lessonNum.toString())!.classList.add("complete-lesson");
+        });
+      }
     }
   } 
 

@@ -15,18 +15,28 @@ export type Json =
             username: string;
             password: string;
             firstName: string;
+            faster_calculations: boolean;
+            lesson_text: boolean;
+            move_retracing: boolean;
+
           };
           Insert: {
             userID: number;
             username: string;
             password: string;
             firstName?: string;
+            faster_calculations?: boolean;
+            lesson_text?: boolean;
+            move_retracing?: boolean;
           };
           Update: {
             userID?: number;
             username?: string;
             password?: string;
             firstName?: string;
+            faster_calculations?: boolean;
+            lesson_text?: boolean;
+            move_retracing?: boolean;
           };
           Relationships: [{
             foreignKeyName: "userID_results_fkey";

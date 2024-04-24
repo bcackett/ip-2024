@@ -23,6 +23,9 @@ function NavBar() {
       <Link reloadDocument to="/train">
         <button className="links">Practice Lessons</button>
       </Link>
+      <Link reloadDocument to="/settings">
+        <button className="links">Settings</button>
+      </Link>
       <Link reloadDocument to="/login">
         <button className="links">{logInButtonText()}</button>
       </Link>
