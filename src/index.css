@@ -30,18 +30,48 @@ code {
   /* background-color: rgba(125, 2, 2, 1); */
 }
 
-.spaced-button {
-  margin: 10px 10px 10px 10px;
+.hollow-button {
+  font-size: var(--links-font-size);
+  color: var(--off-white);
+  font-weight: bold;
+  background-color: transparent;
+  padding: 10px;
+  border: 3px solid var(--off-white);
+  border-radius:  5px;
+}
+
+.hollow-button:hover {
+  color: grey;
+  border-color: grey;
+}
+
+.solid-button {
+  color: var(--red-suit);
+  font-weight: bold;
+  background-color: var(--off-white);
+  padding: 10px;
+  border: 3px solid var(--red-suit);
+  border-radius:  5px;
+  margin: 0.5vw 0.5vw 0.5vw 0.5vw;
   width:5vw;
   height: 2.5vw;
   font-size: 1vw;
 }
 
-.reset-spaced-button {
+.solid-button-no-dims {
+  color: var(--red-suit);
+  font-weight: bold;
+  background-color: var(--off-white);
+  padding: 10px;
+  border: 5px solid var(--red-suit);
+  border-radius:  5px;
   margin: 0.5vw 0.5vw 0.5vw 0.5vw;
-  width:5vw;
-  height: 2.5vw;
   font-size: 1vw;
+}
+
+.solid-button:hover, .solid-button-no-dims:hover {
+  color: grey;
+  border-color: grey;
 }
 
 h1 {
@@ -278,3 +308,15 @@ h1 {
   border: 2px solid var(--black-suit);
 }
 
+.dividing-line {
+  display: inline-block;
+  height: 1px;
+  width: 70vw;
+  background-color: rgba(255,255,255, 0.5);
+  margin-top: 20px;
+}
+
+.complete-lesson {
+  color: darkgreen;
+  border-color: darkgreen;
+}

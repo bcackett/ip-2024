@@ -9,6 +9,7 @@ import LoadingOverlay from "react-loading-overlay-ts";
 import TeachingText from "./TeachingText";
 import StateEncoder from "./StateEncoder";
 import { findSourceMap } from "module";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 type roomSize = {
   totalPlayers: number;
@@ -780,6 +781,20 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
     }
 
+    if (lessonNum && sessionStorage.getItem("userID")) {
+      let existingLessonsComplete = await supabase.from("lessons").select("completedLessons").eq("userID", Number(sessionStorage.getItem("userID"))).limit(1).single();
+      if (existingLessonsComplete.error) {
+        throw existingLessonsComplete.error;
+      } else {
+        let completedLessons = existingLessonsComplete.data.completedLessons;
+        if (!completedLessons.includes(lessonNum)) {
+          let newCompletedLessons = completedLessons.concat(lessonNum);
+          let e = await supabase.from("lessons").update({completedLessons: newCompletedLessons}).eq("userID", Number(sessionStorage.getItem("userID")));
+          if (e.error) {throw e.error};
+        } 
+      }
+    }
+
     setPlayerBanks(newBanks);
     setPot(0);
     setWinner(playerNums[0]);
@@ -934,21 +949,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       <div id="info-box" hidden={true}>
         <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
         <div>
-          <button id="revert-button" className="spaced-button" type="button" hidden={true} onClick={() => revertGameState()}>Go back</button>
-          <button id="ok-button" className="spaced-button" type="button" onClick={() => handlePromptBox()}>OK</button>
+          <button id="revert-button" className="hollow-button" type="button" hidden={true} onClick={() => revertGameState()}>Go back</button>
+          <button id="ok-button" className="hollow-button" type="button" onClick={() => handlePromptBox()}>OK</button>
         </div>
       </div>
       <div id="warning-reporter">
         <h1 id="warning-text" style={{padding:"0.5vw"}}/>
       </div>
       <div id="table">
-        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="reset-spaced-button" id="start-button" type="button">
+        <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="solid-button" id="start-button" type="button">
           Start
         </button>
-        <button onClick={() => Reset()} className="reset-spaced-button" id="reset-button" type="button" hidden={true}>
+        <button onClick={() => Reset()} className="solid-button" id="reset-button" type="button" hidden={true}>
           Next Round
         </button>
-        <button onClick={() => window.location.reload()} className="reset-spaced-button" id="full-reset-button" type="button" hidden={true}>
+        <button onClick={() => window.location.reload()} className="solid-button" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
         <div id="hole-card-one" hidden={true}>
@@ -999,13 +1014,13 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           Player 8: £{playerBanks[7]}
         </h1>
         <div id="decision-buttons">
-          <button id="bet-button" className="spaced-button" type="button" onClick={() => Bet()} hidden={true}>
+          <button id="bet-button" className="solid-button" type="button" onClick={() => Bet()} hidden={true}>
             {betButtonText()}
           </button>
-          <button id="raise-button" className="spaced-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+          <button id="raise-button" className="solid-button" type="button" onClick={() => Raise()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
             {raiseButtonText()}
           </button>
-          <button id="fold-button" className="spaced-button" type="button" onClick={() => Fold()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
+          <button id="fold-button" className="solid-button" type="button" onClick={() => Fold()} disabled={playerBanks[currentPlayer - 1] === 0} hidden={true}>
             Fold
           </button>  
         </div>
@@ -1026,7 +1041,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }}).toString()}</h1> */}
       <div >
         <h1 id="best-hand" style={{color: "#f5f8e7", display: "inline"}}>{bestHandText} </h1>
-        <button id="ready-button" hidden={true} className="spaced-button" type="button" onClick={() => showCards()}>Ready</button>
+        <button id="ready-button" hidden={true} className="hollow-button" type="button" onClick={() => showCards()}>Ready</button>
       </div>
     </LoadingOverlay>
   );

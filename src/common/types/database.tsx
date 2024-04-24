@@ -14,22 +14,31 @@ export type Json =
             userID: number;
             username: string;
             password: string;
+            firstName: string;
           };
           Insert: {
             userID: number;
             username: string;
             password: string;
+            firstName?: string;
           };
           Update: {
             userID?: number;
             username?: string;
             password?: string;
+            firstName?: string;
           };
           Relationships: [{
-            foreignKeyName: "userID_fkey";
+            foreignKeyName: "userID_results_fkey";
             columns: ["userID"];
             referencedRelation: "results";
             referencedColumns: ["userID"];
+          },
+          {
+            foreignKeyName: "userID_lessons_fkey";
+            columns: ["userID"];
+            referencedRelation: "lessons";
+            referencedColumns:["userID"];
           }];
         };
         results: {
@@ -46,6 +55,20 @@ export type Json =
           Update: {
             gameID?: number;
             result?: number;
+          };
+          Relationships: [];
+        };
+        lessons: {
+          Row: {
+            userID: number;
+            completedLessons: number[];
+          };
+          Insert: {
+            userID: number;
+            completedLessons?: number[];
+          };
+          Update: {
+            completedLessons?: number[];
           };
           Relationships: [];
         };

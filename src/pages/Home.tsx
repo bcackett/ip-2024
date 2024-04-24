@@ -1,34 +1,59 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-type UserDetails = {
-  userID?: number;
-}
 
-function Welcome(id: UserDetails) {
+function Welcome() {
 
   const nav = useNavigate();
 
   const goToPlay = () => {
-    nav("/play")
+    nav("/play");
   }
 
   const goToTrain = () => {
-    nav("/train")
+    nav("/train");
+  }
+
+  const goToLogin = () => {
+    nav("/login");
+  }
+
+  function isLoggedIn() {
+    if (sessionStorage.getItem("userID")) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   return (
     <>
       <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
       <div>
-        <label style={{color: "#f5f8e7"}}>GetPokerEd is a one-site-fits-all solution to learning and improving at Texas Hold 'Em Poker!</label>
+        <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>GetPokerEd aims to help anyone and everyone learn and improve at Texas Hold 'Em Poker.</label>
       </div>
       <div>
-        <button className="spaced-button" type="button" onClick={goToTrain}>
+        <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>This website offers 12 lessons with varying difficulty to help understand the basics, and a local multiplayer platform for practicing against your friends.</label>
+      </div>
+      <div className="dividing-line" />
+      <div>
+        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Ready to start solo training?</h1>
+        <button className="hollow-button" type="button" onClick={goToTrain}>
           Training Lessons
         </button>
-        <button className="spaced-button" type="button" onClick={goToPlay}>
-          Play Locally
+      </div>
+      <div className="dividing-line" />
+      <div>
+        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to practice as a group?</h1>
+        <button className="hollow-button" type="button" onClick={goToTrain}>
+          Local Multiplayer
+        </button>
+      </div>
+      <div className="dividing-line" />
+      <div hidden={isLoggedIn()}>
+        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to save your progress?</h1>
+        <button className="hollow-button" type="button" onClick={goToLogin}>
+          Login/Register
         </button>
       </div>
     </>

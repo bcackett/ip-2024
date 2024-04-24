@@ -3,7 +3,7 @@ class TeachingText {
     [1, ["Poker has a lot of technical terms that will be referenced in all of the other lessons. Here, the cards only you can see (at the bottom of the screen) are called \"hole cards\".",
       "The cards everyone can see (at the top of the screen) are called \"communal cards\". The turn where the first three are dealt is called the \"flop\".",
       "The turn where the fourth communal card is dealt is called the \"turn\". The amount of money everyone has bet (in the middle of the screen) is called \"the pot\".",
-      "Knowing these terms you learn in this lesson, you're ready to use PokerEdu to its fullest! Enjoy!"
+      "Knowing these terms you learn in this lesson, you're ready to use GetPokerEd to its fullest! Enjoy!"
     ]],
     [2, ["The way to win Poker is by having the strongest hand at the end of each round, or by having every other player fold. There are 10 total hands, with the worst being High Card and the best being Royal Flush.",
       "As more community cards are dealt, you get a better idea of how strong your hand is. You can see your best current hand at the bottom of the board!",

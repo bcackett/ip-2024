@@ -42,11 +42,12 @@ function Login() {
           <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div> 
-        <input type="submit" value="Log In"/>
+        <input type="submit" value="Log In" className="hollow-button" style={{marginTop: "10px"}}/>
       </form>
+      <div className="dividing-line" />
       <h1 style={{color:"rgb(248, 245, 231)", margin:"1vw"}}>Don't have an account yet?</h1>
       <Link reloadDocument to="/register">
-      <button style={{color:"rgb(248, 245, 231)"}} className="links">Click here to register!</button>
+      <button className="hollow-button">Click here to register!</button>
       </Link>
     </>
   )

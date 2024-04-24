@@ -6,6 +6,7 @@ function Register() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
   const nav = useNavigate();
 
   const goToHome = () => {
@@ -34,9 +35,18 @@ function Register() {
           if (e2.error) {
             throw e2.error;
           } else {
-            alert("Account creation successful.");
-            sessionStorage.setItem("userID", newUserID.toString());
-            goToHome();
+            const e3 = await supabase.from("lessons").insert({userID: newUserID});
+            if (e3.error) {
+              throw e3.error;
+            } else {
+              alert("Account creation successful.");
+              sessionStorage.setItem("userID", newUserID.toString());
+              if (firstName.length > 0) {
+                const e4 = await supabase.from("logins").update({firstName: firstName}).eq("userID", newUserID);
+                if (e4.error) {throw e4.error};
+              }
+              goToHome();
+            }
           }
         }
       }
@@ -52,14 +62,19 @@ function Register() {
           <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}/>
         </div>
         <div>
+          <label style={{color:"rgb(248, 245, 231)"}}>{"Preferred First Name \(optional\): "} </label>
+          <input type="text" value={password} onChange={(e) => setFirstName(e.target.value)}/>
+        </div> 
+        <div>
           <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div> 
-        <input type="submit" value="Register"/>
+        <input type="submit" value="Register" className="hollow-button" style={{marginTop: "10px"}}/>
       </form>
+      <div className="dividing-line" />
       <h1 style={{color:"rgb(248, 245, 231)", margin:"1vw"}}>Already have an account?</h1>
       <Link reloadDocument to="/login">
-        <button style={{color:"rgb(248, 245, 231)"}} className="links">Click here to log in!</button>
+        <button className="hollow-button">Click here to log in!</button>
       </Link>
     </>
   )
