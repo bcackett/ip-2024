@@ -66,7 +66,7 @@ function Register() {
         </div>
         <div>
           <label style={{color:"rgb(248, 245, 231)"}}>{"Preferred First Name \(optional\): "} </label>
-          <input type="text" value={password} onChange={(e) => setFirstName(e.target.value)}/>
+          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
         </div> 
         <div>
           <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
