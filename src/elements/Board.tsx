@@ -422,7 +422,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
         amount = Number(window.prompt("What would you like to raise the bet to?"));
-        while (amount > playerBanks[currentPlayerNum - 1] || amount <= newCurrentBet) {
+        while (amount > (playerBanks[currentPlayerNum - 1] + playerBets[currentPlayerNum - 1]) || amount <= newCurrentBet) {
           amount = Number(window.prompt("Invalid input. What would you like to raise the bet to?"));
         }
         if (currentPlayerNum <= totalPlayers - computerPlayers) {
