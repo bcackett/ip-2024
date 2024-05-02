@@ -242,8 +242,45 @@ class Calculations {
         }
       }
     }
+    // let handStrength = (ihrArray[0] + ihrArray[1]/2) / (ihrArray[0] + ihrArray[1] + ihrArray[2]);
+    // if(communalCards.length === 5) {
+    //   return handStrength;
+    // } else {
+    //   let posPotential = (ehsArray[2][0] + ehsArray[2][1]/2 + ehsArray[1][0]/2) / (ihrArray[2] + ihrArray[1]);
+    //   let negPotential = (ehsArray[0][2] + ehsArray[1][2]/2 + ehsArray[0][1]/2) / (ihrArray[0] + ihrArray[1]);
+    //   return handStrength * (1 - negPotential) + (1 - handStrength) * posPotential;
+    // }
+    return this.handStrengthCalculation(ihrArray, ehsArray, communalCards.length === 5);
+  }
+
+  ehsRandomSample (playerCards: number[], communalCards: number[]) {
+    let ihrArray = [0, 0, 0];
+    let ehsArray: number[][] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    let playerBestHand = this.FindBestHand(playerCards.concat(communalCards));
+    let oppBestHand: number[] = [];
+    let possibleOpponentCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
+    console.log("fast ehs");
+    for (let i = 0; i < 100; i++) {
+      let newPossibleOpponentCards = possibleOpponentCards.sort(() => Math.random() - 0.5);
+      let possibleOpponentHole = newPossibleOpponentCards.slice(0, 2);
+      let ihrIndex = this.oneHandIHR(playerBestHand, possibleOpponentHole.concat(communalCards)) * 2;
+      ihrArray[ihrIndex] += 1;
+      let opponentCards = communalCards.concat(newPossibleOpponentCards.slice(0, 7 - communalCards.length));
+      let oppBestHand = this.FindBestHand(opponentCards);
+      if (playerBestHand[0] - oppBestHand[0] > 0) {
+        ehsArray[ihrIndex][0] += 1;
+      } else if (playerBestHand[0] === oppBestHand[0]) {
+        ehsArray[ihrIndex][1] += 1;
+      } else {
+        ehsArray[ihrIndex][2] += 1;
+      }
+    }
+    return this.handStrengthCalculation(ihrArray, ehsArray, communalCards.length === 5);
+  }
+
+  handStrengthCalculation(ihrArray: number[], ehsArray: number[][], allCommunalCardsKnown: boolean) {
     let handStrength = (ihrArray[0] + ihrArray[1]/2) / (ihrArray[0] + ihrArray[1] + ihrArray[2]);
-    if(communalCards.length === 5) {
+    if(allCommunalCardsKnown) {
       return handStrength;
     } else {
       let posPotential = (ehsArray[2][0] + ehsArray[2][1]/2 + ehsArray[1][0]/2) / (ihrArray[2] + ihrArray[1]);
@@ -260,9 +297,12 @@ class Calculations {
       decisionVal = this.ihr(playerCards, communalCards);
     // } else if (communalCards.length === 4) {
     //   decisionVal = this.ehs(playerCards, communalCards);
-    } else {
+    } else if (sessionStorage.getItem("fasterCalcs") === "false") {
       decisionVal = this.ehs(playerCards, communalCards);
       console.log(decisionVal);
+    } else {
+      decisionVal = this.ehsRandomSample(playerCards, communalCards);
+      console.log(decisionVal.toString() + "but this was done faster.");
     }
     return decisionVal;
   }

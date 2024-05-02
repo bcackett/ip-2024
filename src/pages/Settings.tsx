@@ -53,7 +53,7 @@ function Settings() {
     return (
       <>
         <div>
-          <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>{"Faster Calculations \(CURRENTLY NOT IMPLEMENTED\): "}</h1>
+          <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>{"Faster Calculations: "}</h1>
           <button style={{display:"inline-block"}} className={getInitialButtonState("fasterCalcs")} id="faster-calcs-button" onClick={() => handleSettingButton("fasterCalcs", "faster-calcs-button")}>
             {getButtonText("fasterCalcs")}
           </button>
