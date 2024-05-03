@@ -240,7 +240,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number, lastPlayer?: number) {
     handleLoadingTrue();
-    if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
+    if (foldedtotalPlayers.filter(p => p === 0).length === 1 || (Array.from(new Set(playerBanks)).length === 1 && playerBanks[0] === 0)) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner]);
     } else {
@@ -801,7 +801,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function betButtonText(): import("react").ReactNode {
-    if (currentBet === 0) {
+    if (currentBet === 0 || playerBanks[currentPlayer - 1] === 0) {
       return "Check";
     } else {
       return "Call";
