@@ -260,7 +260,7 @@ class Calculations {
     let oppBestHand: number[] = [];
     let possibleOpponentCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
     console.log("fast ehs");
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 50000; i++) {
       let newPossibleOpponentCards = possibleOpponentCards.sort(() => Math.random() - 0.5);
       let possibleOpponentHole = newPossibleOpponentCards.slice(0, 2);
       let ihrIndex = this.oneHandIHR(playerBestHand, possibleOpponentHole.concat(communalCards)) * 2;

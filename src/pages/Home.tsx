@@ -30,6 +30,12 @@ function Welcome() {
     }
   }
 
+  if (!sessionStorage.getItem("userID")) {
+    sessionStorage.setItem("fasterCalcs", "true");
+    sessionStorage.setItem("lessonText", "true");
+    sessionStorage.setItem("moveRetracing", "true");
+  }
+
   return (
     <>
       <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
