@@ -261,7 +261,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       console.log("Player Bet Sum: " + playerBets.reduce((x,y) => x + y));
       console.log("Starting Pot: " + potStartOfRound);
-      // setPot(potStartOfRound + playerBets.reduce((x,y) => x + y));
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
       let foldedPlayerIndices = Array.from(foldedtotalPlayers.keys());
       let orderedFoldedPlayers = foldedPlayerIndices.slice(startingPlayer - 1).concat(foldedPlayerIndices.slice(0, startingPlayer - 2))
