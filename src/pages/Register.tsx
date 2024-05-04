@@ -39,7 +39,7 @@ function Register() {
             if (e3.error) {
               throw e3.error;
             } else {
-              alert("Account creation successful.");
+              alert("Account creation successful. You are now logged in as " + username + ".");
               sessionStorage.setItem("userID", newUserID.toString());
               sessionStorage.setItem("fasterCalcs", "false"); 
               sessionStorage.setItem("lessonText", "true"); 

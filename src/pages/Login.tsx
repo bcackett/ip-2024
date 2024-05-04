@@ -21,7 +21,7 @@ function Login() {
       const {data, error} = await supabase.from("logins").select("userID, faster_calculations, lesson_text, move_retracing").eq("username", username).eq("password", password);
       if (error) throw error;
       if (data.length !== 0) {
-        alert("Login successful.")
+        alert("Login successful. You are now logged in as " + username + ".");
         sessionStorage.setItem("userID", data.map(x => x.userID).toString()); 
         sessionStorage.setItem("fasterCalcs", data.map(x => x.faster_calculations).toString()); 
         sessionStorage.setItem("lessonText", data.map(x => x.lesson_text).toString()); 
