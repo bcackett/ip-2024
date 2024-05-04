@@ -204,7 +204,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     getPastPlayerPerformance();
   }
 
-  function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number) {
+  function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
     // if (newPlayerNum > totalPlayers - computerPlayers) {
     //   console.log("MADE IT HERE");
     //   resetBets += 1;
@@ -233,7 +233,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
       RiverDeal(knownCards, newPlayerNum);
     } else {
-      DisplayWinner(CalculateWinner());
+      DisplayWinner(CalculateWinner(), nestedCurrentBet);
     }
     return knownCards;
   }
@@ -242,7 +242,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     handleLoadingTrue();
     if (foldedtotalPlayers.filter(p => p === 0).length === 1 || (Array.from(new Set(playerBanks)).length === 1 && playerBanks[0] === 0)) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
-      DisplayWinner([winner]);
+      DisplayWinner([winner], nestedCurrentBet);
     } else {
       let newPlayerNum: number;
       let oldPlayerNum: number;
@@ -261,10 +261,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       console.log("Player Bet Sum: " + playerBets.reduce((x,y) => x + y));
       console.log("Starting Pot: " + potStartOfRound);
-      setPot(potStartOfRound + playerBets.reduce((x,y) => x + y));
+      // setPot(potStartOfRound + playerBets.reduce((x,y) => x + y));
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
-      let orderedFoldedPlayers = foldedtotalPlayers.slice(startingPlayer - 1).concat(foldedtotalPlayers.slice(0, startingPlayer - 2))
-      let trueStartingPlayer = orderedFoldedPlayers.indexOf(0) + 1;
+      let foldedPlayerIndices = Array.from(foldedtotalPlayers.keys());
+      let orderedFoldedPlayers = foldedPlayerIndices.slice(startingPlayer - 1).concat(foldedPlayerIndices.slice(0, startingPlayer - 2))
+      let trueStartingPlayer = orderedFoldedPlayers[0] + 1;
       let newCard = false;
       let cycleComplete = false;
       let betsNoFoldedPlayers = [];
@@ -275,15 +276,22 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
       let uniqueBets = Array.from(new Set(betsNoFoldedPlayers));
       if (newPlayerNum === totalPlayers + 1) {
-        cycleComplete = true;
         newPlayerNum = firstPlayer;
+      }
+
+      console.log("TRUE STARTING PLAYER: " + trueStartingPlayer.toString());
+      if (newPlayerNum === trueStartingPlayer) {
+        cycleComplete = true;
       }
 
       while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
         newPlayerNum++;
         if (newPlayerNum === totalPlayers + 1) {
-          cycleComplete = true;
           newPlayerNum = firstPlayer;
+        }
+
+        if (newPlayerNum === trueStartingPlayer) {
+          cycleComplete = true;
         }
       }
 
@@ -305,7 +313,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         }
         setPotStartOfRound(potStartOfRound + playerBets.reduce((x,y) => x + y));
         console.log("Next Round Starting Pot: " + potStartOfRound);
-        knownCards = ImmediateNewCard(newPlayerNum);
+        knownCards = ImmediateNewCard(newPlayerNum, nestedCurrentPlayer, nestedCurrentBet);
       } else {
         if (document.getElementById("flop-card-one")!.hidden === true) {
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
@@ -481,6 +489,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setCurrentBet(amount);
     setPlayerBanks(newBanks);
     setPlayerBets(newBets);
+    setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
     console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
     // setPot(pot + amount);
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
@@ -572,6 +581,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         newBets[currentPlayerNum - 1] += betDiff;
         setPlayerBanks(newBanks);
         setPlayerBets(newBets);
+        setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
         console.log("Player Bets on Bet:" + playerBets +". This was for player" + currentPlayerNum);
         // setPot(pot + currentPlayerBet);
         document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
@@ -589,6 +599,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       // } else {
       //   ChangePlayer();
       // }
+      console.log("CURRENT PLAYER AFTER BET: " + currentPlayerNum.toString());
       ChangePlayer(currentPlayerNum, currentPlayerBet);
     }
   }
@@ -726,7 +737,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     return handIndices;
   }
 
-  async function DisplayWinner(playerNums: number[]) {
+  async function DisplayWinner(playerNums: number[], finalActionBet?: number) {
     if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) { //TODO Change this
       document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
     } else if (playerNums.length === 1) {
@@ -766,8 +777,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
     let newBanks = playerBanks;
     console.log("Final Banks: " + newBanks.toString());
+    let newPot = pot;
+    if (finalActionBet) {
+      newPot += finalActionBet;
+    }
     playerNums.forEach(playerNum => {
-      newBanks[playerNum - 1] += pot/playerNums.length;
+      newBanks[playerNum - 1] += newPot/playerNums.length;
     });
 
     if (computerPlayers === 0 && sessionStorage.getItem("userID")) {
