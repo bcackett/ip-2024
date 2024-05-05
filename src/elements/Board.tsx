@@ -426,82 +426,89 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let newBanks = playerBanks;
     let newBets = playerBets
     let amount = 0;
+    let nullableAmount: string | null = "0";
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
-        amount = Number(window.prompt("What would you like to raise the bet to?"));
-        while (amount > (playerBanks[currentPlayerNum - 1] + playerBets[currentPlayerNum - 1]) || amount <= newCurrentBet) {
-          amount = Number(window.prompt("Invalid input. What would you like to raise the bet to?"));
+        nullableAmount = window.prompt("What would you like to raise the bet to?");
+        amount = Number(nullableAmount);
+        while (nullableAmount !== null && (amount > (playerBanks[currentPlayerNum - 1] + playerBets[currentPlayerNum - 1]) || amount <= newCurrentBet)) {
+          nullableAmount = window.prompt("What would you like to raise the bet to?");
+          amount = Number(nullableAmount);
         }
-        if (currentPlayerNum <= totalPlayers - computerPlayers) {
-          let newPlayerPrompts = playerPrompts;
-          if (document.getElementById("flop-card-one")!.hidden) {
-            if (currentPlayerPrediction === 0) {
-              newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to fold on this hand.\n\n";
-            } else if (currentPlayerPrediction === 0.5) {
-              newPlayerPrompts[currentPlayerNum - 1] += "Raising could be risky here. Just calling might be safer.\n\n";
+        if (nullableAmount !== null) {
+          if (currentPlayerNum <= totalPlayers - computerPlayers) {
+            let newPlayerPrompts = playerPrompts;
+            if (document.getElementById("flop-card-one")!.hidden) {
+              if (currentPlayerPrediction === 0) {
+                newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to fold on this hand.\n\n";
+              } else if (currentPlayerPrediction === 0.5) {
+                newPlayerPrompts[currentPlayerNum - 1] += "Raising could be risky here. Just calling might be safer.\n\n";
+              } else {
+                newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
+              }
+            } else if (pastPlayerPerformance < 0) {
+              if (currentPlayerPrediction < 0.3) {
+                newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to fold on this hand.\n\n";
+              } else if (currentPlayerPrediction < 0.8) {
+                newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to " + betButtonText()!.toString().toLowerCase() + ".\n\n";
+              } else {
+                newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
+              }
+            } else if (pastPlayerPerformance >= 50) {
+              if (currentPlayerPrediction < 0.1) {
+                newPlayerPrompts[currentPlayerNum - 1] += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
+              } else if (currentPlayerPrediction < 0.5 && newCurrentBet > BIGBLIND) {
+                newPlayerPrompts[currentPlayerNum - 1] += "The bet has already gone up. Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText()!.toString().toLowerCase() + "\n\n";
+              } else if (currentPlayerPrediction < 0.7 && newCurrentBet > 3*BIGBLIND) {
+                newPlayerPrompts[currentPlayerNum - 1] += "The bet is already quite high. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
+              } else {
+                newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
+              }
             } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
+              if (currentPlayerPrediction < 0.2) {
+                newPlayerPrompts[currentPlayerNum - 1] += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
+              } else if (currentPlayerPrediction < 0.5) {
+                newPlayerPrompts[currentPlayerNum - 1] += "Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText()!.toString().toLowerCase() + "\n\n";
+              } else if (currentPlayerPrediction < 0.7 && newCurrentBet > BIGBLIND) {
+                newPlayerPrompts[currentPlayerNum - 1] += "The bet has already gone up. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
+              } else {
+                newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
+              }
             }
-          } else if (pastPlayerPerformance < 0) {
-            if (currentPlayerPrediction < 0.3) {
-              newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to fold on this hand.\n\n";
-            } else if (currentPlayerPrediction < 0.8) {
-              newPlayerPrompts[currentPlayerNum - 1] += "Are you sure about this? It might be safer to " + betButtonText()!.toString().toLowerCase() + ".\n\n";
-            } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
-            }
-          } else if (pastPlayerPerformance >= 50) {
-            if (currentPlayerPrediction < 0.1) {
-              newPlayerPrompts[currentPlayerNum - 1] += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
-            } else if (currentPlayerPrediction < 0.5 && newCurrentBet > BIGBLIND) {
-              newPlayerPrompts[currentPlayerNum - 1] += "The bet has already gone up. Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText()!.toString().toLowerCase() + "\n\n";
-            } else if (currentPlayerPrediction < 0.7 && newCurrentBet > 3*BIGBLIND) {
-              newPlayerPrompts[currentPlayerNum - 1] += "The bet is already quite high. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
-            } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
-            }
-          } else {
-            if (currentPlayerPrediction < 0.2) {
-              newPlayerPrompts[currentPlayerNum - 1] += "This is a particularly weak hand. You could wait to see if it improves, but it could be worth folding this time.\n\n";
-            } else if (currentPlayerPrediction < 0.5) {
-              newPlayerPrompts[currentPlayerNum - 1] += "Your hand is ok, but is it worth risking betting any more? It might be safer to " + betButtonText()!.toString().toLowerCase() + "\n\n";
-            } else if (currentPlayerPrediction < 0.7 && newCurrentBet > BIGBLIND) {
-              newPlayerPrompts[currentPlayerNum - 1] += "The bet has already gone up. You have a pretty strong hand, but are you sure you want to push it further?\n\n";
-            } else {
-              newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
-            }
+            setPlayerPrompts(newPlayerPrompts);
+            document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
+            document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
           }
-          setPlayerPrompts(newPlayerPrompts);
-          document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
-          document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
+          // amount = currentBet + newRaise;
         }
-        // amount = currentBet + newRaise;
       }
     } else {
       amount = raise;
       // amount = nestedCurrentBet! + newRaise;
     }
-    // amount = newCurrentBet + newRaise;
-    newBanks[currentPlayerNum - 1] -= (amount - newBets[currentPlayerNum - 1]);
-    newBets[currentPlayerNum - 1] += (amount - newBets[currentPlayerNum - 1]);
-    document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " raised the bet to £" + amount +".\n\n";
-    setCurrentBet(amount);
-    setPlayerBanks(newBanks);
-    setPlayerBets(newBets);
-    setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
-    console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
-    // setPot(pot + amount);
-    document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
-      handleLoadingTrue();
-      reversionPrompt();
-    } else {
-      // if (playerNum) {
-      //   ChangePlayer(playerNum, amount);
-      // } else {
-      //   ChangePlayer();
-      // }
-      ChangePlayer(currentPlayerNum, amount);
+    if (nullableAmount !== null) {
+      // amount = newCurrentBet + newRaise;
+      newBanks[currentPlayerNum - 1] -= (amount - newBets[currentPlayerNum - 1]);
+      newBets[currentPlayerNum - 1] += (amount - newBets[currentPlayerNum - 1]);
+      document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " raised the bet to £" + amount +".\n\n";
+      setCurrentBet(amount);
+      setPlayerBanks(newBanks);
+      setPlayerBets(newBets);
+      setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
+      console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
+      // setPot(pot + amount);
+      document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
+      if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
+        handleLoadingTrue();
+        reversionPrompt();
+      } else {
+        // if (playerNum) {
+        //   ChangePlayer(playerNum, amount);
+        // } else {
+        //   ChangePlayer();
+        // }
+        ChangePlayer(currentPlayerNum, amount);
+      }
     }
   }
 
@@ -936,9 +943,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function revertGameState() {
-    console.log("Previous state" + prevStates[gameState - 1]);
+    console.log("Previous state" + prevStates[gameState]);
     if (prevStates.filter(x => x !== "").length > 0) {
-      stateEncoder.decode(prevStates[gameState - 1]);
+      stateEncoder.decode(prevStates[gameState]);
       document.getElementById("info-box")!.hidden = true;
       setCards(stateEncoder.getCards());
       setFoldedtotalPlayers(stateEncoder.getFoldedPlayers());
@@ -950,6 +957,20 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       setStartingPlayer(stateEncoder.getStartingPlayer());
       setCurrentPlayer(stateEncoder.getCurrentPlayer());
       setCurrentBet(stateEncoder.getPlayerBets().reduce((x, y) => {if (x >= y) {return x} else {return y}}));
+      let newPlayText = document.getElementById("play-text")!.innerText.split("\n\n");
+      let newPlayerPrompts = playerPrompts;
+      let changedPrompt = "";
+      let newWarningText = playerPrompts[currentPlayer - 1].split("\n\n")
+      document.getElementById("play-text")!.innerText = "";
+      document.getElementById("warning-text")!.innerText = "";
+      for (let i = 0; i < newPlayText.length - 2; i++) {
+        document.getElementById("play-text")!.innerText += newPlayText[i] + "\n\n";
+      }
+      for (let i = 0; i < newWarningText.length - 2; i++) {
+        changedPrompt += newWarningText[i] + "\n\n";
+      }
+      newPlayerPrompts[currentPlayer - 1] = changedPrompt;
+      setPlayerPrompts(newPlayerPrompts);
       hideCards(currentPlayer);
       handleLoadingFalse();
     }
