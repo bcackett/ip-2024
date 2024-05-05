@@ -47,6 +47,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [winner, setWinner] = useState(0);
   const [p1InitialBank, setP1InitialBank] = useState(200)
   const [prevStates, setPrevStates] = useState(new Array(5).fill(""));
+  const [preAction, setPreAction] = useState(true);
   const handleLoadingFalse = useCallback(() => setLoadingActive(false), []);
   const handleLoadingTrue = useCallback(() => setLoadingActive(true), []);
   useEffect(() => {setCurrentPlayer(winner)}, [winner]);
@@ -201,6 +202,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setStartingPlayer(newStartingPlayer);
     setCurrentPlayer(newStartingPlayer);
     setPotStartOfRound(0);
+    setPreAction(true);
     getPastPlayerPerformance();
   }
 
@@ -240,6 +242,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number, lastPlayer?: number) {
     handleLoadingTrue();
+    setPreAction(true);
     if (foldedtotalPlayers.filter(p => p === 0).length === 1 || (Array.from(new Set(playerBanks)).length === 1 && playerBanks[0] === 0)) {
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner], nestedCurrentBet);
@@ -411,6 +414,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function Raise(raise?: number, playerNum?: number, nestedCurrentBet?: number) {
+    setPreAction(false);
     let currentPlayerNum: number;
     let newCurrentBet: number;
     if (playerNum) {
@@ -513,6 +517,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function Bet(playerNum?: number, bet?: number) {
+    setPreAction(false);
     let currentPlayerNum: number;
     let currentPlayerBet: number;
     if (playerNum) {
@@ -611,6 +616,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function Fold(playerNum?: number) {
+    setPreAction(false);
     let currentPlayerNum: number;
     if (playerNum) {
       currentPlayerNum = playerNum;
@@ -935,7 +941,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       knownCards.concat(cards.slice(-5, cards.length));
     }
     let bestHand = calcs.FindBestHand(knownCards);
-    if (!document.getElementById("revert-button")!.hidden) {
+    if (!preAction) {
       ChangePlayer(currentPlayer);
     } else {
       setBestHandText(HANDS[bestHand[0]]);
