@@ -1014,12 +1014,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
   }
 
+  function retraceText() {
+    let buttonText = "Back to ";
+    let gameStateList = ["Preflop", "Flop", "Turn", "River"];
+    if (gameState > 0) {
+      buttonText += gameStateList[gameState - 1];
+    }
+    return buttonText;
+  }
+
   return (
     <LoadingOverlay active={loadingActive} text={loadingOverlayText()} spinner={false}>
       <div id="info-box" hidden={true}>
         <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
         <div>
-          <button id="revert-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(prevState)}>Go back</button>
+          <button id="revert-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(prevState)}>Go Back</button>
           <button id="ok-button" className="hollow-button" type="button" onClick={() => handlePromptBox()}>OK</button>
         </div>
       </div>
@@ -1036,7 +1045,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         <button onClick={() => window.location.reload()} className="solid-button" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
-        <button id="revert-by-round-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(startOfRoundStates[gameState - 1])}>Go Back</button>
+        <button id="revert-by-round-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(startOfRoundStates[gameState - 1])}>{retraceText()}</button>
         <div id="hole-card-one" hidden={true}>
           <Card val={cards[2 * (currentPlayer - 1)]}/>  
         </div> 
