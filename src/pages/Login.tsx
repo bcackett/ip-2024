@@ -18,7 +18,7 @@ function Login() {
     if (username === "" || password === "") {
       alert("Please enter both a username and a password");
     } else {
-      const {data, error} = await supabase.from("logins").select("userID, faster_calculations, lesson_text, move_retracing").eq("username", username).eq("password", password);
+      const {data, error} = await supabase.from("logins").select("userID, firstName, faster_calculations, lesson_text, move_retracing").eq("username", username).eq("password", password);
       if (error) throw error;
       if (data.length !== 0) {
         alert("Login successful. You are now logged in as " + username + ".");
@@ -26,6 +26,9 @@ function Login() {
         sessionStorage.setItem("fasterCalcs", data.map(x => x.faster_calculations).toString()); 
         sessionStorage.setItem("lessonText", data.map(x => x.lesson_text).toString()); 
         sessionStorage.setItem("moveRetracing", data.map(x => x.move_retracing).toString()); 
+        if (data.map(x => x.firstName) !== null) {
+          sessionStorage.setItem("name", data.map(x => x.firstName).toString()); 
+        }
         goToHome();
       } else {
         alert("Invalid username/password combination. Remember: passwords are case-sensitive!");

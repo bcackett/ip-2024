@@ -47,6 +47,7 @@ function Register() {
               if (firstName.length > 0) {
                 const e4 = await supabase.from("logins").update({firstName: firstName}).eq("userID", newUserID);
                 if (e4.error) {throw e4.error};
+                sessionStorage.setItem("name", firstName); 
               }
               goToHome();
             }

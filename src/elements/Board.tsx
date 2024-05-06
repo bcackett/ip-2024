@@ -495,7 +495,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       // amount = newCurrentBet + newRaise;
       newBanks[currentPlayerNum - 1] -= (amount - newBets[currentPlayerNum - 1]);
       newBets[currentPlayerNum - 1] += (amount - newBets[currentPlayerNum - 1]);
-      document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " raised the bet to £" + amount +".\n\n";
+      document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " raised the bet to £" + amount +".\n\n";
       setCurrentBet(amount);
       setPlayerBanks(newBanks);
       setPlayerBets(newBets);
@@ -580,7 +580,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
       }
       if (currentPlayerBet === 0) {
-        document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " checked.\n\n";
+        document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " checked.\n\n";
       } else {
         let newBanks = playerBanks;
         let newBets = playerBets;
@@ -596,10 +596,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
         console.log("Player Bets on Bet:" + playerBets +". This was for player" + currentPlayerNum);
         // setPot(pot + currentPlayerBet);
-        document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " bet £" + currentPlayerBet + ".\n\n";
+        document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " bet £" + currentPlayerBet + ".\n\n";
       }
     } else {
-      document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " checked.\n\n";
+      document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " checked.\n\n";
     }
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
@@ -664,7 +664,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     newBestHands[currentPlayerNum - 1] = new Array(6).fill(0);
     setFoldedtotalPlayers(newFoldedtotalPlayers);
     setBestHands(newBestHands);
-    document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " folded.\n\n";
+    document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " folded.\n\n";
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
       handleLoadingTrue();
@@ -686,14 +686,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
     let newBanks = playerBanks;
     let newBets = playerBets;
-    document.getElementById("play-text")!.innerText += "Player " + (nextPlayer) + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
+    document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND / 2;
     newBets[nextPlayer - 1] += BIGBLIND / 2;
     nextPlayer += 1;
     if (nextPlayer > totalPlayers) {
       nextPlayer = 1;
     }
-    document.getElementById("play-text")!.innerText += "Player " + nextPlayer + " bet " + BIGBLIND + " as the big blind.\n\n"
+    document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet " + BIGBLIND + " as the big blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND;
     newBets[nextPlayer - 1] += BIGBLIND;
     nextPlayer += 1;
@@ -751,7 +751,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function DisplayWinner(playerNums: number[], finalActionBet?: number) {
-    if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) { //TODO Change this
+    if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) {
       document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
     } else if (playerNums.length === 1) {
       let cardsCopy: number[] = [];
@@ -860,11 +860,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     // document.getElementById("turn-card")!.hidden = true;
     // document.getElementById("river-card")!.hidden = true;
     document.getElementById("ready-button")!.hidden = false;
-    if (nextPlayer <= totalPlayers - computerPlayers) {
-      setBestHandText("Player " + nextPlayer + ": Ready?")
-    } else {
-      setBestHandText("Player " + nextPlayer + " (BOT): Ready?")
-    }
+    setBestHandText(playerOrBotText(nextPlayer) + "'s Turn: Ready?");
   }
 
   function showCards() {
@@ -1008,7 +1004,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   function loadingOverlayText() {
     if (lessonNum) {
-      return "Next Player: Player " + currentPlayer;
+      return "Next Player: " + playerOrBotText(currentPlayer);
     } else {
       return "Please pass to the next player...";
     }
@@ -1021,6 +1017,22 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       buttonText += gameStateList[gameState - 1];
     }
     return buttonText;
+  }
+
+  function playerOrBotText(player: number) {
+    if (player === 1 && sessionStorage.getItem("name")) {
+      return sessionStorage.getItem("name");
+    } else if (player <= totalPlayers - computerPlayers) {
+      return "Player " + player.toString();
+    } else {
+      return "BOT " + player.toString();
+    }
+  }
+
+  function playerLabelText(player: number) {
+    let output = playerOrBotText(player);
+    output += ": £" + playerBanks[player - 1];
+    return output;
   }
 
   return (
@@ -1070,28 +1082,28 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           </div>
         </div>
         <h1 id="p1-stats" className=".player-stats">
-          Player 1: £{playerBanks[0]}
+          {playerLabelText(1)}
         </h1>
         <h1 id="p2-stats" className=".player-stats">
-          Player 2: £{playerBanks[1]}
+          {playerLabelText(2)}
         </h1>
         <h1 id="p3-stats" className=".player-stats" hidden={playerBanks.length < 3}>
-          Player 3: £{playerBanks[2]}
+          {playerLabelText(3)}
         </h1>
         <h1 id="p4-stats" className=".player-stats" hidden={playerBanks.length < 4}>
-          Player 4: £{playerBanks[3]}
+          {playerLabelText(4)}
         </h1>
         <h1 id="p5-stats" className=".player-stats" hidden={playerBanks.length < 5}>
-          Player 5: £{playerBanks[4]}
+          {playerLabelText(5)}
         </h1>
         <h1 id="p6-stats" className=".player-stats" hidden={playerBanks.length < 6}>
-          Player 6: £{playerBanks[5]}
+          {playerLabelText(6)}
         </h1>
         <h1 id="p7-stats" className=".player-stats" hidden={playerBanks.length < 7}>
-          Player 7: £{playerBanks[6]}
+          {playerLabelText(7)}
         </h1>
         <h1 id="p8-stats" className=".player-stats" hidden={playerBanks.length < 8}>
-          Player 8: £{playerBanks[7]}
+          {playerLabelText(8)}
         </h1>
         <div id="decision-buttons">
           <button id="bet-button" className="solid-button" type="button" onClick={() => Bet()} hidden={true}>
