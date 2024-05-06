@@ -8,8 +8,10 @@ class StateEncoder {
   private startingPlayer: number = 0;
   private currentPlayer: number = 0;
   private potStartOfRound: number = 0;
+  private playText: string = "";
+  private warningText: string[] = new Array();
 
-  encode(cards: number[], foldedPlayers: number[], pot: number, potStartOfRound: number,  playerBanks: number[], playerBets: number[], gameState: number, startingPlayer: number, currentPlayer: number) {
+  encode(cards: number[], foldedPlayers: number[], pot: number, potStartOfRound: number,  playerBanks: number[], playerBets: number[], gameState: number, startingPlayer: number, currentPlayer: number, playText: string, warningText: string[]) {
     let result = "";
     let i: number;
     for (i = 0; i < cards.length; i++) {
@@ -39,13 +41,17 @@ class StateEncoder {
         result += ",";
       }
     }
+    result += "\n" + playText.replaceAll("\n\n", "|");
+    for (i = 0; i < warningText.length; i++) {
+      result += "\n" + warningText[i].replaceAll("\n\n", "|");
+    }
     result += "\n" + gameState.toString() + "," + startingPlayer.toString() + "," + currentPlayer.toString();
     return result;
   }
 
   decode(input: string) {
     let lines = input.split("\n");
-
+    let warningTextIndex = 0;
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].split(",");
       if (i === 0) {
@@ -58,7 +64,13 @@ class StateEncoder {
         this.potStartOfRound = this.playerBanks.shift()!;
       } else if (i === 3) {
         this.playerBets = line.map(x => Number(x));
-      } else {
+      } else if (i === 4) {
+        this.playText = line[0].replaceAll("|", "\n\n");
+      } else if ( i < lines.length - 1) {
+        this.warningText[warningTextIndex] = line[0].replaceAll("|", "\n\n");
+        warningTextIndex++;
+      }
+      else {
         let endData = line.map(x => Number(x));
         this.gameState = endData[0];
         this.startingPlayer = endData[1];
@@ -89,6 +101,14 @@ class StateEncoder {
 
   getPlayerBets() {
     return this.playerBets;
+  }
+
+  getPlayText() {
+    return this.playText;
+  }
+
+  getWarningText() {
+    return this.warningText;
   }
 
   getGameState() {

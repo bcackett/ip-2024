@@ -46,7 +46,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [loadingActive, setLoadingActive] = useState(false);
   const [winner, setWinner] = useState(0);
   const [p1InitialBank, setP1InitialBank] = useState(200)
-  const [prevStates, setPrevStates] = useState(new Array(5).fill(""));
+  const [prevState, setPrevState] = useState("");
+  const [startOfRoundStates, setStartOfRoundStates] = useState(new Array(5).fill(""));
   const [preAction, setPreAction] = useState(true);
   const handleLoadingFalse = useCallback(() => setLoadingActive(false), []);
   const handleLoadingTrue = useCallback(() => setLoadingActive(true), []);
@@ -216,7 +217,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     // setPlayerBets(new Array(totalPlayers).fill(0));
     // resetBets += 1;
     resetBets();
-    forceUpdate();
+    // forceUpdate();
     console.log("Player Bets on New Card:" + playerBets);
     let knownCards: number[] = [];
     if (nestedCurrentPlayer) {
@@ -502,7 +503,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
       // setPot(pot + amount);
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-      if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
+      if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
         handleLoadingTrue();
         reversionPrompt();
       } else {
@@ -601,7 +602,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " checked.\n\n";
     }
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
+    if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
       handleLoadingTrue();
       reversionPrompt();
     } else {
@@ -665,7 +666,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setBestHands(newBestHands);
     document.getElementById("play-text")!.innerText += "Player " + currentPlayerNum + " folded.\n\n";
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
-    if (lessonNum && gameState >= 1 && currentPlayerNum <= totalPlayers - computerPlayers) {
+    if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
       handleLoadingTrue();
       reversionPrompt();
     } else {
@@ -780,6 +781,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("raise-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
     document.getElementById("ready-button")!.hidden = true;
+    document.getElementById("revert-by-round-button")!.hidden = true;
     
     for (let i = 1; i <= totalPlayers; i++) {
       document.getElementById("p" + i +"-stats")!.classList.remove("glow");
@@ -851,6 +853,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("fold-button")!.hidden = true;
     document.getElementById("hole-card-one")!.hidden = true;
     document.getElementById("hole-card-two")!.hidden = true;
+    document.getElementById("revert-by-round-button")!.hidden = true;
     // document.getElementById("flop-card-one")!.hidden = true;
     // document.getElementById("flop-card-two")!.hidden = true;
     // document.getElementById("flop-card-three")!.hidden = true;
@@ -878,6 +881,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("flop-card-two")!.hidden = false;
       document.getElementById("flop-card-three")!.hidden = false;
       knownCards.concat(cards.slice(-5, -2));
+      if (lessonNum && sessionStorage.getItem("moveRetracing") === "true") {
+        document.getElementById("revert-by-round-button")!.hidden = false;
+      }
     }
     if (gameState > 1) {
       document.getElementById("turn-card")!.hidden = false;
@@ -891,6 +897,17 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
     if (currentPlayer <= totalPlayers - computerPlayers) {
       document.getElementById("warning-text")!.innerText = playerPrompts[currentPlayer - 1];
+    }
+
+    if (currentPlayer <= totalPlayers - computerPlayers && lessonNum && sessionStorage.getItem("moveRetracing") === "true") {
+      let newState = stateEncoder.encode(
+        cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer, document.getElementById("play-text")!.innerText, playerPrompts);
+      setPrevState(newState);
+      if (startOfRoundStates[gameState] === "") {
+        let newStartStates = startOfRoundStates;
+        newStartStates[gameState] = newState;
+        setStartOfRoundStates(newStartStates);
+      }
     }
     
     if (lessonNum && teachingText.returnTargetPrompt(lessonNum, gameState) && currentPlayer <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
@@ -929,9 +946,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
-    let newPrevStates = prevStates;
-    newPrevStates[gameState] = stateEncoder.encode(cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer)
-    setPrevStates(newPrevStates);
+    // let newPrevStates = prevStates;
+    // newPrevStates[gameState] = stateEncoder.encode(cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer)
+    // setPrevStates(newPrevStates);
     let knownCards = cards.slice(2 * (currentPlayer - 1), 2 * (currentPlayer - 1) + 2)
     if (gameState === 1) {
       knownCards.concat(cards.slice(-5, -2));
@@ -948,10 +965,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
   }
 
-  function revertGameState() {
-    console.log("Previous state" + prevStates[gameState]);
-    if (prevStates.filter(x => x !== "").length > 0) {
-      stateEncoder.decode(prevStates[gameState]);
+  function retrace(state: string) {
+    if (state !== "") {
+      stateEncoder.decode(state);
       document.getElementById("info-box")!.hidden = true;
       setCards(stateEncoder.getCards());
       setFoldedtotalPlayers(stateEncoder.getFoldedPlayers());
@@ -963,20 +979,28 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       setStartingPlayer(stateEncoder.getStartingPlayer());
       setCurrentPlayer(stateEncoder.getCurrentPlayer());
       setCurrentBet(stateEncoder.getPlayerBets().reduce((x, y) => {if (x >= y) {return x} else {return y}}));
-      let newPlayText = document.getElementById("play-text")!.innerText.split("\n\n");
-      let newPlayerPrompts = playerPrompts;
-      let changedPrompt = "";
-      let newWarningText = playerPrompts[currentPlayer - 1].split("\n\n")
-      document.getElementById("play-text")!.innerText = "";
-      document.getElementById("warning-text")!.innerText = "";
-      for (let i = 0; i < newPlayText.length - 2; i++) {
-        document.getElementById("play-text")!.innerText += newPlayText[i] + "\n\n";
-      }
-      for (let i = 0; i < newWarningText.length - 2; i++) {
-        changedPrompt += newWarningText[i] + "\n\n";
-      }
-      newPlayerPrompts[currentPlayer - 1] = changedPrompt;
-      setPlayerPrompts(newPlayerPrompts);
+      document.getElementById("play-text")!.innerText = stateEncoder.getPlayText();
+      setPlayerPrompts(stateEncoder.getWarningText());
+      // let newPlayText = document.getElementById("play-text")!.innerText.split("\n\n");
+      // let newPlayerPrompts = playerPrompts;
+      // let changedPrompt = "";
+      // let newWarningText = playerPrompts[currentPlayer - 1].split("\n\n")
+      // document.getElementById("play-text")!.innerText = "";
+      // document.getElementById("warning-text")!.innerText = "";
+      // for (let i = 0; i < newPlayText.length - 2; i++) {
+      //   document.getElementById("play-text")!.innerText += newPlayText[i] + "\n\n";
+      // }
+      // for (let i = 0; i < newWarningText.length - 2; i++) {
+      //   changedPrompt += newWarningText[i] + "\n\n";
+      // }
+      // newPlayerPrompts[currentPlayer - 1] = changedPrompt;
+      // if (setGameState(stateEncoder.getGameState())! < gameState) {
+      //   let newStartOfRoundStates = startOfRoundStates;
+      //   newStartOfRoundStates[gameState] = "";
+      //   setStartOfRoundStates(newStartOfRoundStates);
+      // }
+      // setPlayerPrompts(newPlayerPrompts);
+      setPreAction(true);
       hideCards(currentPlayer);
       handleLoadingFalse();
     }
@@ -995,7 +1019,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       <div id="info-box" hidden={true}>
         <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
         <div>
-          <button id="revert-button" className="hollow-button" type="button" hidden={true} onClick={() => revertGameState()}>Go back</button>
+          <button id="revert-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(prevState)}>Go back</button>
           <button id="ok-button" className="hollow-button" type="button" onClick={() => handlePromptBox()}>OK</button>
         </div>
       </div>
@@ -1012,6 +1036,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         <button onClick={() => window.location.reload()} className="solid-button" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
+        <button id="revert-by-round-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(startOfRoundStates[gameState - 1])}>Go Back</button>
         <div id="hole-card-one" hidden={true}>
           <Card val={cards[2 * (currentPlayer - 1)]}/>  
         </div> 
@@ -1087,7 +1112,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }}).toString()}</h1> */}
       <div >
         <h1 id="best-hand" style={{color: "#f5f8e7", display: "inline"}}>{bestHandText} </h1>
-        <button id="ready-button" hidden={true} className="hollow-button" type="button" onClick={() => showCards()}>Ready</button>
+        <button id="ready-button" hidden={true} className="hollow-button" type="button" onClick={() => showCards()} style={{marginLeft: "1vw"}}>Ready</button>
       </div>
     </LoadingOverlay>
   );

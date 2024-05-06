@@ -1,5 +1,5 @@
 :root {
-  --height: 37vw;
+  --height: 35vw;
   --reporter-width: 20vw;
   --players-font-size: 2vw;
   --links-font-size: 1vw;
@@ -37,6 +37,7 @@ code {
   background-color: transparent;
   padding: 10px;
   border: 3px solid var(--off-white);
+  margin: 0.5vw 0.5vw 0.5vw 0.5vw;
   border-radius:  5px;
 }
 
@@ -319,4 +320,14 @@ h1 {
 .complete-lesson {
   color: darkgreen;
   border-color: darkgreen;
+}
+
+.retrace-button {
+  display: inline-block;
+  height: 2.5vw;
+  width: 2.5vw;
+  border-radius: 100%;
+  margin-left: 3vw;
+  margin-right: 3vw;
+  margin-bottom: 1vw;
 }
