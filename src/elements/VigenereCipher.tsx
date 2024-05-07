@@ -5,14 +5,10 @@ class VigenereCipher {
   // firstNameKey = "JKCNFLMJDSNXLMCXVBMGMJNKM";
 
   encode(data: string, purpose: string) {
-    const usernameKey: string = process.env.REACT_APP_USERNAME_VIGENERE_KEY!;
-    const passwordKey: string = process.env.REACT_APP_PASSWORD_VIGENERE_KEY!;
-    const firstNameKey: string = process.env.REACT_APP_FIRSTNAME_VIGENERE_KEY!; 
-    const supabaseURL: string = process.env.REACT_APP_SUPABASE_URL!
-    const supabaseKey: string = process.env.REACT_APP_SUPABASE_KEY!;
+    const usernameKey: string = process.env.USERNAME_VIGENERE_KEY!;
+    const passwordKey: string = process.env.PASSWORD_VIGENERE_KEY!;
+    const firstNameKey: string = process.env.FIRSTNAME_VIGENERE_KEY!; 
 
-    console.log(supabaseURL);
-    console.log(supabaseKey);
     console.log(usernameKey);
     console.log(passwordKey);
     console.log(firstNameKey);
