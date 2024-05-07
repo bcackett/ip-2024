@@ -5,9 +5,9 @@ class VigenereCipher {
   // firstNameKey = "JKCNFLMJDSNXLMCXVBMGMJNKM";
 
   encode(data: string, purpose: string) {
-    const usernameKey: string = process.env.USERNAME_VIGENERE_KEY!;
-    const passwordKey: string = process.env.PASSWORD_VIGENERE_KEY!;
-    const firstNameKey: string = process.env.FIRSTNAME_VIGENERE_KEY!; 
+    const usernameKey: string = process.env.REACT_APP_USERNAME_VIGENERE_KEY!;
+    const passwordKey: string = process.env.REACT_APP_PASSWORD_VIGENERE_KEY!;
+    const firstNameKey: string = process.env.REACT_APP_FIRSTNAME_VIGENERE_KEY!; 
 
     console.log(usernameKey);
     console.log(passwordKey);
