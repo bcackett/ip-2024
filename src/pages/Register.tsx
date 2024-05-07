@@ -30,15 +30,10 @@ function Register() {
       } else {
         let newUserID = 0;
         const e1 = await supabase.from("logins").select("userID").order("userID", {ascending: false}).limit(1).single();
-        if (e1.error) {
-          throw e1.error;
-        } else {
-          if (e1.data.userID) {
-            newUserID = e1.data.userID + 1;
-          } else {
-            newUserID = 1;
-          }
-          const e2 = await supabase.from("logins").insert({userID: newUserID, username: cipher.encode(username, "username"), password: cipher.encode(password, "password")});
+        if (!e1.error) {
+          newUserID = e1.data.userID + 1;
+        }
+        const e2 = await supabase.from("logins").insert({userID: newUserID, username: cipher.encode(username, "username"), password: cipher.encode(password, "password")});
           if (e2.error) {
             throw e2.error;
           } else {
@@ -59,7 +54,6 @@ function Register() {
               goToHome();
             }
           }
-        }
       }
     }
   }
