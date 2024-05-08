@@ -25,7 +25,6 @@ function Register() {
       const {data, error} = await supabase.from("logins").select("username").eq("username", cipher.encode(username, "username"));
       if (error) throw error;
       if (data.length !== 0) {
-        console.log(data.toString);
         alert("This username already exists. Please try again.");
       } else {
         let newUserID = 0;

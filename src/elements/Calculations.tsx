@@ -290,6 +290,7 @@ class Calculations {
   }
 
   decisionCalc(playerCards: number[], communalCards: number[]) {
+    console.log("Known Cards on Decision: " + playerCards.concat(communalCards).toString())
     let decisionVal = 0;
     if (communalCards.length === 0) {
       decisionVal = this.PreFlopBet(playerCards);
@@ -299,7 +300,7 @@ class Calculations {
     //   decisionVal = this.ehs(playerCards, communalCards);
     } else if (sessionStorage.getItem("fasterCalcs") === "false") {
       decisionVal = this.ehs(playerCards, communalCards);
-      console.log(decisionVal);
+      console.log("Decision value: " + decisionVal.toString());
     } else {
       decisionVal = this.ehsRandomSample(playerCards, communalCards);
       console.log(decisionVal.toString() + "but this was done faster.");

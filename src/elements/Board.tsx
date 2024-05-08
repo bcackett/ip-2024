@@ -10,6 +10,7 @@ import TeachingText from "./TeachingText";
 import StateEncoder from "./StateEncoder";
 import { findSourceMap } from "module";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { exec } from "child_process";
 
 type roomSize = {
   totalPlayers: number;
@@ -83,14 +84,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("river-card")!.hidden = true;
     }
   }, [gameState]);
-  const resetBets = useCallback(() => {console.log("MADE IT TO THE USEEFFECT!"); setPlayerBets(new Array(totalPlayers).fill(0))}, []); 
+  const resetBets = useCallback(() => {setPlayerBets(new Array(totalPlayers).fill(0))}, []); 
   const [, forceUpdate] = useReducer(x => x + 1, 0);
 
   // const [blindStage, setBlindStage] = useState(true);
 
   async function getPastPlayerPerformance() {
     if (sessionStorage.getItem("userID")) {
-      const {data, error} = await supabase.from("results").select("result").eq("userID", Number(sessionStorage.getItem("userID"))); //TODO: CHANGE THIS SO IT SELECTS THE USERID OF THE CURRENTLY LOGGED IN USER
+      const {data, error} = await supabase.from("results").select("result").eq("userID", Number(sessionStorage.getItem("userID")));
       if (error) throw error;
       if (data.length !== 0) {
         setPastPlayerPerformance(data.map(x => x.result).reduce((x,y) => x + y));
@@ -104,8 +105,20 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   
   getPastPlayerPerformance();
 
+  
+  function runLLM() {
+    exec("python3 messageGen.py", (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+      } else if (stderr) {
+        console.log(`stderr: ${stderr}`)
+      } else {
+        console.log(stdout);
+      }
+    })
+  }
+
   function HoleDeal(visibleCards: number[], playerNum: number) {
-    console.log(cards.toString());
     document.getElementById("hole-card-one")!.hidden = false;
     document.getElementById("hole-card-two")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
@@ -208,16 +221,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
-    // if (newPlayerNum > totalPlayers - computerPlayers) {
-    //   console.log("MADE IT HERE");
-    //   resetBets += 1;
-    // } else {
-    //   setPlayerBets(new Array(totalPlayers).fill(0));
-    // }
-    // setPlayerBets(new Array(totalPlayers).fill(0));
-    // resetBets += 1;
     resetBets();
-    // forceUpdate();
     console.log("Player Bets on New Card:" + playerBets);
     let knownCards: number[] = [];
     if (nestedCurrentPlayer) {
@@ -480,6 +484,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
                 newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
               }
             }
+            runLLM();
             setPlayerPrompts(newPlayerPrompts);
             document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
             document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
@@ -575,6 +580,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
             newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
           }
         }
+        runLLM();
         setPlayerPrompts(newPlayerPrompts);
         document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
         document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
@@ -656,6 +662,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
         }
       }
+      runLLM();
       setPlayerPrompts(newPlayerPrompts);
       document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
       document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
