@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { supabase } from "../common/supabase";
 import { useNavigate } from "react-router-dom";
+import VigenereCipher from "../elements/VigenereCipher";
 
 function Settings() {
 
@@ -12,6 +14,9 @@ function Settings() {
   const goToHome = () => {
     nav("/");
   }
+
+  const [firstName, setFirstName] = useState(sessionStorage.getItem("name") || "");
+  const cipher = new VigenereCipher;
 
   function handleSettingButton(settingName: string, buttonID: string) {
     if (sessionStorage.getItem(settingName) === "true") {
@@ -41,7 +46,8 @@ function Settings() {
   }
 
   async function saveSettings() {
-    let e = await supabase.from("logins").update({faster_calculations: (sessionStorage.getItem("fasterCalcs") === "true"), lesson_text: (sessionStorage.getItem("lessonText") === "true"), move_retracing: (sessionStorage.getItem("moveRetracing") === "true")}).eq("userID", Number(sessionStorage.getItem("userID")!));
+    sessionStorage.setItem("name", firstName);
+    let e = await supabase.from("logins").update({faster_calculations: (sessionStorage.getItem("fasterCalcs") === "true"), lesson_text: (sessionStorage.getItem("lessonText") === "true"), move_retracing: (sessionStorage.getItem("moveRetracing") === "true"), firstName: cipher.encode(firstName, "name")}).eq("userID", Number(sessionStorage.getItem("userID")!));
     if (e.error) {
       throw e.error;
     } else {
@@ -69,6 +75,10 @@ function Settings() {
           <button style={{display:"inline-block"}} className={getInitialButtonState("moveRetracing")} id="move-retrace-button" onClick={() => handleSettingButton("moveRetracing", "move-retrace-button")}>
             {getButtonText("moveRetracing")}
           </button>
+        </div>
+        <div>
+          <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Change Preferred Name: </h1>
+          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
         </div>
         <button style={{width:"10vw"}} className="solid-button" onClick={() => saveSettings()}>Save Settings</button>
       </>

@@ -29,7 +29,7 @@ function Login() {
         sessionStorage.setItem("lessonText", data.map(x => x.lesson_text).toString()); 
         sessionStorage.setItem("moveRetracing", data.map(x => x.move_retracing).toString()); 
         if (data.map(x => x.firstName) !== null) {
-          sessionStorage.setItem("name", data.map(x => x.firstName).toString()); 
+          sessionStorage.setItem("name", cipher.decode(data.map(x => x.firstName).toString(), "name")); 
         }
         goToHome();
       } else {
