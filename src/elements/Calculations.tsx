@@ -143,26 +143,33 @@ class Calculations {
 
   PreFlopBet(playerCards: number[]) {
     console.log("preflop");
-    let cardValues = playerCards.map(c => {if (c % 15 === 1) {return 14} else {return c % 15}}).sort();
+    let cardValues = playerCards.map(c => {if (c % 15 === 1) {return 14} else {return c % 15}}).sort((a, b) => b - a);
     let cardSuits = playerCards.map(c => c / 15);
-    if ((cardValues[0] >= 10 && cardValues[1] >= 10)
-      || (cardValues[0] >= 10 && cardValues[1] >= 8 && cardSuits[0] === cardSuits[1])
-      || (cardValues[0] >= 8 && cardValues[1] >= 10 && cardSuits[0] === cardSuits[1])) {
-        return 0;
-    } else if (cardValues[0] === 14 || cardValues[1] === 14) {
-      return 0;
-    } else if (cardValues[0] === cardValues[1]) {
-      return 0.5;
-    } else if (cardValues.includes(13) && cardSuits[0] === cardSuits[1]) {
-      return 0.5;
-    } else if (cardSuits[0] === cardSuits[1] && cardValues[0] === cardValues[1] - 1 && cardValues[0] >= 4) {
-      return 0.5;
-    } else if (cardSuits[0] === cardSuits[1] && cardValues[0] === cardValues[1] - 2 && cardValues[0] >= 5) {
-      return 0.5;
-    } else if (cardValues.includes(9) && (cardValues[0] >= 12 || cardValues[1] >= 12)) {
-      return 0.5;
-    } else {
+    
+    if (cardValues[0] >= 10 && (cardValues[1] >= 10 || (cardValues[1] >= 8 && cardSuits[0] === cardSuits[1]))) {
       return 1;
+    } else if (cardValues[0] === cardValues[1]) {
+      return 1;
+    } else if (cardValues[0] === 14 && (cardSuits[0] === cardSuits[1] || cardValues[1] >= 7)) {
+      return 1;
+    } else if (cardSuits[0] === cardSuits[1] && cardValues[0] + cardValues[1] >= 19) {
+      return 1;
+    } else if (cardSuits[0] !== cardSuits[1]) {
+      if (cardValues[0] <= 11 && cardValues[0] - cardValues[1] >= 4) {
+        return 0;
+      } else if ((cardValues[0] === 13 || cardValues[0] === 12) && cardValues[0] + cardValues[1] <= 19) {
+        return 0;
+      } else if (cardValues[0] <= 6 && cardValues[1] <= 3) {
+        return 0;
+      } else if (cardValues[0] === 7 && cardValues[1] === 4) {
+        return 0;
+      } else {
+        console.log("0.5");
+        return 0.5;
+      }
+    } else {
+      console.log("0.5");
+      return 0.5;
     }
   }
 
@@ -185,10 +192,11 @@ class Calculations {
       console.log("ihr");
       for (let j = 0; j < possibleOpponentCards.length; j++) {
         if (i !== j) {
-          ihrArray[this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]])] += 1;
+          ihrArray[this.oneHandIHR(playerBestHand, [possibleOpponentCards[i], possibleOpponentCards[j]].concat(communalCards)) * 2] += 1;
         }
       }
     }
+    console.log(ihrArray.toString())
     return (ihrArray[0] + ihrArray[1]/2) / (ihrArray[0] + ihrArray[1] + ihrArray[2]);
   }
 
