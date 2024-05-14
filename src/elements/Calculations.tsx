@@ -1,4 +1,5 @@
 import Deck from "./Deck"
+import { supabase } from "../common/supabase";
 
 class Calculations {
   deck = new Deck;
@@ -307,46 +308,48 @@ class Calculations {
     return decisionVal;
   }
 
-  calcPlayground(playerCards: number[], communalCards: number[]) {
-    const distinctCombinations = [1277, 2860, 858, 858, 10, 1277, 156, 156, 9, 1];
-    const totalCombinations = [1302540, 1098240, 123552, 54912, 10200, 5108, 3744, 624, 36, 4];
-    var winDrawLoss = [0, 0, 0];
-    var ehsWinDrawLoss = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-
-    let playerBestHand = this.FindBestHand(playerCards.concat(communalCards));
-    for (let i = 0; i < distinctCombinations.length; i++) {
-      let ihrIndex: number;
-      if (i < playerBestHand[0]) {
-        ihrIndex = 0;
-      } else if (i === playerBestHand[0]) {
-        ihrIndex = 1;
-      } else {
-        ihrIndex = 2;  
+  async calcPlayground() {
+    let currentDivision = 300;
+    const e1 = await supabase.from("results").select("result");
+    if (e1.error) throw e1.error;
+    if (e1.data.length !== 0) {
+      let dataMapped = e1.data.map(x => x.result);
+      let dataSize = dataMapped.length;
+      let dataSum = dataMapped.reduce((x,y) => x + y);
+      let averageWinnings = dataSum / dataSize;
+      let stdDev = 0;
+      for (let i = 0; i < dataSize; i++) {
+        stdDev += Math.pow(dataMapped[i] - averageWinnings, 2);
       }
-      winDrawLoss[ihrIndex] += totalCombinations[i];
-      
-
-      if (communalCards.length < 5) {
-        let possibleRiverCards = this.deck.cards.filter(c => !(playerCards.includes(c) || communalCards.includes(c)));
-        for (let c1 = 0; c1 < possibleRiverCards.length; c1++) {
-          if (communalCards.length < 4) {
-            let possibleTurnCards = possibleRiverCards.filter(c => c !== possibleRiverCards[c1]);
-            for (let c2 = 0; c2 < possibleTurnCards.length; c2++) {
-              playerBestHand = this.FindBestHand(playerCards.concat(communalCards, possibleRiverCards[c1], possibleTurnCards[c2]));
-              let ehsIndex: number;
-              if (i < playerBestHand[0]) {
-                ehsIndex = 0;
-              } else if (i === playerBestHand[0]) {
-                ehsIndex = 1;
-              } else {
-                ehsIndex = 2;  
-              }
-              ehsWinDrawLoss[ihrIndex][ehsIndex] += totalCombinations[i]
-            }
+      stdDev = Math.sqrt(stdDev / dataSize);
+      let divisionSize = 0.06 * stdDev;
+      const e2 = await supabase.from("results").select("result").eq("userID", Number(sessionStorage.getItem("userID")));
+      if (e2.error) throw e2.error;
+      if (e2.data.length !== 0) {
+        let playerDataMapped = e2.data.map(x => x.result);
+        let playerDataSize = playerDataMapped.length;
+        let playerDataSum = playerDataMapped.reduce((x,y) => x + y);
+        let playerAverageWinnings = playerDataSum / playerDataSize;
+        let i = 0;
+        if (playerAverageWinnings < averageWinnings) {
+          while (playerAverageWinnings < averageWinnings - i) {
+            currentDivision -= 1;
+            i += divisionSize;
           }
+        } else if(playerAverageWinnings > averageWinnings) {
+          while (playerAverageWinnings > averageWinnings + i) {
+            currentDivision += 1;
+            i += divisionSize;
+          }
+        }
+        if (playerDataMapped.slice(-10).filter(x => x < 0).length > 7) {
+          currentDivision -= 60;
+        } else if (playerDataMapped.slice(-10).filter(x => x > 0).length > 7) {
+          currentDivision += 60;
         }
       }
     }
+    return 1 / 1 + Math.exp(-((currentDivision/60) - 5));
   }  
 }
 
