@@ -40,7 +40,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [potStartOfRound, setPotStartOfRound] = useState(0);
   const [bestHands, setBestHands] = useState(new Array(totalPlayers).fill(0));
   const [humanPredictedResults, setHumanPredictedResults] = useState(new Array(totalPlayers - computerPlayers).fill(0));
-  const [pastPlayerPerformance, setPastPlayerPerformance] = useState(0);
   const [currentPlayerPrediction, setCurrentPlayerPrediction] = useState(0);
   const [gameState, setGameState] = useState(-1); //0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner, -1 = error
   const [loadingActive, setLoadingActive] = useState(false);
@@ -88,22 +87,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   // const [blindStage, setBlindStage] = useState(true);
 
-  async function getPastPlayerPerformance() {
-    if (sessionStorage.getItem("userID")) {
-      const {data, error} = await supabase.from("results").select("result").eq("userID", Number(sessionStorage.getItem("userID"))); //TODO: CHANGE THIS SO IT SELECTS THE USERID OF THE CURRENTLY LOGGED IN USER
-      if (error) throw error;
-      if (data.length !== 0) {
-        setPastPlayerPerformance(data.map(x => x.result).reduce((x,y) => x + y));
-      }
-    }
-  }
-
   async function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
   
-  getPastPlayerPerformance();
-
   function HoleDeal(visibleCards: number[], playerNum: number) {
     console.log(cards.toString());
     document.getElementById("hole-card-one")!.hidden = false;
@@ -204,7 +191,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setCurrentPlayer(newStartingPlayer);
     setPotStartOfRound(0);
     setPreAction(true);
-    getPastPlayerPerformance();
   }
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
@@ -359,7 +345,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function humanSimCalc(playerNum: number, allCards: number[], newCurrentBet: number) {
-    console.log("Human player past performance: " + pastPlayerPerformance);
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
@@ -416,6 +401,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   async function decisionToMessage(playerDecision: number) {
     let currentPlayerAbility = await calcs.calcPlayground(); //TODO: Create metric for measuring player ability compared to previous games and other users.
+    console.log("Current Player Ability: " + currentPlayerAbility);
     let strongestPlayerThreshold = 0;
     let weakestPlayerThreshold = 0;
     let output = [0, ""];
@@ -444,7 +430,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
             output = [-1, "This situation looks pretty rough. In this case, it might be a better idea to fold to avoid needing to add any more money to the pot."];
           }
         } else if (gameState < 3) {
-          if (currentPlayerAbility > 0.8 + (gameState * 0.08)) {
+          if (currentPlayerAbility > 0.8 + (gameState * 0.05)) {
             output = [1,"It might be risky, but it's possible the other players don't have great cards here. You could raise here as a bluff to intimidate them, even though your hand isn't great."];
           } else {
             output = [-1, "This situation looks pretty rough. In this case, it might be a better idea to fold to avoid needing to add any more money to the pot."];
@@ -459,7 +445,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       } else if (currentPlayerPrediction < 0.7) {
         if (currentBet > 3 * BIGBLIND) {
           if (currentPlayerAbility > 0.9 + (gameState * 0.025)) {
-            output = [1, "This could be very risky, but you could raise the bet here. Matching the bet is also "];
+            output = [1, "This could be very risky, but you could raise the bet here. Matching the bet is also a good call, but this is a better opportunity than most to apply some pressure to your opponents."];
           } else if (currentPlayerAbility < 0.3 - (gameState * 0.05)){
             output = [-1, "This situation looks pretty rough. In this case, it might be a better idea to fold to avoid needing to add any more money to the pot."];
           } else {
@@ -484,10 +470,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         }
       }
     }
+    console.log("Output pre-transform: " + output);
     if (output[0] === playerDecision) {
-      return "Good decision!";
+      return "Good decision!\n\n";
     } else {
-      return output[1];
+      return output[1] + "\n\n";
     }
   }
 
@@ -901,7 +888,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   function reversionPrompt() {
     let currentPlayerText = playerPrompts[currentPlayer - 1].split("\n\n");
     console.log("Prompt Array: " + currentPlayerText);
-    document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 1];
+    document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 2];
     if (sessionStorage.getItem("moveRetracing") === "true") {
       document.getElementById("revert-button")!.hidden = false;
     }

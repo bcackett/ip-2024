@@ -350,7 +350,9 @@ class Calculations {
         }
       }
     }
-    return 1 / 1 + Math.exp(-((currentDivision/60) - 5));
+    console.log("Current division after conversion: " + (currentDivision/60 - 5).toString());
+    console.log( 1 / (1 + Math.exp(-((currentDivision/60) - 5))));
+    return 1 / (1 + Math.exp(-((currentDivision/60) - 5)));
   }  
 }
 
