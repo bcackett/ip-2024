@@ -149,9 +149,9 @@ class Calculations {
     if ((cardValues[0] >= 10 && cardValues[1] >= 10)
       || (cardValues[0] >= 10 && cardValues[1] >= 8 && cardSuits[0] === cardSuits[1])
       || (cardValues[0] >= 8 && cardValues[1] >= 10 && cardSuits[0] === cardSuits[1])) {
-        return 0;
+        return 1;
     } else if (cardValues[0] === 14 || cardValues[1] === 14) {
-      return 0;
+      return 1;
     } else if (cardValues[0] === cardValues[1]) {
       return 0.5;
     } else if (cardValues.includes(13) && cardSuits[0] === cardSuits[1]) {
@@ -163,7 +163,7 @@ class Calculations {
     } else if (cardValues.includes(9) && (cardValues[0] >= 12 || cardValues[1] >= 12)) {
       return 0.5;
     } else {
-      return 1;
+      return 0;
     }
   }
 
@@ -305,6 +305,7 @@ class Calculations {
       decisionVal = this.ehsRandomSample(playerCards, communalCards);
       console.log(decisionVal.toString() + "but this was done faster.");
     }
+    console.log("Decision Value: " + decisionVal.toString());
     return decisionVal;
   }
 
