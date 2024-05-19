@@ -405,7 +405,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function computerCalc(playerProfile: number[], allCards: number[], playerNum: number, newCurrentBet: number) {
-    console.log("GameState " + gameState);
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
@@ -416,7 +415,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let randomDecisionValue = Math.random() * 100;
     if (randomDecisionValue < playerProfile[2]) {
       randomDecisionValue = Math.floor(Math.random() * 100);
-      if (randomDecisionValue < (10 - playerProfile[0]/10) && gameState >= 1) {
+      if (randomDecisionValue < (10 - playerProfile[0]/10) && gameState >= 2) {
         Fold(playerNum);
       } else if (randomDecisionValue < (50 - playerProfile[0]/10) || playerBanks[playerNum - 1] === 0) {
         Bet(playerNum, newCurrentBet);
@@ -429,14 +428,17 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       Bet(playerNum, newCurrentBet);
     } else {
       let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
+      console.log("EHS: " + effectiveHandScore);
       // let nashEquilibrium = Calculations.nashEq(cards);
-      if (effectiveHandScore < (0.1 - playerProfile[0] / 1000)) {
-        if (randomDecisionValue >= playerProfile[1] && gameState >= 1) {
+      if (effectiveHandScore < (0.2 - (playerProfile[0] / 1000))) {
+        if (randomDecisionValue >= playerProfile[1] && gameState >= 2) {
           Fold(playerNum);
+        } else if (randomDecisionValue >= playerProfile[1]) {
+          Bet(playerNum);
         } else {
           Raise(Math.min(newCurrentBet + 30 + Math.floor(playerProfile[0] / 5), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         }
-      } else if (effectiveHandScore > (0.75 - playerProfile[0] / 1000)) {
+      } else if (effectiveHandScore > (0.75 - (playerProfile[0] / 200))) {
         Raise(Math.min(newCurrentBet + 10 + Math.floor(playerProfile[0] / 5), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
       } else {
         if (randomDecisionValue >= playerProfile[1]) {
@@ -886,18 +888,18 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("flop-card-one")!.hidden = false;
       document.getElementById("flop-card-two")!.hidden = false;
       document.getElementById("flop-card-three")!.hidden = false;
-      knownCards.concat(cards.slice(-5, -2));
+      knownCards = knownCards.concat(cards.slice(-5, -2));
       if (lessonNum && sessionStorage.getItem("moveRetracing") === "true") {
         document.getElementById("revert-by-round-button")!.hidden = false;
       }
     }
     if (gameState > 1) {
       document.getElementById("turn-card")!.hidden = false;
-      knownCards.concat(cards[-1]);
+      knownCards = knownCards.concat(cards.slice(-5, -2));
     }
     if (gameState > 2) {
       document.getElementById("river-card")!.hidden = false;
-      knownCards.concat(cards[cards.length]);
+      knownCards = knownCards.concat(cards.slice(-5, -2));
     }
     document.getElementById("ready-button")!.hidden = true;
     setBestHandText(HANDS[bestHands[currentPlayer-1][0]]);
@@ -915,7 +917,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         setStartOfRoundStates(newStartStates);
       }
     }
-    
     
     if (currentPlayer > totalPlayers - computerPlayers) {
       computerCalc(playerProfiles![currentPlayer - 2], knownCards, currentPlayer, currentBet);
@@ -935,9 +936,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   async function handlePromptBox() {
     document.getElementById("info-box")!.hidden = true;
     await sleep(1);
-    document.getElementById("bet-button")!.hidden = false;
-    document.getElementById("raise-button")!.hidden = false;
-    document.getElementById("fold-button")!.hidden = false;
     // let newPrevStates = prevStates;
     // newPrevStates[gameState] = stateEncoder.encode(cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer)
     // setPrevStates(newPrevStates);
