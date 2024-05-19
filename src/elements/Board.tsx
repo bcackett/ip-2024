@@ -10,6 +10,7 @@ import TeachingText from "./TeachingText";
 import StateEncoder from "./StateEncoder";
 import { findSourceMap } from "module";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import LLMRunner from "./LLMRunner";
 
 type roomSize = {
   totalPlayers: number;
@@ -480,6 +481,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
                 newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
               }
             }
+            LLMRunner();
             setPlayerPrompts(newPlayerPrompts);
             document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
             document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
@@ -575,6 +577,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
             newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
           }
         }
+        LLMRunner();
         setPlayerPrompts(newPlayerPrompts);
         document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
         document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
@@ -656,6 +659,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           newPlayerPrompts[currentPlayerNum - 1] += "Good decision!\n\n";
         }
       }
+      LLMRunner();
       setPlayerPrompts(newPlayerPrompts);
       document.getElementById("warning-text")!.innerText = newPlayerPrompts[currentPlayerNum - 1];
       document.getElementById("warning-reporter")!.scrollTop = document.getElementById("warning-reporter")!.scrollHeight;
