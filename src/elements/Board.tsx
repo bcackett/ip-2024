@@ -811,7 +811,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       newBanks[playerNum - 1] += newPot/playerNums.length;
     });
 
-    if (computerPlayers === 0 && sessionStorage.getItem("userID")) {
+    if (sessionStorage.getItem("userID") && (computerPlayers === 0 || (lessonNum && lessonNum >= 5 && sessionStorage.getItem("moveRetracing") === "false"))) {
       let e1 = await supabase.from("results").select("gameID").order("gameID", {ascending: false}).limit(1).single();
       if (e1.error) {
         throw e1.error;
