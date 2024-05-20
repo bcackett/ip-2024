@@ -817,13 +817,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         throw e1.error;
       } else {
         let newGameID = 0;
-        if (e1.data.map(x => x.gameID)[0]) { 
+        if (e1.data.map(x => x.gameID)[0] !== undefined) { 
           newGameID = e1.data.map(x => x.gameID)[0] + 1;
           console.log("Made it: " + e1.data.map(x => x.gameID)[0]);
         }
         let winnings = newBanks[0] - p1InitialBank;
         let e2 = await supabase.from("results").insert({userID: Number(sessionStorage.getItem("userID")), gameID: newGameID, result: winnings});
         if (e2.error) {throw e2.error};
+        console.log("DONE");
       }
     }
 
