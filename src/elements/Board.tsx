@@ -812,12 +812,17 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     });
 
     if (sessionStorage.getItem("userID") && (computerPlayers === 0 || (lessonNum && lessonNum >= 5 && sessionStorage.getItem("moveRetracing") === "false"))) {
-      let e1 = await supabase.from("results").select("gameID").order("gameID", {ascending: false}).limit(1).single();
+      let e1 = await supabase.from("results").select("gameID").order("gameID", {ascending: false}).limit(1);
       if (e1.error) {
         throw e1.error;
       } else {
+        let newGameID = 0;
+        if (e1.data.map(x => x.gameID)[0]) { 
+          newGameID = e1.data.map(x => x.gameID)[0] + 1;
+          console.log("Made it: " + e1.data.map(x => x.gameID)[0]);
+        }
         let winnings = newBanks[0] - p1InitialBank;
-        let e2 = await supabase.from("results").insert({userID: Number(sessionStorage.getItem("userID")), gameID:e1.data.gameID + 1, result: winnings});
+        let e2 = await supabase.from("results").insert({userID: Number(sessionStorage.getItem("userID")), gameID: newGameID, result: winnings});
         if (e2.error) {throw e2.error};
       }
     }
