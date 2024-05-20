@@ -451,7 +451,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function decisionToMessage(playerDecision: number) {
-    let currentPlayerAbility = await calcs.calcPlayground(); //TODO: Create metric for measuring player ability compared to previous games and other users.
+    let currentPlayerAbility = await calcs.moveSuggestionCalc(); //TODO: Create metric for measuring player ability compared to previous games and other users.
     console.log("Current Player Ability: " + currentPlayerAbility);
     let strongestPlayerThreshold = 0;
     let weakestPlayerThreshold = 0;

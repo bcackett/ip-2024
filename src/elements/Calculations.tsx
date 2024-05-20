@@ -309,7 +309,7 @@ class Calculations {
     return decisionVal;
   }
 
-  async calcPlayground() {
+  async moveSuggestionCalc() {
     let currentDivision = 300;
     const e1 = await supabase.from("results").select("result");
     if (e1.error) throw e1.error;
