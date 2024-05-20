@@ -63,22 +63,34 @@ function Settings() {
           <button style={{display:"inline-block"}} className={getInitialButtonState("fasterCalcs")} id="faster-calcs-button" onClick={() => handleSettingButton("fasterCalcs", "faster-calcs-button")}>
             {getButtonText("fasterCalcs")}
           </button>
+          <div className="tooltip">{"\u24d8"}
+            <span className="tooltip-text">Enabling this setting speeds up the calculations in the game substially, but sacrifices accuracy of suggested decisions.</span>       
+          </div>
         </div>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Lesson Text: </h1>
           <button style={{display:"inline-block"}} className={getInitialButtonState("lessonText")} id="lesson-text-button" onClick={() => handleSettingButton("lessonText", "lesson-text-button")}>
             {getButtonText("lessonText")}
           </button>
+          <div className="tooltip">{"\u24d8"}
+            <span className="tooltip-text">With this setting disabled, the text at the start of each round in a lesson (if any) will be skipped. This does not skip the text with suggested moves at the end of each decision made.</span>       
+          </div>
         </div>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Move Retracing: </h1>
           <button style={{display:"inline-block"}} className={getInitialButtonState("moveRetracing")} id="move-retrace-button" onClick={() => handleSettingButton("moveRetracing", "move-retrace-button")}>
             {getButtonText("moveRetracing")}
           </button>
+          <div className="tooltip">{"\u24d8"}
+            <span className="tooltip-text">Enabling this allows you to return to previous decisions and change your mind against computer opponents. However, training lessons will not contribute to your statistics when this is enabled.</span>       
+          </div>
         </div>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Change Preferred Name: </h1>
           <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
+          <div className="tooltip">{"\u24d8"}
+            <span className="tooltip-text">This is a cosmetic change that will display your name in any games you play. Make GetPokerEd a bit more personal and put yourself in the game!</span>       
+          </div>
         </div>
         <button style={{width:"10vw"}} className="solid-button" onClick={() => saveSettings()}>Save Settings</button>
       </>

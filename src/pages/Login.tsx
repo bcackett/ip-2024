@@ -7,6 +7,7 @@ function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [submitButtonText, setSubmitButtonText] = useState("Log In")
   const nav = useNavigate();
   const cipher = new VigenereCipher
   sessionStorage.clear();
@@ -16,10 +17,12 @@ function Login() {
   }
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    await setSubmitButtonText("...");
     event.preventDefault();
     if (username === "" || password === "") {
       alert("Please enter both a username and a password");
     } else {
+      document.getElementById("submission-button")!.innerText = "...";
       const {data, error} = await supabase.from("logins").select("userID, firstName, faster_calculations, lesson_text, move_retracing").eq("username", cipher.encode(username, "username")).eq("password", cipher.encode(password, "password"));
       if (error) throw error;
       if (data.length !== 0) {
@@ -34,9 +37,11 @@ function Login() {
         goToHome();
       } else {
         alert("Invalid username/password combination. Remember: passwords are case-sensitive!");
+        await setSubmitButtonText("Log In");
       }
     }
   }
+
 
   return (
     <>
@@ -50,7 +55,7 @@ function Login() {
           <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div> 
-        <input type="submit" value="Log In" className="hollow-button" style={{marginTop: "10px"}}/>
+        <input type="submit" value={submitButtonText} className="hollow-button" id="submission-button" style={{marginTop: "10px"}}/>
       </form>
       <div className="dividing-line" />
       <h1 style={{color:"rgb(248, 245, 231)", margin:"1vw"}}>Don't have an account yet?</h1>

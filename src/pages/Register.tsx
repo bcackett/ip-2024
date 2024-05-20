@@ -8,6 +8,7 @@ function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [submitButtonText, setSubmitButtonText] = useState("Register")
   const cipher = new VigenereCipher;
   const nav = useNavigate();
 
@@ -18,15 +19,18 @@ function Register() {
   sessionStorage.clear();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    await setSubmitButtonText("...");
     event.preventDefault();
     if (username === "" || password === "") {
       alert("Please enter both a username and a password");
+      await setSubmitButtonText("Register");
     } else {
       const {data, error} = await supabase.from("logins").select("username").eq("username", cipher.encode(username, "username"));
       if (error) throw error;
       if (data.length !== 0) {
         console.log(data.toString);
         alert("This username already exists. Please try again.");
+        await setSubmitButtonText("Register");
       } else {
         let newUserID = 0;
         const e1 = await supabase.from("logins").select("userID").order("userID", {ascending: false}).limit(1).single();
@@ -74,7 +78,7 @@ function Register() {
           <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div> 
-        <input type="submit" value="Register" className="hollow-button" style={{marginTop: "10px"}}/>
+        <input type="submit" value={submitButtonText} className="hollow-button" style={{marginTop: "10px"}}/>
       </form>
       <div className="dividing-line" />
       <h1 style={{color:"rgb(248, 245, 231)", margin:"1vw"}}>Already have an account?</h1>
