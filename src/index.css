@@ -331,3 +331,28 @@ h1 {
   margin-right: 3vw;
   margin-bottom: 1vw;
 }
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  color: rgb(248, 245, 231);
+  margin-left: 1vw;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  top: -250%;
+  left: 105%;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}
