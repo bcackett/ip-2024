@@ -389,7 +389,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         // }
       }
     }
-    document.getElementById("warning-text")!.hidden = true;
+    if (totalPlayers - computerPlayers > 1) {
+      document.getElementById("warning-text")!.hidden = true;
+    }
     handleLoadingFalse();
   }
 

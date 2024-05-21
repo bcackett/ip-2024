@@ -41,9 +41,9 @@ class StateEncoder {
         result += ",";
       }
     }
-    result += "\n" + playText.replaceAll("\n\n", "|");
+    result += "\n" + playText.replaceAll("\n\n", "|").replaceAll(",", "/");
     for (i = 0; i < warningText.length; i++) {
-      result += "\n" + warningText[i].replaceAll("\n\n", "|");
+      result += "\n" + warningText[i].replaceAll("\n\n", "|").replaceAll(",", "/");
     }
     result += "\n" + gameState.toString() + "," + startingPlayer.toString() + "," + currentPlayer.toString();
     return result;
@@ -65,9 +65,9 @@ class StateEncoder {
       } else if (i === 3) {
         this.playerBets = line.map(x => Number(x));
       } else if (i === 4) {
-        this.playText = line[0].replaceAll("|", "\n\n");
+        this.playText = line[0].replaceAll("|", "\n\n").replaceAll("/", ",");
       } else if ( i < lines.length - 1) {
-        this.warningText[warningTextIndex] = line[0].replaceAll("|", "\n\n");
+        this.warningText[warningTextIndex] = line[0].replaceAll("|", "\n\n").replaceAll("/", ",");
         warningTextIndex++;
       }
       else {
@@ -76,6 +76,7 @@ class StateEncoder {
         this.startingPlayer = endData[1];
         this.currentPlayer = endData[2];
       }
+      console.log(this.warningText);
     }
   }
 
