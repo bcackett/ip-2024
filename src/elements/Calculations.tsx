@@ -351,10 +351,14 @@ class Calculations {
             i += divisionSize;
           }
         }
-        if (playerDataMapped.slice(-10).filter(x => x < 0).length > 7) {
+        if (playerDataMapped.slice(-10).filter(x => x < 0).length > 7 && currentDivision >= 60) {
           currentDivision -= 60;
-        } else if (playerDataMapped.slice(-10).filter(x => x > 0).length > 7) {
+        } else if (playerDataMapped.slice(-10).filter(x => x < 0).length > 7) {
+          currentDivision = 0;
+        } else if (playerDataMapped.slice(-10).filter(x => x > 0).length > 7 && currentDivision <= 540) {
           currentDivision += 60;
+        } else if (playerDataMapped.slice(-10).filter(x => x > 0).length > 7) {
+          currentDivision = 600;
         }
       }
     }

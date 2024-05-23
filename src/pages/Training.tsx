@@ -30,6 +30,12 @@ function Training() {
 
   return (
     <>
+      <h1 style={{color: "rgb(248, 245, 231)"}}>Training</h1>
+      <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw", marginBottom: "2vw", marginTop: "1vw"}}>
+        {`These training scenarios will give you a chance to learn and practice your Poker skills in single player against computer opponents.\n
+        Throughout each game, you'll be introduced to concepts that you can test out if you choose to do so.\n
+        After you make a choice, the game will suggest an alternative should one exist, but with Move Retracing enabled you can choose whether you wish to try your own idea or the game's!\n`}
+      </label>
       <h1 style={{color: "rgb(248, 245, 231)"}}>The Basics</h1>
       <div className="lesson-grid">
         <button className="solid-button-no-dims" id="lesson-1" onClick={goToScenario(1)}>Technical Terms</button>
