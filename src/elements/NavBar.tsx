@@ -11,6 +11,10 @@ function NavBar() {
     }
   }
 
+  const openGuide = () => {
+    window.open("/guide", "_blank")!.focus();
+  }
+
   var loggedInText = "Log In/Register"
   return (
     <nav className="nav-bar" style={{marginBottom: "1vw"}}>
@@ -23,6 +27,7 @@ function NavBar() {
       <Link reloadDocument to="/train">
         <button className="links">Practice Lessons</button>
       </Link>
+      <button className="links" onClick={openGuide}>Interactive Guide</button>
       <Link reloadDocument to="/settings">
         <button className="links">Settings</button>
       </Link>

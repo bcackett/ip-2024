@@ -22,6 +22,10 @@ function Welcome() {
     nav("/settings");
   }
 
+  const openGuide = () => {
+    window.open("/guide", "_blank")!.focus();
+  }
+
   function isLoggedIn() {
     if (sessionStorage.getItem("userID")) {
       return true;
@@ -44,6 +48,13 @@ function Welcome() {
       </div>
       <div>
         <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>This website offers 12 lessons with varying difficulty to help understand the basics, and a local multiplayer platform for practicing against your friends.</label>
+      </div>
+      <div className="dividing-line" />
+      <div>
+        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want a guide to this platform?</h1>
+        <button className="hollow-button" type="button" onClick={openGuide}>
+          Interactive Guide
+        </button>
       </div>
       <div className="dividing-line" />
       <div>

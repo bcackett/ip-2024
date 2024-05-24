@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import TrainingScenario from './pages/TrainingScenario';
 import CustomSetup from "./pages/CustomSetup";
 import Settings from './pages/Settings';
+import Guide from './pages/Guide';
 
 function App() {
   const regex = "([0-9]+)";
@@ -25,6 +26,7 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/customgame" element= {<CustomSetup />} />
       <Route path="/settings" element= {<Settings />} />
+      <Route path="/guide" element= {<Guide />} />
       <Route path="/*" element={<NotFound />} />
     </Routes>
   );
