@@ -571,6 +571,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
             await SetWarningText(currentPlayerNum, 1);
           }
           // amount = currentBet + newRaise;
+        } else {
+          handleLoadingFalse();
         }
       }
     } else {
