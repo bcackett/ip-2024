@@ -53,7 +53,7 @@ function Register() {
               if (firstName.length > 0) {
                 const e4 = await supabase.from("logins").update({firstName: cipher.encode(firstName, "name")}).eq("userID", newUserID);
                 if (e4.error) {throw e4.error};
-                sessionStorage.setItem("name", cipher.decode(firstName, "name")); 
+                sessionStorage.setItem("name", firstName); 
               }
               goToHome();
             }
