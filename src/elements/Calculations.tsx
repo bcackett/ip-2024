@@ -27,39 +27,46 @@ class Calculations {
         bestHand = [4].concat(consecutiveCards.slice(consecutiveCards.length - 5, consecutiveCards.length)); //Straight
       } else {
         consecutiveCards = consecutiveCards.slice(1, consecutiveCards.length);
-        consecutiveCards.map(card => {if (card % 15 === 1 ) {card = card + 13}})
-        let valueArray = Array.from(this.CheckMatchingValues(cards));
+        let aceHighCards: number[] = [];
+        consecutiveCards.forEach(card => {
+          if (card % 15 === 1) {
+            aceHighCards = aceHighCards.concat(card + 13);
+          } else {
+            aceHighCards = aceHighCards.concat(card);
+          }
+        });
+        // consecutiveCards.map(card => {if (card % 15 === 1 ) {card = card + 13}});
+        let valueArray = Array.from(this.CheckMatchingValues(aceHighCards));
         if (valueArray.map(p => p[1]).includes(4)) {
           let fourOfAKindValue = valueArray[valueArray.map(p => p[1]).indexOf(4)][0];
-          let fourOfAKind = cards.filter(c => c % 15 === fourOfAKindValue);
-          let highestOtherCard = cards.filter(c => c % 15 != fourOfAKindValue).sort((a, b) => (b % 15) - (a % 15))[0];
+          let fourOfAKind = aceHighCards.filter(c => c % 15 === fourOfAKindValue);
+          let highestOtherCard = aceHighCards.filter(c => c % 15 != fourOfAKindValue).sort((a, b) => (b % 15) - (a % 15))[0];
           bestHand = [7].concat(fourOfAKind, [highestOtherCard]); //Four of a Kind
         } else if (valueArray.map(p => p[1]).includes(3)) {
           let threeOfAKindValues = valueArray.filter(p => p[1] === 3).map(p => p[0]).sort();
-          let threeOfAKind = cards.filter(c => c % 15 === threeOfAKindValues[threeOfAKindValues.length - 1]);
+          let threeOfAKind = aceHighCards.filter(c => c % 15 === threeOfAKindValues[threeOfAKindValues.length - 1]);
           if (valueArray.map(p => p[1]).includes(2)) {
             let pairValues = valueArray.filter(p => p[1] === 2).map(p => p[0]).sort();
-            let pair = cards.filter(c => c % 15 === pairValues[pairValues.length - 1]);
+            let pair = aceHighCards.filter(c => c % 15 === pairValues[pairValues.length - 1]);
             bestHand = [6].concat(threeOfAKind, pair); //Full House
           } else {
-            let highestOtherCards = cards.filter(c => c % 15 != threeOfAKindValues[threeOfAKindValues.length - 1]).sort((a, b) => (b % 15) - (a % 15)).slice(0, 2);
+            let highestOtherCards = aceHighCards.filter(c => c % 15 != threeOfAKindValues[threeOfAKindValues.length - 1]).sort((a, b) => (b % 15) - (a % 15)).slice(0, 2);
             bestHand = [3].concat(threeOfAKind, highestOtherCards); //Three of a Kind
           }
         } else if (valueArray.map(p => p[1]).includes(2)) {
           let pairValues = valueArray.filter(p => p[1] === 2).map(p => p[0]).sort();
-          let pair = cards.filter(c => c % 15 === pairValues[pairValues.length - 1]);
+          let pair = aceHighCards.filter(c => c % 15 === pairValues[pairValues.length - 1]);
           if (pairValues.length > 1) {
             let pairTwo = cards.filter(c => c % 15 === pairValues[pairValues.length - 2]);
-            let otherCards = cards.filter(c => c % 15 != pairValues[pairValues.length - 1] && c % 15 != pairValues[pairValues.length - 2]);
+            let otherCards = aceHighCards.filter(c => c % 15 != pairValues[pairValues.length - 1] && c % 15 != pairValues[pairValues.length - 2]);
             let highestOtherCard = otherCards.sort((a, b) => (b % 15) - (a % 15))[0];
             bestHand = [2].concat(pair, pairTwo, highestOtherCard); //Two Pair
           } else {
-            let highestOtherCards = cards.filter(c => c % 15 != pairValues[pairValues.length - 1]).sort((a, b) => (b % 15) - (a % 15)).slice(0, 3);
+            let highestOtherCards = aceHighCards.filter(c => c % 15 != pairValues[pairValues.length - 1]).sort((a, b) => (b % 15) - (a % 15)).slice(0, 3);
             bestHand = [1].concat(pair, highestOtherCards);
           }
         } else {
-          bestHand = [0].concat(cards.sort((a, b) => (b % 15) - (a % 15)).splice(0, 5).reverse()); //High Card
-  
+          bestHand = [0].concat(aceHighCards.sort((a, b) => (b % 15) - (a % 15)).splice(0, 5).reverse()); //High Card
         }
       }
     }

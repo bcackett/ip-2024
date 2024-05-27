@@ -197,6 +197,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       cardsCopy.push(card);
     });
     let bestHand = calcs.FindBestHand(cardsCopy);
+    console.log("BEST HAND: " + bestHand);
     setBestHandText(HANDS[bestHand[0]]);
     let newBestHands = bestHands;
     newBestHands[playerNum - 1] = bestHand;
@@ -751,6 +752,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function CalculateWinner() {
+    console.log("BEST HANDS AT END OF GAME: " + bestHands);
     let finalBestHands = bestHands.map(function(hand) { return hand.slice(); });
     for (let i = 0; i < bestHands[0].length; i++) {
       finalBestHands.sort((a, b) => (b[i] % 15) - (a[i] % 15));
