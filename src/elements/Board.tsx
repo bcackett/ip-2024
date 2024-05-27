@@ -102,7 +102,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let bestHand = FindBestHand(visibleCards, playerNum);
     setGameState(0);
 
-    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 0) && currentPlayer <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 0) && playerNum <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
@@ -133,7 +133,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setCurrentBet(0);
     setGameState(1);
 
-    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 1) && currentPlayer <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 1) && playerNum <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
@@ -153,7 +153,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setCurrentBet(0);
     setGameState(2);
 
-    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 2) && currentPlayer <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 2) && playerNum <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
@@ -173,7 +173,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setCurrentBet(0);
     setGameState(3);
 
-    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 3) && currentPlayer <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
+    if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 3) && playerNum <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
       document.getElementById("fold-button")!.hidden = true;
@@ -181,6 +181,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("revert-button")!.hidden = true;
       document.getElementById("info-box")!.hidden = false;
       document.getElementById("ready-button")!.ariaDisabled = "true";
+      handleLoadingTrue();
     }
   }
   
