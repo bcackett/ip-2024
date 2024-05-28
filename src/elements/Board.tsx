@@ -1058,10 +1058,10 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="solid-button" id="start-button" type="button">
           Start
         </button>
-        <button onClick={() => Reset()} className="solid-button" id="reset-button" type="button" hidden={true}>
+        <button onClick={() => Reset()} className="solid-button-no-dims" id="reset-button" type="button" hidden={true}>
           Next Round
         </button>
-        <button onClick={() => window.location.reload()} className="solid-button" id="full-reset-button" type="button" hidden={true}>
+        <button onClick={() => window.location.reload()} className="solid-button-no-dims" id="full-reset-button" type="button" hidden={true}>
           Restart Game
         </button>
         <button id="revert-by-round-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(startOfRoundStates[gameState - 1])}>{retraceText()}</button>

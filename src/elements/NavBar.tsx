@@ -1,7 +1,29 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 function NavBar() {
+
+  const nav = useNavigate();
+
+  const goToPlay = () => {
+    nav("/play");
+  }
+
+  const goToTrain = () => {
+    nav("/train");
+  }
+
+  const goToLogin = () => {
+    nav("/login");
+  }
+
+  const goToSettings = () => {
+    nav("/settings");
+  }
+
+  const goToHome = () => {
+    nav("/");
+  }
 
   function logInButtonText() {
     if (sessionStorage.getItem("userID")) {
@@ -18,22 +40,12 @@ function NavBar() {
   var loggedInText = "Log In/Register"
   return (
     <nav className="nav-bar" style={{marginBottom: "1vw"}}>
-      <Link reloadDocument to="/">
-        <button className="title">GetPokerEd</button>
-      </Link>
-      <Link reloadDocument to="/play">
-        <button className="links">Play Locally</button>
-      </Link> 
-      <Link reloadDocument to="/train">
-        <button className="links">Practice Lessons</button>
-      </Link>
+      <button className="title" onClick={goToHome}>GetPokerEd</button>
+      <button className="links" onClick={goToPlay}>Play Locally</button>
+      <button className="links" onClick={goToTrain}>Practice Lessons</button>
       <button className="links" onClick={openGuide}>Interactive Guide</button>
-      <Link reloadDocument to="/settings">
-        <button className="links">Settings</button>
-      </Link>
-      <Link reloadDocument to="/login">
-        <button className="links">{logInButtonText()}</button>
-      </Link>
+      <button className="links" onClick={goToSettings}>Settings</button>
+      <button className="links" onClick={goToLogin}>{logInButtonText()}</button>
     </nav>
   )
 }
