@@ -46,11 +46,6 @@ code {
   border-radius:  5px;
 }
 
-.hollow-button:hover {
-  color: var(--hover-grey);
-  border-color: var(--hover-grey);
-}
-
 .solid-button {
   color: var(--red-suit);
   font-weight: 500;
@@ -78,6 +73,88 @@ code {
 .solid-button:hover, .solid-button-no-dims:hover {
   color: var(--lighter-red);
   border-color: var(--lighter-red);
+}
+
+.logo-grid {
+  position: absolute;
+  grid-template-columns: 47vw;
+  grid-template-rows: 43vh;
+  left: 3%;
+}
+
+.logo-image {
+  background-image: url("../public/Logo\ For\ Dark\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size:contain;
+  background-color: transparent;
+  height: 43vh;
+  width: 47vw;
+}
+
+.logo-div {
+  background-color: var(--red-suit);
+  height: 42vh;
+  width: 47vw;
+  border-radius: 10px;
+}
+
+.relocate-grid {
+  position: absolute;
+  display: inline-grid;
+  grid-template-columns: 46vw;
+  grid-template-rows: 21.5vh 21.5vh 21.5vh 21.5vh;
+  left: 51%;
+}
+
+.relocate-button {
+  color: var(--off-white);
+  background-color: transparent;
+  font-size: var(--players-font-size);
+  border: 6px solid var(--off-white);
+  height: 20vh;
+  width: 47vw;
+  border-radius: 10px;
+}
+
+.settings-button {
+  background-image: url("../public/Cog\ no\ background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.guide-button {
+  background-image: url("../public/Info\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.solo-button {
+  background-image: url("../public/Solo\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.multiplayer-button {
+  background-image: url("../public/People\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.login-register-button {
+  background-image: url("../public/Save\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.hollow-button:hover, .relocate-button:hover {
+  color: var(--hover-grey);
+  border-color: var(--hover-grey);
 }
 
 h1 {
