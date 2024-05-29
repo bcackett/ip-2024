@@ -42,7 +42,7 @@ function Welcome() {
 
   return (
     <>
-      <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Optima</h1>
+      <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
       <div>
         <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>GetPokerEd aims to help anyone and everyone learn and improve at Texas Hold 'Em Poker.</label>
       </div>
