@@ -38,7 +38,7 @@ code {
 .hollow-button {
   font-size: var(--links-font-size);
   color: var(--off-white);
-  font-weight: bold;
+  font-weight: 500;
   background-color: transparent;
   padding: 10px;
   border: 3px solid var(--off-white);
@@ -53,7 +53,7 @@ code {
 
 .solid-button {
   color: var(--red-suit);
-  font-weight: bold;
+  font-weight: 500;
   background-color: var(--off-white);
   padding: 10px;
   border: 3px solid var(--red-suit);
@@ -66,7 +66,7 @@ code {
 
 .solid-button-no-dims {
   color: var(--red-suit);
-  font-weight: bold;
+  font-weight: 500;
   background-color: var(--off-white);
   padding: 10px;
   border: 3px solid var(--red-suit);
@@ -82,7 +82,7 @@ code {
 
 h1 {
   color: var(--black-suit);
-  font-weight: 700;
+  font-weight: 500;
   font-size: var(--players-font-size);
   margin: 0px;
 }
@@ -185,11 +185,11 @@ h1 {
 }
 
 #table > .glow {
-  text-shadow: 0px 0px 10px whitesmoke;
+  text-shadow: 0px 0px 10px whitesmoke, 0px 0px 10px whitesmoke;
 }
 
 #table > .winner-glow {
-  text-shadow: 0px 0px 10px gold;
+  text-shadow: 0px 0px 10px gold, 0px 0px 10px gold;
 }
 
 #table > #pot {
@@ -224,7 +224,7 @@ h1 {
 
 #play-reporter > #play-text {
   color: var(--off-white);
-  font-weight: 700;
+  font-weight: 500;
   font-size: var(--reporter-font-size);
   margin: 0px;
 }
@@ -246,8 +246,9 @@ h1 {
 }
 
 #warning-reporter > #warning-text {
-  color: rgb(255, 60, 0);;
-  font-weight: 700;
+  /* color: rgb(255, 60, 0); */
+  color: rgb(255, 175, 84);
+  font-weight: 500;
   font-size: var(--reporter-font-size);
   margin: 0px;
 }
@@ -270,8 +271,11 @@ h1 {
   position: absolute;
   height: 20vw;
   width: 35vw;
+  min-width: 250px;
+  min-height: 145px;
   justify-content: center;
   vertical-align: center;
+  padding: 5px;
 }
 
 .slider {

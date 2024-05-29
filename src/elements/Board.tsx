@@ -1045,7 +1045,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   return (
     <LoadingOverlay active={loadingActive} text={loadingOverlayText()} spinner={false}>
       <div id="info-box" hidden={true}>
-        <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw"}}></h2>
+        <h2 id="info-text" style={{color: "#f5f8e7", display: "inline", margin:"0.5vw", fontSize:"calc(8px + 1vw)"}}></h2>
         <div>
           <button id="revert-button" className="hollow-button" type="button" hidden={true} onClick={() => retrace(prevState)}>Go Back</button>
           <button id="ok-button" className="hollow-button" type="button" onClick={() => handlePromptBox()}>OK</button>
