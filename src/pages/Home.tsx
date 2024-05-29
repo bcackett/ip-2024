@@ -47,11 +47,21 @@ function Welcome() {
         <div className="logo-div">
           <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
           <div>
-            <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>GetPokerEd aims to help anyone and everyone learn and improve at Texas Hold 'Em Poker.</label>
+            <label className="intro-label">GetPokerEd aims to help anyone and everyone learn and improve at Texas Hold 'Em Poker.</label>
           </div>
           <div>
-            <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>This website offers 12 lessons with varying difficulty to help understand the basics, and a local multiplayer platform for practicing against your friends.</label>
+            <label className="intro-label"> </label>
           </div>
+          <div>
+            <label className="intro-label">This website offers 12 lessons with varying difficulty to help understand both the basics and more advanced strategies, and a local multiplayer platform for practicing against your friends.</label>
+          </div>
+          <div>
+            <label className="intro-label"> </label>
+          </div>
+          <div>
+            <label className="intro-label">Above all else, GetPokerEd offers you the opportunity to do something unique: turn back time. Revisit previous decisions and see how other scenarios could have played out mid-game!</label>
+          </div>
+          <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Good Luck and Enjoy!</h1>
         </div>
       </div>
       

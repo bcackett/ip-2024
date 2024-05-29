@@ -177,11 +177,18 @@ h1 {
 
 .title {
   font-size: var(--players-font-size);
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   color: var(--off-white);
-  font-weight: bolder;
   margin: 0 10vw 0 10vw;
   background-color: transparent;
   border-color: transparent;
+}
+
+.intro-label {
+  display: inline-block;
+  color: var(--off-white);
+  width: 45vw;
+  font-size: calc((1vh + 1.5vw)/2);
 }
 
 .links {
