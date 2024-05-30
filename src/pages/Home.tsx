@@ -42,47 +42,52 @@ function Welcome() {
 
   return (
     <>
-      <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
-      <div>
-        <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>GetPokerEd aims to help anyone and everyone learn and improve at Texas Hold 'Em Poker.</label>
+      <div className="logo-grid">
+        <div className="logo-image" />
+        <div className="logo-div">
+          <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Welcome to GetPokerEd!</h1>
+          <div>
+            <label className="intro-label">GetPokerEd aims to help anyone and everyone learn and improve at Texas Hold 'Em Poker.</label>
+          </div>
+          <div>
+            <label className="intro-label"> </label>
+          </div>
+          <div>
+            <label className="intro-label">This website offers 12 lessons with varying difficulty to help understand both the basics and more advanced strategies, and a local multiplayer platform for practicing against your friends.</label>
+          </div>
+          <div>
+            <label className="intro-label"> </label>
+          </div>
+          <div>
+            <label className="intro-label">Above all else, GetPokerEd offers you the opportunity to do something unique: turn back time. Revisit previous decisions and see how other scenarios could have played out mid-game!</label>
+          </div>
+          <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Good Luck and Enjoy!</h1>
+        </div>
       </div>
-      <div>
-        <label style={{display: "inline-block", color: "#f5f8e7", width: "45vw"}}>This website offers 12 lessons with varying difficulty to help understand the basics, and a local multiplayer platform for practicing against your friends.</label>
-      </div>
-      <div className="dividing-line" />
-      <div>
-        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want a guide to this platform?</h1>
-        <button className="hollow-button" type="button" onClick={openGuide}>
-          Interactive Guide
+      
+      <div className="relocate-grid">
+        {/* <div className="dividing-line" /> */}
+        <button className="relocate-button guide-button" onClick={openGuide}>
+          Want a guide to this platform?
+        </button>
+
+        {/* <div className="dividing-line" /> */}
+        <button className="relocate-button solo-button" onClick={goToTrain}>
+          Ready to start solo training?
+        </button>
+        {/* <div className="dividing-line" /> */}
+        <button className="relocate-button multiplayer-button" onClick={goToPlay}>
+          Want to practice as a group?
+        </button>
+        {/* <div className="dividing-line" /> */}
+        <button hidden={isLoggedIn()} className="relocate-button login-register-button" onClick={goToLogin}>
+          Want to save your progress?
+        </button>
+        <button hidden={!isLoggedIn()} className="relocate-button settings-button" onClick={goToSettings}>
+          Want to configure your personal settings?
         </button>
       </div>
-      <div className="dividing-line" />
-      <div>
-        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Ready to start solo training?</h1>
-        <button className="hollow-button" type="button" onClick={goToTrain}>
-          Training Lessons
-        </button>
-      </div>
-      <div className="dividing-line" />
-      <div>
-        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to practice as a group?</h1>
-        <button className="hollow-button" type="button" onClick={goToPlay}>
-          Local Multiplayer
-        </button>
-      </div>
-      <div className="dividing-line" />
-      <div hidden={isLoggedIn()}>
-        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to save your progress?</h1>
-        <button className="hollow-button" type="button" onClick={goToLogin}>
-          Login/Register
-        </button>
-      </div>
-      <div hidden={!isLoggedIn()}>
-        <h1 style={{padding: "20px 20px 20px 20px", color:"rgb(248, 245, 231)"}}>Want to configure your personal settings?</h1>
-        <button className="hollow-button" type="button" onClick={goToSettings}>
-          Change Settings
-        </button>
-      </div>
+      
     </>
   );
 }

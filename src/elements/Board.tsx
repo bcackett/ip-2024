@@ -10,6 +10,7 @@ import TeachingText from "./TeachingText";
 import StateEncoder from "./StateEncoder";
 import { findSourceMap } from "module";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 type roomSize = {
   totalPlayers: number;
@@ -19,6 +20,7 @@ type roomSize = {
 }
 
 function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : roomSize) {
+  const nav = useNavigate();
   const deck: Deck = new Deck;
   const calcs: Calculations = new Calculations;
   const teachingText: TeachingText = new TeachingText;
@@ -1042,6 +1044,23 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     return output;
   }
 
+  function resetOrNextLesson() {
+    if (lessonNum && lessonNum < 12) {
+      nav("/lessons/" + (lessonNum + 1).toString().padStart(2, "0"));
+      window.location.reload();
+    } else {
+      Reset();
+    }
+  }
+
+  function resetOrNextLessonText() {
+    if (lessonNum && lessonNum < 12) {
+      return "Next Lesson";
+    } else {
+      return "Next Round";
+    }
+  }
+
   return (
     <LoadingOverlay active={loadingActive} text={loadingOverlayText()} spinner={false}>
       <div id="info-box" hidden={true}>
@@ -1058,8 +1077,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         <button onClick={function() {HoleDeal(cards.slice(2 * (currentPlayer - 1), 2), startingPlayer); SmallAndBigBlind(startingPlayer - 1);}} className="solid-button" id="start-button" type="button">
           Start
         </button>
-        <button onClick={() => Reset()} className="solid-button-no-dims" id="reset-button" type="button" hidden={true}>
-          Next Round
+        <button onClick={() => resetOrNextLesson()} className="solid-button-no-dims" id="reset-button" type="button" hidden={true}>
+          {resetOrNextLessonText()}
         </button>
         <button onClick={() => window.location.reload()} className="solid-button-no-dims" id="full-reset-button" type="button" hidden={true}>
           Restart Game

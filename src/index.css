@@ -30,6 +30,33 @@ code {
     monospace;
 }
 
+@keyframes fade-in {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes rotation {
+  100% {transform: rotate(360deg);}
+}
+
+@keyframes background-change {
+  0% {background-image: none;}
+  25% {background-image: url(../public/Card\ Back\ Single.png);}
+  50% {background-image: url(../public/three\ cards.png);}
+  75% {background-image: url(../public/five\ cards.png);}
+  100% {background-image: url(../public/Logo\ For\ Dark\ Background.png);}
+}
+
+/* @keyframes slide-width {
+  from {left: 100%;}
+  to {width: 51%};
+} */
+
+/* @keyframes animated-logo-grid {
+  from {grid-template-rows: auto 0px;}
+  to {grid-template-rows: 43vh 43vh;}
+} */
+
 .name-frame {
   padding: 20px 20px 20px 20px;
   /* background-color: rgba(125, 2, 2, 1); */
@@ -44,11 +71,6 @@ code {
   border: 3px solid var(--off-white);
   margin: 0.5vw 0.5vw 0.5vw 0.5vw;
   border-radius:  5px;
-}
-
-.hollow-button:hover {
-  color: var(--hover-grey);
-  border-color: var(--hover-grey);
 }
 
 .solid-button {
@@ -80,6 +102,116 @@ code {
   border-color: var(--lighter-red);
 }
 
+.logo-grid {
+  position: absolute;
+  grid-template-columns: 47vw;
+  grid-template-rows: 43vh;
+  left: 3%;
+}
+
+.logo-image {
+  background-image: url("../public/Logo\ For\ Dark\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size:contain;
+  background-color: transparent;
+  height: 43vh;
+  width: 47vw;
+  animation: background-change 2s;
+  animation-fill-mode: forwards;
+}
+
+.logo-div {
+  background-color: var(--red-suit);
+  height: 42vh;
+  width: 47vw;
+  opacity: 0;
+  border-radius: 10px;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.5s;
+  animation-fill-mode: forwards;
+}
+
+.relocate-grid {
+  position: absolute;
+  display: inline-grid;
+  grid-template-columns: 46vw;
+  grid-template-rows: 21.5vh 21.5vh 21.5vh 21.5vh;
+  left: 51%;
+}
+
+.relocate-button {
+  color: var(--off-white);
+  background-color: transparent;
+  font-size: var(--players-font-size);
+  border: 6px solid var(--off-white);
+  height: 20vh;
+  width: 47vw;
+  border-radius: 10px;
+  opacity: 0;
+}
+
+.settings-button {
+  background-image: url("../public/Cog\ no\ background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 3.1s;
+  animation-fill-mode: forwards;
+}
+
+.guide-button {
+  background-image: url("../public/Info\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.5s;
+  animation-fill-mode: forwards;
+}
+
+.solo-button {
+  background-image: url("../public/Solo\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.7s;
+  animation-fill-mode: forwards;
+}
+
+.multiplayer-button {
+  background-image: url("../public/People\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.9s;
+  animation-fill-mode: forwards;
+}
+
+.login-register-button {
+  background-image: url("../public/Save\ No\ Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 3.1s;
+  animation-fill-mode: forwards;
+}
+
+.hollow-button:hover, .relocate-button:hover {
+  color: var(--hover-grey);
+  border-color: var(--hover-grey);
+}
+
 h1 {
   color: var(--black-suit);
   font-weight: 500;
@@ -100,11 +232,18 @@ h1 {
 
 .title {
   font-size: var(--players-font-size);
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   color: var(--off-white);
-  font-weight: bolder;
   margin: 0 10vw 0 10vw;
   background-color: transparent;
   border-color: transparent;
+}
+
+.intro-label {
+  display: inline-block;
+  color: var(--off-white);
+  width: 45vw;
+  font-size: calc((1vh + 1.5vw)/2);
 }
 
 .links {
