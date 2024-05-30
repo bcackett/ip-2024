@@ -30,6 +30,33 @@ code {
     monospace;
 }
 
+@keyframes fade-in {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes rotation {
+  100% {transform: rotate(360deg);}
+}
+
+@keyframes background-change {
+  0% {background-image: none;}
+  25% {background-image: url(../public/Card\ Back\ Single.png);}
+  50% {background-image: url(../public/three\ cards.png);}
+  75% {background-image: url(../public/five\ cards.png);}
+  100% {background-image: url(../public/Logo\ For\ Dark\ Background.png);}
+}
+
+/* @keyframes slide-width {
+  from {left: 100%;}
+  to {width: 51%};
+} */
+
+/* @keyframes animated-logo-grid {
+  from {grid-template-rows: auto 0px;}
+  to {grid-template-rows: 43vh 43vh;}
+} */
+
 .name-frame {
   padding: 20px 20px 20px 20px;
   /* background-color: rgba(125, 2, 2, 1); */
@@ -90,13 +117,20 @@ code {
   background-color: transparent;
   height: 43vh;
   width: 47vw;
+  animation: background-change 2s;
+  animation-fill-mode: forwards;
 }
 
 .logo-div {
   background-color: var(--red-suit);
   height: 42vh;
   width: 47vw;
+  opacity: 0;
   border-radius: 10px;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.5s;
+  animation-fill-mode: forwards;
 }
 
 .relocate-grid {
@@ -115,6 +149,7 @@ code {
   height: 20vh;
   width: 47vw;
   border-radius: 10px;
+  opacity: 0;
 }
 
 .settings-button {
@@ -122,6 +157,10 @@ code {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 3.1s;
+  animation-fill-mode: forwards;
 }
 
 .guide-button {
@@ -129,6 +168,10 @@ code {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.5s;
+  animation-fill-mode: forwards;
 }
 
 .solo-button {
@@ -136,6 +179,10 @@ code {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.7s;
+  animation-fill-mode: forwards;
 }
 
 .multiplayer-button {
@@ -143,6 +190,10 @@ code {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 2.9s;
+  animation-fill-mode: forwards;
 }
 
 .login-register-button {
@@ -150,6 +201,10 @@ code {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-delay: 3.1s;
+  animation-fill-mode: forwards;
 }
 
 .hollow-button:hover, .relocate-button:hover {
