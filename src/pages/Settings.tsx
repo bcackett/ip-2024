@@ -15,18 +15,51 @@ function Settings() {
     nav("/");
   }
 
+  const [fasterCalcsStateTempState, setFasterCalcsTempState] = useState(sessionStorage.getItem("fasterCalcs"));
+  const [moveRetracingTempState, setMoveRetracingTempState] = useState(sessionStorage.getItem("moveRetracing"));
+  const [lessonTextTempState, setLessonTextTempState] = useState(sessionStorage.getItem("lessonText"));
   const [firstName, setFirstName] = useState(sessionStorage.getItem("name") || "");
   const cipher = new VigenereCipher;
 
-  function handleSettingButton(settingName: string, buttonID: string) {
-    if (sessionStorage.getItem(settingName) === "true") {
-      sessionStorage.setItem(settingName, "false");
-      document.getElementById(buttonID)!.classList.remove("complete-lesson");
+  // function handleSettingButton(settingName: string, buttonID: string) {
+  //   if (sessionStorage.getItem(settingName) === "true") {
+  //     sessionStorage.setItem(settingName, "false");
+  //     document.getElementById(buttonID)!.classList.remove("complete-lesson");
+  //   } else {
+  //     sessionStorage.setItem(settingName, "true");
+  //     document.getElementById(buttonID)!.classList.add("complete-lesson");
+  //   }
+  //   document.getElementById(buttonID)!.innerText = getButtonText(settingName);
+  // }
+
+  function handleFasterCalcsButton() {
+    if (fasterCalcsStateTempState === "true") {
+      setFasterCalcsTempState("false");
+      document.getElementById("faster-calcs-button")!.classList.remove("complete-lesson");
     } else {
-      sessionStorage.setItem(settingName, "true");
-      document.getElementById(buttonID)!.classList.add("complete-lesson");
+      setFasterCalcsTempState("true");
+      document.getElementById("faster-calcs-button")!.classList.add("complete-lesson");
     }
-    document.getElementById(buttonID)!.innerText = getButtonText(settingName);
+  }
+
+  function handleMoveRetracingButton() {
+    if (moveRetracingTempState === "true") {
+      setMoveRetracingTempState("false");
+      document.getElementById("move-retrace-button")!.classList.remove("complete-lesson");
+    } else {
+      setMoveRetracingTempState("true");
+      document.getElementById("move-retrace-button")!.classList.add("complete-lesson");
+    }
+  }
+
+  function handleLessonTextButton() {
+    if (lessonTextTempState === "true") {
+      setLessonTextTempState("false");
+      document.getElementById("lesson-text-button")!.classList.remove("complete-lesson");
+    } else {
+      setLessonTextTempState("true");
+      document.getElementById("lesson-text-button")!.classList.add("complete-lesson");
+    }
   }
 
   function getButtonText(settingName: string) {
@@ -47,7 +80,10 @@ function Settings() {
 
   async function saveSettings() {
     sessionStorage.setItem("name", firstName);
-    let e = await supabase.from("logins").update({faster_calculations: (sessionStorage.getItem("fasterCalcs") === "true"), lesson_text: (sessionStorage.getItem("lessonText") === "true"), move_retracing: (sessionStorage.getItem("moveRetracing") === "true"), firstName: cipher.encode(firstName, "name")}).eq("userID", Number(sessionStorage.getItem("userID")!));
+    sessionStorage.setItem("fasterCalcs", fasterCalcsStateTempState!);
+    sessionStorage.setItem("lessonText", lessonTextTempState!);
+    sessionStorage.setItem("moveRetracing", moveRetracingTempState!);
+    let e = await supabase.from("logins").update({faster_calculations: (fasterCalcsStateTempState! === "true"), lesson_text: (lessonTextTempState! === "true"), move_retracing: (moveRetracingTempState! === "true"), firstName: cipher.encode(firstName, "name")}).eq("userID", Number(sessionStorage.getItem("userID")!));
     if (e.error) {
       throw e.error;
     } else {
@@ -60,7 +96,7 @@ function Settings() {
       <>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>{"Faster Calculations: "}</h1>
-          <button style={{display:"inline-block"}} className={getInitialButtonState("fasterCalcs")} id="faster-calcs-button" onClick={() => handleSettingButton("fasterCalcs", "faster-calcs-button")}>
+          <button style={{display:"inline-block"}} className={getInitialButtonState("fasterCalcs")} id="faster-calcs-button" onClick={() => handleFasterCalcsButton()}>
             {getButtonText("fasterCalcs")}
           </button>
           <div className="tooltip" style={{color:"rgb(248, 245, 231)"}}>{"\u24d8"}
@@ -69,7 +105,7 @@ function Settings() {
         </div>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Lesson Text: </h1>
-          <button style={{display:"inline-block"}} className={getInitialButtonState("lessonText")} id="lesson-text-button" onClick={() => handleSettingButton("lessonText", "lesson-text-button")}>
+          <button style={{display:"inline-block"}} className={getInitialButtonState("lessonText")} id="lesson-text-button" onClick={() => handleLessonTextButton()}>
             {getButtonText("lessonText")}
           </button>
           <div className="tooltip" style={{color:"rgb(248, 245, 231)"}}>{"\u24d8"}
@@ -78,7 +114,7 @@ function Settings() {
         </div>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Move Retracing: </h1>
-          <button style={{display:"inline-block"}} className={getInitialButtonState("moveRetracing")} id="move-retrace-button" onClick={() => handleSettingButton("moveRetracing", "move-retrace-button")}>
+          <button style={{display:"inline-block"}} className={getInitialButtonState("moveRetracing")} id="move-retrace-button" onClick={() => handleMoveRetracingButton()}>
             {getButtonText("moveRetracing")}
           </button>
           <div className="tooltip" style={{color:"rgb(248, 245, 231)"}}>{"\u24d8"}

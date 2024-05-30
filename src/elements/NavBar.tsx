@@ -40,7 +40,7 @@ function NavBar() {
   var loggedInText = "Log In/Register"
   return (
     <nav className="nav-bar" style={{marginBottom: "1vw"}}>
-      <button className="title" onClick={goToHome}>GetPokerEd</button>
+      <button className="title" onClick={goToHome}>GET POKER ED</button>
       <button className="links" onClick={goToPlay}>Play Locally</button>
       <button className="links" onClick={goToTrain}>Practice Lessons</button>
       <button className="links" onClick={openGuide}>Interactive Guide</button>
