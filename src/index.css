@@ -219,9 +219,23 @@ h1 {
   margin: 0px;
 }
 
+.gamble-warning {
+  font-size: calc(8px + 1vh);
+  color: var(--off-white);
+}
+
 .nav-bar {
   padding: 15px;
-  border: 2px solid var(--black-suit);
+  margin-bottom: 0.25vw;
+  display: flex;
+  background-color: var(--red-suit);
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+#gamble-bar {
+  padding: 15px;
   margin-bottom: 0.25vw;
   display: flex;
   background-color: var(--red-suit);

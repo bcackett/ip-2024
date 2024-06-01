@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GambleAwareBar from "../elements/GambleAwareBar";
 
 
 function Welcome() {
@@ -42,6 +43,7 @@ function Welcome() {
 
   return (
     <>
+      <GambleAwareBar />
       <div className="logo-grid">
         <div className="logo-image" />
         <div className="logo-div">
