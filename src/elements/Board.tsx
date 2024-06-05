@@ -1045,9 +1045,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function resetOrNextLesson() {
-    if (lessonNum && lessonNum < 12) {
+    if (lessonNum && lessonNum < 11) {
       nav("/lessons/" + (lessonNum + 1).toString().padStart(2, "0"));
       window.location.reload();
+    } else if (lessonNum && lessonNum === 11) {
+      nav("/customgame");
     } else {
       Reset();
     }

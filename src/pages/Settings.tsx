@@ -63,7 +63,11 @@ function Settings() {
   }
 
   function getButtonText(settingName: string) {
-    if (sessionStorage.getItem(settingName) === "true") {
+    if (settingName === "fasterCalcs" && fasterCalcsStateTempState === "true") {
+      return "ON";
+    } else if (settingName === "moveRetracing" && moveRetracingTempState === "true") {
+      return "ON";
+    } else if (settingName === "lessonText" && lessonTextTempState === "true") {
       return "ON";
     } else {
       return "OFF";
