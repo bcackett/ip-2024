@@ -600,14 +600,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let nullableAmount: string | null = "0";
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
-        nullableAmount = window.prompt("The bet is currently set at " + newCurrentBet + ". What would you like to raise the bet to?");
+        nullableAmount = window.prompt("The bet is currently set at £" + newCurrentBet + ". What would you like to raise the bet to?");
         amount = Number(nullableAmount);
         while (nullableAmount !== null && (amount > (playerBanks[currentPlayerNum - 1] + playerBets[currentPlayerNum - 1]) || amount <= newCurrentBet)) {
           let windowText = "";
           if (amount <= newCurrentBet) {
-            windowText = "You must raise the bet to a number higher than its current value. The bet is currently set at " + newCurrentBet + ". What would you like to raise the bet to?";
+            windowText = "You must raise the bet to a number higher than its current value. The bet is currently set at £" + newCurrentBet + ". What would you like to raise the bet to?";
           } else {
-            windowText = "You cannot raise the bet to more than you currently have in your bank. The bet is currently set at " + newCurrentBet + ". What would you like to raise the bet to?";
+            windowText = "You cannot raise the bet to more than you currently have in your bank. The bet is currently set at £" + newCurrentBet + ". What would you like to raise the bet to?";
           }
           nullableAmount = window.prompt(windowText);
           amount = Number(nullableAmount);
@@ -764,14 +764,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
     let newBanks = playerBanks;
     let newBets = playerBets;
-    document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet " + BIGBLIND/2 + " as the small blind.\n\n"
+    document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet £" + BIGBLIND/2 + " as the small blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND / 2;
     newBets[nextPlayer - 1] += BIGBLIND / 2;
     nextPlayer += 1;
     if (nextPlayer > totalPlayers) {
       nextPlayer = 1;
     }
-    document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet " + BIGBLIND + " as the big blind.\n\n"
+    document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet £" + BIGBLIND + " as the big blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND;
     newBets[nextPlayer - 1] += BIGBLIND;
     nextPlayer += 1;
@@ -831,7 +831,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
 
   async function DisplayWinner(playerNums: number[], finalActionBet?: number) {
     if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) {
-      document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
+      document.getElementById("play-text")!.innerText += playerOrBotText(playerNums[0]) + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
     } else if (playerNums.length === 1) {
       let cardsCopy: number[] = [];
       cards.forEach(card => {
@@ -840,14 +840,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       let bestHand = HANDS[calcs.FindBestHand(cardsCopy.slice(2 * (playerNums[0] - 1), 2 * (playerNums[0] - 1) + 2))[0]];
       document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + bestHand + "!\n";
     } else {
-      let winnersString = "Players ";
-      for (let i = 0; i < playerNums.length; i++) {
+      let winnersString = playerOrBotText(playerNums[0]) + " ";
+      for (let i = 1; i < playerNums.length; i++) {
         if (i === playerNums.length - 1) {
-          winnersString += "& " + playerNums[i] + " split the pot with a " +  HANDS[bestHands[playerNums[0] - 1][0]] + " tie!\n"
+          winnersString += "& " + playerOrBotText(playerNums[i]) + " split the pot with a " +  HANDS[bestHands[playerNums[0] - 1][0]] + " tie!\n"
         } else if (i === playerNums.length - 2) {
-          winnersString += playerNums[i] + " ";
+          winnersString += playerOrBotText(playerNums[i]) + " ";
         } else {
-          winnersString += playerNums[i] + ", ";
+          winnersString += playerOrBotText(playerNums[i]) + ", ";
         }
       }
       document.getElementById("play-text")!.innerText += winnersString;
