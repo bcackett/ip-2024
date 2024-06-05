@@ -600,10 +600,16 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let nullableAmount: string | null = "0";
     if (!raise) {
       if (playerBanks[currentPlayerNum - 1] !== 0) {
-        nullableAmount = window.prompt("What would you like to raise the bet to?");
+        nullableAmount = window.prompt("The bet is currently set at " + newCurrentBet + ". What would you like to raise the bet to?");
         amount = Number(nullableAmount);
         while (nullableAmount !== null && (amount > (playerBanks[currentPlayerNum - 1] + playerBets[currentPlayerNum - 1]) || amount <= newCurrentBet)) {
-          nullableAmount = window.prompt("What would you like to raise the bet to?");
+          let windowText = "";
+          if (amount <= newCurrentBet) {
+            windowText = "You must raise the bet to a number higher than its current value. The bet is currently set at " + newCurrentBet + ". What would you like to raise the bet to?";
+          } else {
+            windowText = "You cannot raise the bet to more than you currently have in your bank. The bet is currently set at " + newCurrentBet + ". What would you like to raise the bet to?";
+          }
+          nullableAmount = window.prompt(windowText);
           amount = Number(nullableAmount);
         }
         if (nullableAmount !== null) {
