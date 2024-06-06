@@ -1,20 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import Board from "../elements/Board";
+import { useState } from "react";
+import ReactSlider from "react-slider";
 
 function Play() {
-  let nullableAmount = window.prompt("How many players are participating? Minimum 2, maximum 8.");
-  let amount = Number(nullableAmount);
-  while ((amount < 2 || amount > 8) && nullableAmount !== null) {
-    nullableAmount = window.prompt("How many players are participating? Minimum 2, maximum 8.");
-    amount = Number(nullableAmount);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [playerCount, setPlayerCount] = useState(2);
+
+  function startGame() {
+    setGameStarted(() => true);
   }
 
-  if (nullableAmount === null) {
-    window.location.assign(window.location.href.slice(0, -4));
-    return (null);
+  if (gameStarted) {
+    return (<Board totalPlayers={playerCount} computerPlayers={0}/>);
   } else {
     return (
-      <Board totalPlayers={amount} computerPlayers={0}/>
+      <div style={{background:"rgba(125, 2, 2, 1)", height:"17vw", minHeight:"150px", width:"32vw", display:"inline-block", marginTop:"3vw", borderRadius: "15px", border: "5px solid rgba(4, 0, 26, 1)"}}>
+        <div style={{paddingBottom: "30px"}}>
+          <h1 style={{color:"rgb(248, 245, 231)", marginTop:"3vw"}}>How many players are participating?</h1>
+          <ReactSlider className="slider" trackClassName="sub-slider-track" thumbClassName="slider-thumb" min={2} max={8} defaultValue={2} value={playerCount} onChange={(value: number) => setPlayerCount(value)}/>
+        </div>
+        <div>
+          <h1 style={{color:"rgb(248, 245, 231)", marginBottom:"1vw"}}>{playerCount}</h1>
+          <button className="hollow-button" onClick={() => startGame()}>Start Game</button>
+        </div>
+      </div>
     );
   }
 }
