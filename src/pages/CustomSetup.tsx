@@ -69,7 +69,7 @@ function CustomSetup() {
       <>
         <h1 style={{color:"rgb(248, 245, 231)"}}>Number of computer players: {computerPlayers}</h1>
         <ReactSlider className="slider" trackClassName="slider-track" thumbClassName="slider-thumb" min={1} max={7} defaultValue={1} value={computerPlayers} onChange={(value) => setComputerPlayers(value)}/>
-        <div style={{background:"rgba(125, 2, 2, 1)", height:"25vw", width:"32vw", display:"inline-block", marginTop:"3vw", borderRadius: "15px", border: "5px solid rgba(4, 0, 26, 1)"}}>
+        <div style={{background:"rgba(125, 2, 2, 1)", height:"55vh", minHeight:"290px", width:"32vw", display:"inline-block", marginTop:"3vw", borderRadius: "15px", border: "5px solid rgba(4, 0, 26, 1)"}}>
           <h1 style={{color:"rgb(248, 245, 231)"}}>CPU {currentlyDisplayedPlayer + 1}</h1>
           <div style={{marginTop:"auto"}}>
             <h2 style={{marginTop:"25px", display:"inline-block", color:"rgb(248, 245, 231)"}}>Aggression</h2>

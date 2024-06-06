@@ -219,6 +219,11 @@ h1 {
   margin: 0px;
 }
 
+h2 {
+  font-weight: 500;
+  font-size: calc(4px + 1vw);
+}
+
 .gamble-warning {
   font-size: calc(8px + 1vh);
   color: var(--off-white);
