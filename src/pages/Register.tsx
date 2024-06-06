@@ -64,19 +64,19 @@ function Register() {
 
   return (
     <>
-      <h1 style={{color:"rgb(248, 245, 231)"}}>Create an account to start improving today.</h1>
+      <h1 style={{color:"rgb(248, 245, 231)", marginBottom: "1vh"}}>Create an account to start improving today.</h1>
       <form onSubmit={handleLogin}>
         <div>
-          <label style={{color:"rgb(248, 245, 231)"}}>Username: </label>
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}/>
+          <h2 style={{color:"rgb(248, 245, 231)"}}>Username: </h2>
+          <input type="text" className="input-field" value={username} onChange={(e) => setUsername(e.target.value)}/>
         </div>
         <div>
-          <label style={{color:"rgb(248, 245, 231)"}}>{"Preferred First Name \(optional\): "} </label>
-          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
+          <h2 style={{color:"rgb(248, 245, 231)"}}>{"Preferred First Name \(optional\): "} </h2>
+          <input type="text" className="input-field" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
         </div> 
         <div>
-          <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
+          <h2 style={{color:"rgb(248, 245, 231)"}}>Password: </h2>
+          <input type="password" className="input-field" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div> 
         <input type="submit" value={submitButtonText} className="hollow-button" style={{marginTop: "10px"}}/>
       </form>

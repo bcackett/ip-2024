@@ -45,15 +45,15 @@ function Login() {
 
   return (
     <>
-      <h1 style={{color:"rgb(248, 245, 231)"}}>Log in to record your Poker progress.</h1>
+      <h1 style={{color:"rgb(248, 245, 231)", marginBottom: "1vh"}}>Log in to record your Poker progress.</h1>
       <form onSubmit={handleLogin}>
         <div>
-          <label style={{color:"rgb(248, 245, 231)"}}>Username: </label>
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}/>
+          <h2 style={{color:"rgb(248, 245, 231)"}}>Username: </h2>
+          <input type="text" className="input-field" value={username} onChange={(e) => setUsername(e.target.value)}/>
         </div>
         <div>
-          <label style={{color:"rgb(248, 245, 231)"}}>Password: </label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
+          <h2 style={{color:"rgb(248, 245, 231)"}}>Password: </h2>
+          <input type="password" className="input-field" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div> 
         <input type="submit" value={submitButtonText} className="hollow-button" id="submission-button" style={{marginTop: "10px"}}/>
       </form>

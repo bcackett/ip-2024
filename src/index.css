@@ -566,3 +566,13 @@ h2 {
 .tooltip:hover .tooltip-text, .tooltip:hover .tooltip-text-left, .tooltip:hover .tooltip-text-top {
   visibility: visible;
 }
+
+.input-field {
+  background-color: transparent;
+  border: 3px solid var(--off-white);
+  color: var(--off-white);
+  border-radius: 3px;
+  height: 30px;
+  font-size: 20px;
+  margin-bottom: 3vh;
+}

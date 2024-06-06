@@ -127,7 +127,7 @@ function Settings() {
         </div>
         <div>
           <h1 style={{color:"rgb(248, 245, 231)", display:"inline-block"}}>Change Preferred Name: </h1>
-          <input style={{marginLeft:"1vw", marginRight: "1vw"}} type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
+          <input style={{marginLeft:"1vw", marginRight: "1vw"}} className="input-field" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
           <div className="tooltip" style={{color:"rgb(248, 245, 231)"}}>{"\u24d8"}
             <span className="tooltip-text">This is a cosmetic change that will display your name in any games you play. Make GetPokerEd a bit more personal and put yourself in the game!</span>       
           </div>
