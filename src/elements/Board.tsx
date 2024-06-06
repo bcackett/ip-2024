@@ -993,7 +993,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
     
     if (currentPlayer > totalPlayers - computerPlayers) {
-      computerCalc(playerProfiles![currentPlayer - 2], knownCards, currentPlayer, currentBet);
+      computerCalc(playerProfiles![currentPlayer - ((totalPlayers - computerPlayers) + 1)], knownCards, currentPlayer, currentBet);
     }
   }
 

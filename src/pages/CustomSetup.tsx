@@ -5,14 +5,17 @@ import Board from "../elements/Board";
 function CustomSetup() {
 
   const [playerValsToRerender, setPlayerValsToRerender] = useState([-1, -1]);
+  const [humanPlayers, setHumanPlayers] = useState(1);
   const [computerPlayers, setComputerPlayers] = useState(1);
+  const [computerPlayerMax, setComputerPlayerMax] = useState(7);
   const [computerPlayerValues, setComputerPlayerValues] = useState([[0, 0, 0]]);
   const [currentlyDisplayedPlayer, setCurrentlyDisplayedPlayer] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  useEffect(() => handlePlayerNumChange(computerPlayers), [computerPlayers]);
+  useEffect(() => handleComputerPlayerNumChange(computerPlayers), [computerPlayers]);
+  useEffect(() => handleHumanPlayerNumChange(humanPlayers), [humanPlayers])
   useEffect(() => handlePlayerValueChange(playerValsToRerender[0], playerValsToRerender[1]), [playerValsToRerender]);
 
-  function handlePlayerNumChange(length: number) {
+  function handleComputerPlayerNumChange(length: number) {
     let newPlayerValues = computerPlayerValues.slice(0, length);
     while (newPlayerValues.length < length) {
       newPlayerValues.push([0, 0, 0]);
@@ -22,6 +25,12 @@ function CustomSetup() {
     if (currentlyDisplayedPlayer > length - 1) {
       setCurrentlyDisplayedPlayer(length - 1);
     }
+  }
+
+  function handleHumanPlayerNumChange(playerCount: number) {
+    let newMax = computerPlayerMax;
+    newMax = 8 - playerCount;
+    setComputerPlayerMax(newMax);
   }
 
   function handlePlayerValueChange(personalityNum: number, newVal: number) {
@@ -61,14 +70,21 @@ function CustomSetup() {
   }
 
   if (gameStarted) {
+    console.log(computerPlayerValues.toString());
     return (
-      <Board totalPlayers={computerPlayers + 1} computerPlayers={computerPlayers} playerProfiles={computerPlayerValues} lessonNum={12}/>
+      <Board totalPlayers={computerPlayers + humanPlayers} computerPlayers={computerPlayers} playerProfiles={computerPlayerValues} lessonNum={12}/>
     )
   } else {
     return (
       <>
-        <h1 style={{color:"rgb(248, 245, 231)"}}>Number of computer players: {computerPlayers}</h1>
-        <ReactSlider className="slider" trackClassName="slider-track" thumbClassName="slider-thumb" min={1} max={7} defaultValue={1} value={computerPlayers} onChange={(value) => setComputerPlayers(value)}/>
+        <div>
+          <h1 style={{color:"rgb(248, 245, 231)"}}>Number of people playing: {humanPlayers}</h1>
+          <ReactSlider className="slider" trackClassName="slider-track" thumbClassName="slider-thumb" min={1} max={7} defaultValue={1} value={humanPlayers} onChange={(value) => setHumanPlayers(value)}/>
+        </div>
+        <div>
+          <h1 style={{color:"rgb(248, 245, 231)", marginTop:"3vw"}}>Number of computer players: {computerPlayers}</h1>
+          <ReactSlider className="slider" trackClassName="slider-track" thumbClassName="slider-thumb" min={1} max={computerPlayerMax} defaultValue={1} value={computerPlayers} onChange={(value) => setComputerPlayers(value)}/>
+        </div>
         <div style={{background:"rgba(125, 2, 2, 1)", height:"55vh", minHeight:"290px", width:"32vw", display:"inline-block", marginTop:"3vw", borderRadius: "15px", border: "5px solid rgba(4, 0, 26, 1)"}}>
           <h1 style={{color:"rgb(248, 245, 231)"}}>CPU {currentlyDisplayedPlayer + 1}</h1>
           <div style={{marginTop:"auto"}}>
