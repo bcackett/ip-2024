@@ -12,6 +12,7 @@ import { findSourceMap } from "module";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 
+// Creating a type that contains all of the input parameters required to create a Board.
 type roomSize = {
   totalPlayers: number;
   computerPlayers: number;
@@ -43,7 +44,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [bestHands, setBestHands] = useState(new Array(totalPlayers).fill(0));
   const [humanPredictedResults, setHumanPredictedResults] = useState(new Array(totalPlayers - computerPlayers).fill(0));
   const [currentPlayerPrediction, setCurrentPlayerPrediction] = useState(0);
-  const [gameState, setGameState] = useState(-1); //0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner, -1 = error
+  const [gameState, setGameState] = useState(-1); // 0 = preflop, 1 = flop, 2 = turn, 3 = river, 4 = winner, -1 = error
   const [loadingActive, setLoadingActive] = useState(false);
   const [winner, setWinner] = useState(0);
   const [p1InitialBank, setP1InitialBank] = useState(200)
@@ -52,11 +53,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   const [preAction, setPreAction] = useState(true);
   const handleLoadingFalse = useCallback(() => setLoadingActive(false), []);
   const handleLoadingTrue = useCallback(() => setLoadingActive(true), []);
-  useEffect(() => {setCurrentPlayer(winner)}, [winner]);
+
+  useEffect(() => {setCurrentPlayer(winner)}, [winner]); // This hook displays the cards of the winning player when this player is determined.
+
+  // This hook ensures that the correct number of cards are displayed for the current game state, including if the game rewinded to a previous state.
   useEffect(() => {
     if (gameState >= 0) {
-      // document.getElementById("hole-card-one")!.hidden = false;
-      // document.getElementById("hole-card-two")!.hidden = false; 
     } else {
       document.getElementById("hole-card-one")!.hidden = true;
       document.getElementById("hole-card-two")!.hidden = true; 
@@ -84,19 +86,19 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("river-card")!.hidden = true;
     }
   }, [gameState]);
+
   const resetBets = useCallback(() => {console.log("MADE IT TO THE USEEFFECT!"); setPlayerBets(new Array(totalPlayers).fill(0))}, []); 
   const [, forceUpdate] = useReducer(x => x + 1, 0);
-
-  // const [blindStage, setBlindStage] = useState(true);
 
   async function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
   
+  // Begins the game by dealing the hole cards.
   function HoleDeal(visibleCards: number[], playerNum: number) {
     console.log(cards.toString());
-    document.getElementById("hole-card-one")!.hidden = false;
-    document.getElementById("hole-card-two")!.hidden = false;
+    // document.getElementById("hole-card-one")!.hidden = false;
+    // document.getElementById("hole-card-two")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -125,9 +127,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function FlopDeal(cards: number[], playerNum: number) {
-    document.getElementById("flop-card-one")!.hidden = false;
-    document.getElementById("flop-card-two")!.hidden = false;
-    document.getElementById("flop-card-three")!.hidden = false;
+    // document.getElementById("flop-card-one")!.hidden = false;
+    // document.getElementById("flop-card-two")!.hidden = false;
+    // document.getElementById("flop-card-three")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -147,7 +149,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function TurnDeal(cards: number[], playerNum: number) {
-    document.getElementById("turn-card")!.hidden = false;
+    // document.getElementById("turn-card")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -167,7 +169,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function RiverDeal(cards:number[], playerNum: number) {
-    document.getElementById("river-card")!.hidden = false;
+    // document.getElementById("river-card")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -756,13 +758,16 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
   }
 
-  function SmallAndBigBlind(nextPlayer: number) {
+  function SmallAndBigBlind(nextPlayer: number, nestedBanks?: number[]) {
     if (nextPlayer <= 0) {
       nextPlayer = totalPlayers;
     }
     let smallBlindPlayer = nextPlayer;
     document.getElementById("p" + nextPlayer + "-stats")?.classList.remove("glow");
     let newBanks = playerBanks;
+    if (nestedBanks) {
+      newBanks = nestedBanks;
+    }
     let newBets = playerBets;
     document.getElementById("play-text")!.innerText += playerOrBotText(nextPlayer) + " bet £" + BIGBLIND/2 + " as the small blind.\n\n"
     newBanks[nextPlayer - 1] -= BIGBLIND / 2;
@@ -1030,7 +1035,26 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function retrace(state: string) {
-    if (state !== "") {
+    console.log("FUNCTION CALL");
+    if (gameState === 1 && state === "") {
+      setCards(cards);
+      setFoldedtotalPlayers(new Array(totalPlayers).fill(0));
+      setPot(0);
+      setPotStartOfRound(0);
+      // setPlayerBanks(Array.from({length: totalPlayers}).map(bank=>STARTBANK));
+      // setPlayerBets(new Array(totalPlayers).fill(0));
+      setGameState(0);
+      setStartingPlayer(startingPlayer);
+      setCurrentPlayer(startingPlayer);
+      setCurrentBet(0);
+      document.getElementById("play-text")!.innerText = "";
+      setPlayerPrompts(new Array(totalPlayers - computerPlayers).fill(""));
+      setPreAction(true);
+      hideCards(startingPlayer);
+      handleLoadingFalse();
+      SmallAndBigBlind(startingPlayer - 1, Array.from({length: totalPlayers}).map(bank=>STARTBANK));
+    } else if (state !== "") {
+      console.log("RETRACING");
       stateEncoder.decode(state);
       document.getElementById("info-box")!.hidden = true;
       setCards(stateEncoder.getCards());

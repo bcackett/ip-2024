@@ -6,6 +6,8 @@ export type Json =
   | { [key: string]: Json }
   | Json[];
 
+  // This interface mirrors the structure of the external database in order to allow for smoother integration between it and the code.
+  // Optional variables in insert statements are nullable fields in the database. More variables are nullable in update statements as these statements should be able to affect individual fields.
   export interface Database {
     public: {
       Tables: {
