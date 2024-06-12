@@ -13,34 +13,38 @@ function Register() {
   const nav = useNavigate();
 
   const goToHome = () => {
+    // Redirects the user back to the home page.
     nav("/");
   }
 
   sessionStorage.clear();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-    await setSubmitButtonText("...");
+    // Handles the operations required to register a new user to the platform.
+    await setSubmitButtonText("..."); // Change button text to indicate that an operation is occuring.
     event.preventDefault();
-    if (username === "" || password === "") {
+    if (username === "" || password === "") { // A new account must have a username and password as they are mandatory fields in the database.
       alert("Please enter both a username and a password");
       await setSubmitButtonText("Register");
     } else {
-      const {data, error} = await supabase.from("logins").select("username").eq("username", cipher.encode(username, "username"));
+      const {data, error} = await supabase.from("logins").select("username").eq("username", cipher.encrypt(username, "username"));
       if (error) throw error;
-      if (data.length !== 0) {
+      if (data.length !== 0) { // If there is data present, the database query returned a hit on the username, meaning it is already in use.
         console.log(data.toString);
         alert("This username already exists. Please try again.");
         await setSubmitButtonText("Register");
       } else {
         let newUserID = 0;
-        const e1 = await supabase.from("logins").select("userID").order("userID", {ascending: false}).limit(1).single();
+        const e1 = await supabase.from("logins").select("userID").order("userID", {ascending: false}).limit(1).single(); // Retrieve the current highest user ID to know what the new one should be.
         if (!e1.error) {
           newUserID = e1.data.userID + 1;
         }
-        const e2 = await supabase.from("logins").insert({userID: newUserID, username: cipher.encode(username, "username"), password: cipher.encode(password, "password")});
+        // Adding the new user to the database.
+        const e2 = await supabase.from("logins").insert({userID: newUserID, username: cipher.encrypt(username, "username"), password: cipher.encrypt(password, "password")});
           if (e2.error) {
             throw e2.error;
           } else {
+            // Add a new entry to the lessons table to begin tracking the new user's completed lessons.
             const e3 = await supabase.from("lessons").insert({userID: newUserID});
             if (e3.error) {
               throw e3.error;
@@ -50,8 +54,8 @@ function Register() {
               sessionStorage.setItem("fasterCalcs", "false"); 
               sessionStorage.setItem("lessonText", "true"); 
               sessionStorage.setItem("moveRetracing", "true"); 
-              if (firstName.length > 0) {
-                const e4 = await supabase.from("logins").update({firstName: cipher.encode(firstName, "name")}).eq("userID", newUserID);
+              if (firstName.length > 0) { // If the user chose to give a first name, add this new information to the newly created user's entry.
+                const e4 = await supabase.from("logins").update({firstName: cipher.encrypt(firstName, "name")}).eq("userID", newUserID);
                 if (e4.error) {throw e4.error};
                 sessionStorage.setItem("name", firstName); 
               }

@@ -5,19 +5,20 @@ import NotFound from "./NotFound";
 
 function TrainingScenario() {
 
-  //Player profiles are a 3 element array, with each value corresponding to the intensity % of aggression, bluffing & randomness
-  // const { search } = useLocation();
-  // const idMatch = search.match(/id=(.*)/);
-  // const id = idMatch?.[1].toString();
+  //Player profiles are a 3 element array, with each value corresponding to the intensity % of aggression, deception (bluffing) & unpredictability (randomness)
 
-  const state = useLocation();
+  const state = useLocation(); // Uses the URL of the current page to determine which lesson to display.
 
   function generateTraitsFromSet() {
+    // This array of traits is used to pseudo-randomly generate a computer opponent's personality values from a fixed set of possibilities.
+    // Used in the known and unknown opponent lessons (9 & 10), when the behaviour of the computer player should not be fixed, but should be known in advance.
     let traits = [[80, 10, 10], [10, 80, 10], [10, 0, 10], [0, 0, 40]];
     return traits[Math.floor(Math.random() * 4)];
   }
 
   function generateRandomTraits() {
+    // Generates a pseudo-random series of three values between 0 and 100 to make up a completely unique computer opponent.
+    // Used in the larger table lesson (11) when the behaviour of the opponents does not need to be known in advance.
     return [Math.floor(Math.random() * 101), Math.floor(Math.random() * 101), Math.floor(Math.random() * 101)]
   }
 

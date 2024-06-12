@@ -5,14 +5,17 @@ function Training() {
   const nav = useNavigate();
 
   function goToScenario(id: number) {
+    // Redirects the user to the lesson that correlates to the id parameter.
     return () => {nav("/lessons/" + id.toString().padStart(2, "0"))};
   }
 
   function goToCustomGameSetup() {
+    // Redirects the user to the custom game page.
     return () =>{nav("/customgame")};
   }
 
   async function getCompletedLessonData() {
+    // Retrieve a logged-in user's lesson data from the database, and visually mark those that have already been completed as such.
     if (sessionStorage.getItem("userID")) {
       let {data, error} = await supabase.from("lessons").select("completedLessons").eq("userID", Number(sessionStorage.getItem("userID"))).limit(1).single();
       if (error) {

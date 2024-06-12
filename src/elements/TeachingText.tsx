@@ -1,4 +1,8 @@
 class TeachingText {
+  // This class stores a dictionary where each key corresponds to a lesson number, and each value is an array of up to four strings.
+  // The strings in the arrays are the lesson text to be displayed at the beginning of rounds in the lesson given by the key.
+  // If multiple rounds have lesson text at the beginning for a given lesson, the text is stored in the array in the order to be displayed.
+
   prompts: Map<number, Array<string>> = new Map([
     [1, ["Poker has a lot of technical terms that will be referenced in all of the other lessons. Here, the cards only you can see (at the bottom of the screen) are called \"hole cards\".",
       "The cards everyone can see (at the top of the screen) are called \"communal cards\". The turn where the first three are dealt is called the \"flop\".",
@@ -31,11 +35,13 @@ class TeachingText {
   ]);
 
   returnTargetPrompt(lessonNum: number, roundNum: number) {
+    // Searches the dictionary for the text that corresponds to the lesson number and round number passed as parameters.
     let promptList = this.prompts.get(lessonNum);
     if (promptList) {
       return this.prompts.get(lessonNum)![roundNum];
     }
-    return "Error: no target prompt found.";
+    // If the lesson number exceeds 12, an error has occurred as only 12 lessons currently exist. Therefore, this lesson is purely a failsafe and should never be reached.
+    return "Error: no target prompt found."; 
   }
 }
 

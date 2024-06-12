@@ -94,11 +94,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     return new Promise((resolve) => setTimeout(resolve, time));
   }
   
-  // Begins the game by dealing the hole cards.
   function HoleDeal(visibleCards: number[], playerNum: number) {
+    // Begins the game and deals the hole cards by setting the game state to 0 and displaying any lesson text required at the beginning of the game.
     console.log(cards.toString());
-    // document.getElementById("hole-card-one")!.hidden = false;
-    // document.getElementById("hole-card-two")!.hidden = false;
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -106,6 +104,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let bestHand = FindBestHand(visibleCards, playerNum);
     setGameState(0);
 
+    // The lesson text displayed is dictated by the lesson number, if any, as well requiring the lesson text setting to be enabled if there is a logged in account.
     if (lessonNum && teachingText.returnTargetPrompt(lessonNum, 0) && playerNum <= totalPlayers - computerPlayers && sessionStorage.getItem("lessonText") === "true") {
       document.getElementById("bet-button")!.hidden = true;
       document.getElementById("raise-button")!.hidden = true;
@@ -125,11 +124,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       handleLoadingTrue();
     }
   }
-  
+
   function FlopDeal(cards: number[], playerNum: number) {
-    // document.getElementById("flop-card-one")!.hidden = false;
-    // document.getElementById("flop-card-two")!.hidden = false;
-    // document.getElementById("flop-card-three")!.hidden = false;
+    // Begins the second betting round and deals the flop cards by setting the game state to 1 and displaying any lesson text required at the beginning of this round.
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -149,7 +146,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function TurnDeal(cards: number[], playerNum: number) {
-    // document.getElementById("turn-card")!.hidden = false;
+    // Begins the third betting round and deals the flop cards by setting the game state to 2 and displaying any lesson text required at the beginning of this round.
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -169,7 +166,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function RiverDeal(cards:number[], playerNum: number) {
-    // document.getElementById("river-card")!.hidden = false;
+    // Begins the final betting round and deals the flop cards by setting the game state to 3 and displaying any lesson text required at the beginning of this round.
     document.getElementById("bet-button")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -189,13 +186,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
   }
   
+  
   function FindBestHand(cards: number[], playerNum: number) {
-    /*Returns value of best hand (0 for high card -> 9 for royal flush), followed by values of cards in best hand.
+    /*Calls the Calculations class via the calcs constant in order to determine the best hand out of the known cards.
+    Returns value of best hand (0 for high card -> 9 for royal flush), followed by values of cards in best hand.
     Eg: [9, 59, 58, 57, 56, 55] = royal flush with spades. */
 
-    // document.getElementById("best-hand")!.innerText = bestHand.toString();
-    // setBestHandText(bestHand.toString())
-    // document.getElementById("best-hand")!.innerText = hands[bestHand[0]];
     let cardsCopy: number[] = [];
     cards.forEach(card => {
       cardsCopy.push(card);
@@ -209,6 +205,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
   
   function Reset() {
+    // Resets the visual components back to the state they should be in at the start of the next game.
     deck.Shuffle();
 
     let newPlayerBanks = playerBanks;
@@ -245,7 +242,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("play-text")!.innerText = "";
     document.getElementById("warning-text")!.innerText = "";
     setBestHandText("");
-    let newStartingPlayer = startingPlayer.valueOf() + 1;
+    let newStartingPlayer = startingPlayer.valueOf() + 1; // Starting player is increased by 1 as opposed to reset as the beginning of play should be passed around the table between games.
     if (newStartingPlayer > totalPlayers) {
       newStartingPlayer = 1;
     }
@@ -260,16 +257,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function ImmediateNewCard(newPlayerNum: number, nestedCurrentPlayer?: number, nestedCurrentBet?: number) {
-    // if (newPlayerNum > totalPlayers - computerPlayers) {
-    //   console.log("MADE IT HERE");
-    //   resetBets += 1;
-    // } else {
-    //   setPlayerBets(new Array(totalPlayers).fill(0));
-    // }
-    // setPlayerBets(new Array(totalPlayers).fill(0));
-    // resetBets += 1;
+    // Triggers the next betting round. This code is isolated as new rounds can begin at any time after every player has taken at least one action.
     resetBets();
-    // forceUpdate();
     console.log("Player Bets on New Card:" + playerBets);
     let knownCards: number[] = [];
     if (nestedCurrentPlayer) {
@@ -278,13 +267,13 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
     }
     document.getElementById("p" + newPlayerNum +"-stats")!.classList.add("glow");
-    if (/*document.getElementById("flop-card-one")!.hidden === true*/gameState === 0) {
+    if (gameState === 0) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -2));
       FlopDeal(knownCards, newPlayerNum);
-    } else if (/*document.getElementById("turn-card")!.hidden === true*/gameState === 1) {
+    } else if (gameState === 1) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1));
       TurnDeal(cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, -1)), newPlayerNum);
-    } else if (/*document.getElementById("river-card")!.hidden === true*/gameState === 2) {
+    } else if (gameState === 2) {
       knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2).concat(cards.slice(-5, cards.length));
       RiverDeal(knownCards, newPlayerNum);
     } else {
@@ -294,11 +283,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function ChangePlayer(nestedCurrentPlayer?: number, nestedCurrentBet?: number, lastPlayer?: number) {
+    // Triggers a change in active player to be called after each player makes an action.
     setPreAction(true);
-    if (foldedtotalPlayers.filter(p => p === 0).length === 1) {
+    if (foldedtotalPlayers.filter(p => p === 0).length === 1) { // If there is only one player left in the game that has not folded, they win by default.
       let winner = foldedtotalPlayers.indexOf(0) + 1;
       DisplayWinner([winner], nestedCurrentBet);
-    } else if ((Array.from(new Set(playerBanks)).length === 1 && playerBanks[0] === 0)) {
+    } else if ((Array.from(new Set(playerBanks)).length === 1 && playerBanks[0] === 0)) { // If all players have bet their entire bank, the remaining cards are dealt and the winner is determined immediately.
       setGameState(4);
       for (let i = 1; i <= totalPlayers; i++) {
         FindBestHand(cards.slice(2 * (i - 1), 2 * (1 - 1) + 2).concat(cards.slice(-5, cards.length)), i);
@@ -306,10 +296,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       let winner = CalculateWinner();
       console.log("GAME OVER - NESTED CURRENT BET: " + nestedCurrentBet);
       DisplayWinner(winner, nestedCurrentBet);
-    } else {
+    } else { // In any other case, the game is only over if all betting rounds have been completed.
       let newPlayerNum: number;
       let oldPlayerNum: number;
       let newCurrentBet: number;
+
+      // Nested variables are used as a failsafe in case the following code is executed before the states are updated.
       if (nestedCurrentBet) {
         newCurrentBet = nestedCurrentBet;
       } else {
@@ -322,12 +314,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         oldPlayerNum = currentPlayer;
         newPlayerNum = currentPlayer + 1;
       }
+
       console.log("Player Bet Sum: " + playerBets.reduce((x,y) => x + y));
       console.log("Starting Pot: " + potStartOfRound);
+
+      // Collecting the bets of all players still in the game in preparation for checking if a betting round has ended.
       let firstPlayer = foldedtotalPlayers.indexOf(0) + 1;
       let foldedPlayerIndices = Array.from(foldedtotalPlayers.keys());
       let orderedFoldedPlayers = foldedPlayerIndices.slice(startingPlayer - 1).concat(foldedPlayerIndices.slice(0, startingPlayer - 2))
-      let trueStartingPlayer = orderedFoldedPlayers[0] + 1;
+      let trueStartingPlayer = orderedFoldedPlayers[0] + 1; // True starting player is the game's starting player unless this person has folded, in which case it is the next player in the cycle
       let newCard = false;
       let cycleComplete = false;
       let betsNoFoldedPlayers = [];
@@ -342,8 +337,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
 
       console.log("TRUE STARTING PLAYER: " + trueStartingPlayer.toString());
+      // If the next player to act is the true starting player, every player still in the game has had a chance to act at least once.
       if (newPlayerNum === trueStartingPlayer) {
-        cycleComplete = true;
+        cycleComplete = true; 
       }
 
       while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
@@ -357,6 +353,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         }
       }
 
+      // A new betting round should begin if every player still in the game has acted at least once and every non-folded player has bet the same amount in this round.
       if (((newPlayerNum === trueStartingPlayer && uniqueBets[0] === 0 && cycleComplete === true) || uniqueBets[0] !== 0)  && uniqueBets.length === 1) {
         if (!(lastPlayer && lastPlayer === newPlayerNum)) {
           newCard = true;
@@ -364,7 +361,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
 
       let knownCards: number[] = [];
-      if (newCard === true) {
+      if (newCard === true) { // Start the next round of betting if the conditions required have been met.
         console.log("New card dealt!");
         newPlayerNum = startingPlayer;
         while (foldedtotalPlayers[newPlayerNum - 1] === 1) {
@@ -376,7 +373,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         setPotStartOfRound(potStartOfRound + playerBets.reduce((x,y) => x + y));
         console.log("Next Round Starting Pot: " + potStartOfRound);
         knownCards = ImmediateNewCard(newPlayerNum, nestedCurrentPlayer, nestedCurrentBet);
-      } else {
+      } else { // Otherwise the next player's cards and best hand should be displayed, along with any communal cards visible in the given round.
         if (document.getElementById("flop-card-one")!.hidden === true) {
           knownCards = cards.slice(2 * (newPlayerNum - 1), 2 * (newPlayerNum - 1) + 2);
         } else if (document.getElementById("turn-card")!.hidden === true) {
@@ -393,34 +390,24 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         } else {
           document.getElementById("p" + currentPlayer +"-stats")!.classList.remove("glow");
         }
-        // let glowing = document.getElementsByClassName("glow");
-        // for (let i = 0; 9 < glowing.length; i++) {
-        //   glowing[i].classList.remove("glow");
-        // }
       }
       if (knownCards.length !== 0) {
         setCurrentPlayer(newPlayerNum);
         hideCards(newPlayerNum);
         if (newPlayerNum <= totalPlayers - computerPlayers) {
-          await sleep(5000);
+          await sleep(5000); // Small delay implemented to allow users time to read suggested decision and pass to next player in local multiplayer games.
           setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
         }
-        // if (newPlayerNum > totalPlayers - computerPlayers) {
-        //   computerCalc(playerProfiles![newPlayerNum - 2], knownCards, newPlayerNum, newCurrentBet);
-        // } else {
-        //   hideCards(newPlayerNum);
-        //   await sleep(3000);
-        //   setCurrentPlayerPrediction(humanSimCalc(newPlayerNum, knownCards, newCurrentBet));
-        // }
       }
     }
     if (totalPlayers - computerPlayers > 1) {
-      document.getElementById("warning-text")!.hidden = true;
+      document.getElementById("warning-text")!.hidden = true; // Hiding the suggested move so as to not give hints to other players.
     }
     handleLoadingFalse();
   }
 
   function humanSimCalc(playerNum: number, allCards: number[], newCurrentBet: number) {
+    // Calculates the best decision the given player could have made given their known cards according to their effective hand strength using the Calculations class through the calcs constant.
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
@@ -432,6 +419,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function computerCalc(playerProfile: number[], allCards: number[], playerNum: number, newCurrentBet: number) {
+    // Chooses the decision the given computer player will make given their known cards according to their effective hand strength and personality values.
     let playerCards = [allCards[0], allCards[1]];
     let communalCards: number[] = [];
     if (allCards.length > 2) {
@@ -440,7 +428,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       }
     }
     let randomDecisionValue = Math.random() * 100;
-    if (randomDecisionValue < playerProfile[2]) {
+    if (randomDecisionValue < playerProfile[2]) { // Check for if a random decision should be made according to the player's randomness value.
       randomDecisionValue = Math.floor(Math.random() * 100);
       if (randomDecisionValue < (10 - playerProfile[0]/10) && gameState >= 2) {
         Fold(playerNum);
@@ -459,16 +447,16 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
           Raise(Math.min(newCurrentBet + 10 + (randomDecisionValue - 60), playerBets[playerNum - 1] + playerBanks[playerNum - 1]), playerNum, newCurrentBet);
         } 
       }
-    } else if (playerBanks[playerNum - 1] === 0) {
+    } else if (playerBanks[playerNum - 1] === 0) { // If the player hs no money in their bank, they cannot act and only check.
       Bet(playerNum, newCurrentBet);
     } else {
       let effectiveHandScore = calcs.decisionCalc(playerCards, communalCards);
       console.log("EHS: " + effectiveHandScore);
       // let nashEquilibrium = Calculations.nashEq(cards);
-      if (effectiveHandScore < (0.2 - (playerProfile[0] / 1000))) {
+      if (effectiveHandScore < (0.2 - (playerProfile[0] / 1000))) { // If not random, the decision made is based off of the player's aggression value.
         if (randomDecisionValue >= playerProfile[1] && gameState >= 2) {
           Fold(playerNum);
-        } else if (randomDecisionValue >= playerProfile[1]) {
+        } else if (randomDecisionValue >= playerProfile[1]) { // The deception value decides if the computer player should bluff by going against the suggested decision.
           Bet(playerNum);
         } else {
           if (Math.min(newCurrentBet + 30 + Math.floor(playerProfile[0] / 5), playerBets[playerNum - 1] + playerBanks[playerNum - 1]) === playerBets[playerNum - 1] + playerBanks[playerNum - 1]) {
@@ -495,11 +483,16 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function decisionToMessage(playerDecision: number) {
-    let currentPlayerAbility = await calcs.moveSuggestionCalc(); //TODO: Create metric for measuring player ability compared to previous games and other users.
+    let currentPlayerAbility = await calcs.moveSuggestionCalc(); // Retrieves the current player's ability compared to the rest of the platform's users using the Calculations class through the calcs constant.
     console.log("Current Player Ability: " + currentPlayerAbility);
     let strongestPlayerThreshold = 0;
     let weakestPlayerThreshold = 0;
-    let output = [0, ""];
+    let output = [0, ""]; // The first element of the array represents the "cost" of the decision. 0 = bet/check, 1 = raise, -1 = fold.
+
+    /* The prompt given to the user depends on:
+        - their performance compared to all of the users on the platform and their recent performance (combined into currentPlayerAbility).
+        - the decision calculated by the effective hand strength algorithm (currentPlayerPrediction).
+        - how high the bet is currently (currentBet). */
     if (currentBet === 0){
       if (currentPlayerPrediction < 0.3) {
         if (currentPlayerAbility > 0.75 + (gameState * 0.05)) {
@@ -567,13 +560,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
     console.log("Output pre-transform: " + output);
     if (output[0] === playerDecision) {
-      return "Good decision!\n\n";
+      return "Good decision!\n\n"; // Replace the warning message with a message of encouragement if the user's decision matched the algorithm's result.
     } else {
       return output[1] + "\n\n";
     }
   }
 
   async function SetWarningText(currentPlayerNum: number, decisionNum: number) {
+    // Changes the text in the player's decision suggestions to match the current game state.
     let newPlayerPrompts = playerPrompts;
     newPlayerPrompts[currentPlayerNum - 1] += await decisionToMessage(decisionNum);
     setPlayerPrompts(newPlayerPrompts);
@@ -582,6 +576,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function Raise(raise?: number, playerNum?: number, nestedCurrentBet?: number) {
+    // Handle the required actions for a player to match a raise.
+    // The raise parameter specifically is optional as it is only required when the current player is a computer player.
     handleLoadingTrue();
     setPreAction(false);
     let currentPlayerNum: number;
@@ -600,11 +596,12 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     let newBets = playerBets
     let amount = 0;
     let nullableAmount: string | null = "0";
-    if (!raise) {
+    if (!raise) { // If there is no bet passed in, the user is human and must therefore be asked how much they want to raise the bet.
       if (playerBanks[currentPlayerNum - 1] !== 0) {
         nullableAmount = window.prompt("The bet is currently set at £" + newCurrentBet + ". What would you like to raise the bet to?");
         amount = Number(nullableAmount);
         while (nullableAmount !== null && (amount > (playerBanks[currentPlayerNum - 1] + playerBets[currentPlayerNum - 1]) || amount <= newCurrentBet)) {
+          // Bets must fall between the current value of the bet and the maximum amount the user currently has in the bank.
           let windowText = "";
           if (amount <= newCurrentBet) {
             windowText = "You must raise the bet to a number higher than its current value. The bet is currently set at £" + newCurrentBet + ". What would you like to raise the bet to?";
@@ -616,28 +613,24 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         }
         if (nullableAmount !== null) {
           if (currentPlayerNum <= totalPlayers - computerPlayers) {
-            await SetWarningText(currentPlayerNum, 1);
+            await SetWarningText(currentPlayerNum, 1); // Ensure that the advice for the player updates before the game continues.
           }
-          // amount = currentBet + newRaise;
         } else {
           handleLoadingFalse();
         }
       }
-    } else {
+    } else { // Otherwise, simply set the amount to be raised by to the value passed in.
       amount = raise;
-      // amount = nestedCurrentBet! + newRaise;
     }
     if (nullableAmount !== null) {
-      // amount = newCurrentBet + newRaise;
       newBanks[currentPlayerNum - 1] -= (amount - newBets[currentPlayerNum - 1]);
       newBets[currentPlayerNum - 1] += (amount - newBets[currentPlayerNum - 1]);
       document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " raised the bet to £" + amount +".\n\n";
-      setCurrentBet(amount);
+      setCurrentBet(amount); // Increase the value of the current bet so that every player after this one must bet at least this new amount.
       setPlayerBanks(newBanks);
       setPlayerBets(newBets);
       setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
       console.log("Player Bets on Raise:" + playerBets +". This was for player" + currentPlayerNum);
-      // setPot(pot + amount);
       document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
       if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
         handleLoadingTrue();
@@ -651,17 +644,13 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         DisplayWinner(winner, nestedCurrentBet);
         handleLoadingFalse();
       } else {
-        // if (playerNum) {
-        //   ChangePlayer(playerNum, amount);
-        // } else {
-        //   ChangePlayer();
-        // }
         ChangePlayer(currentPlayerNum, amount - newBets[currentPlayerNum - 1]);
       }
     }
   }
 
   async function Bet(playerNum?: number, bet?: number) {
+    // Handle the required actions for a player to match a bet.
     handleLoadingTrue();
     setPreAction(false);
     let currentPlayerNum: number;
@@ -678,29 +667,25 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
     let newBanks = playerBanks;
     let newBets = playerBets;
-    let betDiff = currentPlayerBet - newBets[currentPlayerNum - 1];
-    if (playerBanks[currentPlayerNum - 1] !== 0) {
+    // If the betting round has already completed a cycle, the player only needs to bet the difference between the money they have already contributed and the current value of the bet.
+    let betDiff = currentPlayerBet - newBets[currentPlayerNum - 1]; 
+    if (playerBanks[currentPlayerNum - 1] !== 0) { // If the player has money in their bank, the action depends slightly on the current value of the bet.
       console.log("Current Player Num: " + currentPlayerNum.toString())
       if (currentPlayerNum <= totalPlayers - computerPlayers) {
-        await SetWarningText(currentPlayerNum, 0);
+        await SetWarningText(currentPlayerNum, 0); // Ensure that the advice for the player updates before the game continues.
       }
-      if (currentPlayerBet === 0) {
+      if (currentPlayerBet === 0) { // If nobody has added to the pot yet this round, betting continues this trend and no money is contributed. Known as "checking".
         document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " checked.\n\n";
-      } else {
-        // if (blindStage && (currentPlayerNum === startingPlayer || totalPlayers === 2 && currentPlayerNum !== startingPlayer)) {
-        //   currentPlayerBet -= BIGBLIND/2;  
-        // }
-        
+      } else { // Otherwise the player contributes the minimum amount required, as dictated by previous betting rounds.
         newBanks[currentPlayerNum - 1] -= betDiff;
         newBets[currentPlayerNum - 1] += betDiff;
         setPlayerBanks(newBanks);
         setPlayerBets(newBets);
         setPot(potStartOfRound + newBets.reduce((x,y) => x + y));
         console.log("Player Bets on Bet:" + playerBets +". This was for player" + currentPlayerNum);
-        // setPot(pot + currentPlayerBet);
         document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " bet £" + currentPlayerBet + ".\n\n";
       }
-    } else {
+    } else { // If the player has no money in their bank, they always check as they cannot contribute any further to the pot, regardless of the current bet.
       document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " checked.\n\n";
     }
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
@@ -716,17 +701,13 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       DisplayWinner(winner, betDiff);
       handleLoadingFalse();
     } else {
-      // if (playerNum) {
-      //   ChangePlayer(playerNum, currentPlayerBet);
-      // } else {
-      //   ChangePlayer();
-      // }
       console.log("CURRENT PLAYER AFTER BET: " + currentPlayerNum.toString());
       ChangePlayer(currentPlayerNum, currentPlayerBet);
     }
   }
 
   async function Fold(playerNum?: number) {
+    // Handles the required actions for a player to fold.
     handleLoadingTrue();
     setPreAction(false);
     let currentPlayerNum: number;
@@ -740,13 +721,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     if (currentPlayerNum <= totalPlayers - computerPlayers) {
       await SetWarningText(currentPlayerNum, -1);
     }
-    newFoldedtotalPlayers[currentPlayerNum - 1] = 1;
-    newBestHands[currentPlayerNum - 1] = new Array(6).fill(0);
+    newFoldedtotalPlayers[currentPlayerNum - 1] = 1; // Set the current player's folded status to 1 to indicate that they have folded.
+    newBestHands[currentPlayerNum - 1] = new Array(6).fill(0); // Set the current player's best hand to all 0s, as this makes it impossible for them to win as all cards have value > 1.
     setFoldedtotalPlayers(newFoldedtotalPlayers);
     setBestHands(newBestHands);
     document.getElementById("play-text")!.innerText += playerOrBotText(currentPlayerNum) + " folded.\n\n";
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
     if (lessonNum && gameState >= 0 && currentPlayerNum <= totalPlayers - computerPlayers) {
+      // Provide a chance to take back the decision to fold if currently in a lesson with move retracing enabled.
       handleLoadingTrue();
       reversionPrompt();
     } else {
@@ -759,7 +741,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function SmallAndBigBlind(nextPlayer: number, nestedBanks?: number[]) {
+    // Perform the small and big blind turns without requiring input from the user, as these always occur without any decisions being needed.
     if (nextPlayer <= 0) {
+      // Ensures no underflow in player numbers by cycling back to the last player in the list.
       nextPlayer = totalPlayers;
     }
     let smallBlindPlayer = nextPlayer;
@@ -788,11 +772,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     setPlayerBanks(newBanks);
     setPlayerBets(newBets);
     console.log("Player Bets on Small & Big Blind:" + playerBets);
-    if (nextPlayer !== smallBlindPlayer) {
-      setCurrentBet(BIGBLIND);
-    } else {
-      setCurrentBet(BIGBLIND);
-    }
+    setCurrentBet(BIGBLIND);
     let newPot = 0;
     newPot += pot + BIGBLIND + BIGBLIND/2;
     setPot((pot) => {return pot + BIGBLIND + BIGBLIND/2});
@@ -801,31 +781,35 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function HandsSearch(finalBestHand: number[][]) {
+    // Finds all players with hands that are identical to the strongest hand in the game.
     for (let i = 0; i < bestHands.length; i++) {
       let isAMatch = true;
       for (let j = 0; j < bestHands[0].length; j++) {
         if (bestHands[i][j] !== finalBestHand[j]) {
           isAMatch = false;
-          break;
+          break; // If at any point the hand currently being checked doesn't match the strongest hand, it cannot be a match and no other values need checking.
         }
       }
       if (isAMatch) {
-        return i + 1;
+        return i + 1; // Player numbers are indexed from 1, but bestHands are indexed from 0.
       }
     }
     return -1;
   }
   
   function CalculateWinner() {
+    // Determine mathematically who has the best hand at the end of the game, including possible tied games.
     console.log("BEST HANDS AT END OF GAME: " + bestHands);
     let finalBestHands = bestHands.map(function(hand) { return hand.slice(); });
-    for (let i = 0; i < bestHands[0].length; i++) {
+    for (let i = 0; i < bestHands[0].length; i++) { // Sort on the rank of the best hand stored at index 0, then by each card which are already sorted descending by value.
       finalBestHands.sort((a, b) => (b[i] % 15) - (a[i] % 15));
       let bestHandValue = finalBestHands[0][i] % 15;
-      finalBestHands = finalBestHands.filter(h => h[i] % 15 === bestHandValue);
+      finalBestHands = finalBestHands.filter(h => h[i] % 15 === bestHandValue); // Find all hands that match the highest value in the currently assessed index.
       if (finalBestHands.length === 1) {
         return [HandsSearch(finalBestHands[0])];
       }
+      /* No return statement here as the result of the filter will always have a length of one during the final iteration of the loop as this signifies a tie,
+      so the return statement within the if statement will always be called on the final iteration, if not before. */
     }
     let handIndices: number[] = [];
     finalBestHands.forEach(hand => {
@@ -835,16 +819,21 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   async function DisplayWinner(playerNums: number[], finalActionBet?: number) {
-    if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) {
+    /* Makes the appropriate changes to the UI to display the winner of the game.
+    The playerNums parameter contains the player numbers of every player that wins a share of the pot, usually just one player. 
+    The finalActionBet parameter is passed in to ensure that the pot contains the correct amount at the end of the game to be given to the winner(s). */
+
+    if (playerNums.length === 1 && bestHands[playerNums[0] - 1][0]) { // If a single player won the game and their best hand is already known.
       document.getElementById("play-text")!.innerText += playerOrBotText(playerNums[0]) + " wins the pot with a " + HANDS[bestHands[playerNums[0] - 1][0]] + "!\n";
-    } else if (playerNums.length === 1) {
+    } else if (playerNums.length === 1) { // If a single player won the game and their best hand is currently unknown.
       let cardsCopy: number[] = [];
       cards.forEach(card => {
         cardsCopy.push(card);
       });
       let bestHand = HANDS[calcs.FindBestHand(cardsCopy.slice(2 * (playerNums[0] - 1), 2 * (playerNums[0] - 1) + 2))[0]];
       document.getElementById("play-text")!.innerText += "Player " + playerNums[0] + " wins the pot with a " + bestHand + "!\n";
-    } else {
+    } else { // If multiple players tied the game.
+      // Concatenate the player names/numbers for all of the winners into a single string.
       let winnersString = playerOrBotText(playerNums[0]) + " ";
       for (let i = 1; i < playerNums.length; i++) {
         if (i === playerNums.length - 1) {
@@ -856,7 +845,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
         }
       }
       document.getElementById("play-text")!.innerText += winnersString;
-      document.getElementById("best-hand")!.innerText = HANDS[bestHands[playerNums[0] - 1][0]];
+      document.getElementById("best-hand")!.innerText = HANDS[bestHands[playerNums[0] - 1][0]]; // Diplays the hand rank that the winner(s) finished with.
     }
    
     document.getElementById("play-reporter")!.scrollTop = document.getElementById("play-reporter")!.scrollHeight;
@@ -871,20 +860,24 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     for (let i = 1; i <= totalPlayers; i++) {
       document.getElementById("p" + i +"-stats")!.classList.remove("glow");
       if (playerNums.includes(i)) {
-        document.getElementById("p" + i +"-stats")!.classList.add("winner-glow");
+        document.getElementById("p" + i +"-stats")!.classList.add("winner-glow"); // Adds a golden glow effect around the winner(s)'s bank text.
       }
     }
     let newBanks = playerBanks;
     console.log("Final Banks: " + newBanks.toString());
     let newPot = pot;
     if (finalActionBet) {
-      newPot += finalActionBet;
+      newPot += finalActionBet; // Adds the final bet if money was added to the pot as the final action of the game.
     }
     playerNums.forEach(playerNum => {
-      newBanks[playerNum - 1] += newPot/playerNums.length;
+      newBanks[playerNum - 1] += newPot/playerNums.length; // Split the pot as equally as possible between the winning players.
     });
 
     if (sessionStorage.getItem("userID") && (computerPlayers === 0 || (lessonNum && lessonNum >= 5 && sessionStorage.getItem("moveRetracing") === "false"))) {
+      /* Update the database with the results of the game if it is considered "fair" and the user is logged in.
+      A game is considered to be "fair" if:
+      - the computer players are not considered to be unreasonably forgiving (this is any computer opponent in lesson 5 and beyond).
+      - the user has chosen to disable the ability to rewind the game, or are playing in local multiplayer where this is disabled by default. */
       let e1 = await supabase.from("results").select("gameID").order("gameID", {ascending: false}).limit(1);
       if (e1.error) {
         throw e1.error;
@@ -902,6 +895,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     }
 
     if (lessonNum && sessionStorage.getItem("userID")) {
+      // If the current game is a lesson, update the database to indicate that this lesson has now been completed.
       let existingLessonsComplete = await supabase.from("lessons").select("completedLessons").eq("userID", Number(sessionStorage.getItem("userID"))).limit(1).single();
       if (existingLessonsComplete.error) {
         throw existingLessonsComplete.error;
@@ -921,7 +915,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function betButtonText(): import("react").ReactNode {
-    if (currentBet === 0 || playerBanks[currentPlayer - 1] === 0) {
+    // Changes the text on the button to perform a bet to suit the current state of the game.
+    if (currentBet === 0 || playerBanks[currentPlayer - 1] === 0) { 
+      // If the bet is currently set to 0 or the player has no money in their bank, the user is betting a value of 0, known as "checking" The button text should reflect this.
       return "Check";
     } else {
       return "Call";
@@ -929,7 +925,8 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function raiseButtonText(): import("react").ReactNode {
-    if (currentBet === 0) {
+    // Changes the text on the button to perform a raise to suit the current state of the game.
+    if (currentBet === 0) { // If the bet is currently set to 0, the user is not raising the bet, but setting its initial value. The button text should reflect this.
       return "Bet";
     } else {
       return "Raise";
@@ -937,6 +934,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function hideCards(nextPlayer: number) {
+    // Hides all information that other players should not be able to see, as well as decision buttons, so that no player is given an advantage between turns.
     document.getElementById("warning-text")!.hidden = false;
     document.getElementById("raise-button")!.hidden = true;
     document.getElementById("fold-button")!.hidden = true;
@@ -945,16 +943,14 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
     document.getElementById("hole-card-one")!.hidden = true;
     document.getElementById("hole-card-two")!.hidden = true;
     document.getElementById("revert-by-round-button")!.hidden = true;
-    // document.getElementById("flop-card-one")!.hidden = true;
-    // document.getElementById("flop-card-two")!.hidden = true;
-    // document.getElementById("flop-card-three")!.hidden = true;
-    // document.getElementById("turn-card")!.hidden = true;
-    // document.getElementById("river-card")!.hidden = true;
     document.getElementById("ready-button")!.hidden = false;
+
+    // The next player much select that they are ready before information is revealed in order to ensure that no other players see their cards.
     setBestHandText(playerOrBotText(nextPlayer) + "'s Turn: Ready?");
   }
 
   function showCards() {
+    // Shows the information that was previously hidden to the current player so that they can make their decision for this betting round.
     document.getElementById("warning-text")!.hidden = false;
     document.getElementById("raise-button")!.hidden = false;
     document.getElementById("fold-button")!.hidden = false;
@@ -986,8 +982,9 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       document.getElementById("warning-text")!.innerText = playerPrompts[currentPlayer - 1];
     }
 
+    // If the current player is human, the current game is a lesson, and the user has move retracing enabled, the game state before the user's decision is made is saved.
     if (currentPlayer <= totalPlayers - computerPlayers && lessonNum && sessionStorage.getItem("moveRetracing") === "true") {
-      let newState = stateEncoder.encode(
+      let newState = stateEncoder.encode( // The state encoder ensures that the information is stored in such a way that it can rebuild the current game state at a later time.
         cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer, document.getElementById("play-text")!.innerText, playerPrompts);
       setPrevState(newState);
       if (startOfRoundStates[gameState] === "") {
@@ -1003,21 +1000,23 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function reversionPrompt() {
+    // Displays the info box that appears after a human player has made their decision during lessons.
     let currentPlayerText = playerPrompts[currentPlayer - 1].split("\n\n");
     console.log("Prompt Array: " + currentPlayerText);
     document.getElementById("info-text")!.innerText = currentPlayerText[currentPlayerText.length - 2];
     if (sessionStorage.getItem("moveRetracing") === "true") {
+      // The option to rewind the game to the before the user's decision was made should only be shown if the move retracing setting is enabled.
       document.getElementById("revert-button")!.hidden = false;
     }
     document.getElementById("info-box")!.hidden = false;
   }
 
   async function handlePromptBox() {
+    // Dismissed the info box used to provide additional information to the user during lessons.
     document.getElementById("info-box")!.hidden = true;
     await sleep(1);
-    // let newPrevStates = prevStates;
-    // newPrevStates[gameState] = stateEncoder.encode(cards, foldedtotalPlayers, pot, potStartOfRound, playerBanks, playerBets, gameState, startingPlayer, currentPlayer)
-    // setPrevStates(newPrevStates);
+
+    //Ensurign that the correct cards are shown to the player.
     let knownCards = cards.slice(2 * (currentPlayer - 1), 2 * (currentPlayer - 1) + 2)
     if (gameState === 1) {
       knownCards.concat(cards.slice(-5, -2));
@@ -1027,22 +1026,25 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       knownCards.concat(cards.slice(-5, cards.length));
     }
     let bestHand = calcs.FindBestHand(knownCards);
-    if (!preAction) {
+
+    if (!preAction) { // If the current player has already made a decision during this turn, change players.
       ChangePlayer(currentPlayer);
-    } else {
+    } else { // Otherwise, simply dismiss the info box and loading overlay to allow the user to act.
       handleLoadingFalse();
     }
   }
 
   function retrace(state: string) {
-    console.log("FUNCTION CALL");
-    if (gameState === 1 && state === "") {
+    // Changes the UI to represent the game state passed in as a parameter.
+
+    /* In the specific case where, in a two player game with one human and one computer player,
+    the computer player chooses to bet and immediately move the game to the flop round,
+    the retracing button does not function without this first case. */
+    if (gameState === 1 && state === "") { 
       setCards(cards);
       setFoldedtotalPlayers(new Array(totalPlayers).fill(0));
       setPot(0);
       setPotStartOfRound(0);
-      // setPlayerBanks(Array.from({length: totalPlayers}).map(bank=>STARTBANK));
-      // setPlayerBets(new Array(totalPlayers).fill(0));
       setGameState(0);
       setStartingPlayer(startingPlayer);
       setCurrentPlayer(startingPlayer);
@@ -1054,9 +1056,11 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       handleLoadingFalse();
       SmallAndBigBlind(startingPlayer - 1, Array.from({length: totalPlayers}).map(bank=>STARTBANK));
     } else if (state !== "") {
-      console.log("RETRACING");
+      // Passing the string through the state encoder's decode function ensures that all the data required to display the new state is correctly formatted and the correct type.
       stateEncoder.decode(state);
       document.getElementById("info-box")!.hidden = true;
+
+      // The new values for all of the required information can be retrieved from the state encoder's stored values.
       setCards(stateEncoder.getCards());
       setFoldedtotalPlayers(stateEncoder.getFoldedPlayers());
       setPot(stateEncoder.getPot());
@@ -1069,25 +1073,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       setCurrentBet(stateEncoder.getPlayerBets().reduce((x, y) => {if (x >= y) {return x} else {return y}}));
       document.getElementById("play-text")!.innerText = stateEncoder.getPlayText();
       setPlayerPrompts(stateEncoder.getWarningText());
-      // let newPlayText = document.getElementById("play-text")!.innerText.split("\n\n");
-      // let newPlayerPrompts = playerPrompts;
-      // let changedPrompt = "";
-      // let newWarningText = playerPrompts[currentPlayer - 1].split("\n\n")
-      // document.getElementById("play-text")!.innerText = "";
-      // document.getElementById("warning-text")!.innerText = "";
-      // for (let i = 0; i < newPlayText.length - 2; i++) {
-      //   document.getElementById("play-text")!.innerText += newPlayText[i] + "\n\n";
-      // }
-      // for (let i = 0; i < newWarningText.length - 2; i++) {
-      //   changedPrompt += newWarningText[i] + "\n\n";
-      // }
-      // newPlayerPrompts[currentPlayer - 1] = changedPrompt;
-      // if (setGameState(stateEncoder.getGameState())! < gameState) {
-      //   let newStartOfRoundStates = startOfRoundStates;
-      //   newStartOfRoundStates[gameState] = "";
-      //   setStartOfRoundStates(newStartOfRoundStates);
-      // }
-      // setPlayerPrompts(newPlayerPrompts);
       setPreAction(true);
       hideCards(currentPlayer);
       handleLoadingFalse();
@@ -1095,6 +1080,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function loadingOverlayText() {
+    // Changes the text on the loading overlay depending on if the user is in a lesson scenario or a local multiplayer game.
     if (lessonNum) {
       return "Next Player: " + playerOrBotText(currentPlayer);
     } else {
@@ -1103,6 +1089,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function retraceText() {
+    // Ensures that the button on the move retracing button is appropriate for the betting round that the game is currently in.
     let buttonText = "Back to ";
     let gameStateList = ["Preflop", "Flop", "Turn", "River"];
     if (gameState > 0) {
@@ -1112,6 +1099,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function playerOrBotText(player: number) {
+    // Determines whether or not the given player is a human player or computer and, if human, whether a name should be used in place of the generic player label.
     if (player === 1 && sessionStorage.getItem("name")) {
       return sessionStorage.getItem("name");
     } else if (player <= totalPlayers - computerPlayers) {
@@ -1122,12 +1110,15 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function playerLabelText(player: number) {
+    // Provides the text for the text associated with each player's bank.
     let output = playerOrBotText(player);
     output += ": £" + playerBanks[player - 1];
     return output;
   }
 
   function resetOrNextLesson() {
+    /* Changes the function of a button on the UI. In a training lesson before the custom games, it will send the user to the next lesson.
+    Otherwise, it will progress the game to the next round. */
     if (lessonNum && lessonNum < 11) {
       nav("/lessons/" + (lessonNum + 1).toString().padStart(2, "0"));
       window.location.reload();
@@ -1139,6 +1130,7 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
   }
 
   function resetOrNextLessonText() {
+    // Changes the text on the reset/next lesson button to match its purpose.
     if (lessonNum && lessonNum < 12) {
       return "Next Lesson";
     } else {
@@ -1233,15 +1225,6 @@ function Board({totalPlayers, computerPlayers, playerProfiles, lessonNum} : room
       <div id="play-reporter">
         <h1 id="play-text" style={{padding:"0.5vw"}}></h1>
       </div>
-      {/* <h1 style={{color: "#f5f8e7"}}>{cards.map(card => {if (Math.floor(card / 15) === 0) {
-    return card%15 + "H"; //Hearts
-  } else if (Math.floor(card / 15) === 1) {
-    return card%15 + "D"; //Diamonds
-  } else if (Math.floor(card / 15) === 2) {
-    return card%15 + "C"; //Clubs
-  } else {
-    return card%15 + "S"; //Spades
-  }}).toString()}</h1> */}
       <div >
         <h1 id="best-hand" style={{color: "#f5f8e7", display: "inline"}}>{bestHandText} </h1>
         <button id="ready-button" hidden={true} className="hollow-button" type="button" onClick={() => showCards()} style={{marginLeft: "1vw"}}>Ready</button>

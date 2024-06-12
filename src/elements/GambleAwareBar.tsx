@@ -2,11 +2,7 @@ import { useState } from "react";
 
 function GambleAwareBar() {
 
-  // const [hiddenBar, setHiddenBar] = useState(false);
-
-  // function hideBar() {
-  //   setHiddenBar(true);
-  // }
+  // This displays a simple bar providing information for those feeling they are or someone they know is suffering from gambling addiction.
 
   return (
     <div id="gamble-bar" /*hidden={hiddenBar}*/ style={{marginBottom: "1vw"}}>

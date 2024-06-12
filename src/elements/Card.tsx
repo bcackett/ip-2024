@@ -11,15 +11,16 @@ type CardValue = {
 };
 
 function NumToRank(num: number) {
+  // Converts a card value to the card's rank by using modulo.
   num = num % 15;
   if (num === 11) {
-    return "J";
+    return "J"; // Jack
   } else if (num === 12) {
-    return "Q";
+    return "Q"; // Queen
   } else if (num === 13) {
-    return "K";
+    return "K"; // King
   } else if (num === 14 || num === 1) {
-    return "A";
+    return "A"; // Ace (both low and high, they are displayed using the same character)
   } else {
     return num.toString();
   }
@@ -28,18 +29,19 @@ function NumToRank(num: number) {
 function NumToSuit(num: number) {
   num = Math.floor(num / 15);
   if (num === 0) {
-    return "\u2665"; //Hearts
+    return "\u2665"; // Hearts
   } else if (num === 1) {
-    return "\u2666"; //Diamonds
+    return "\u2666"; // Diamonds
   } else if (num === 2) {
-    return "\u2663"; //Clubs
+    return "\u2663"; // Clubs
   } else {
-    return "\u2660"; //Spades
+    return "\u2660"; // Spades
   }
 }
 
 function Card({ val }: CardValue){
-  if (val / 15 < 2) {
+  // Returns a visual representation of a playing card based on its card value as defined above.
+  if (val / 15 < 2) { // If value/15 < 2, the card is either a heart or diamond, both of which are red suits.
     return (
       <button id="card-face" type="button" style={{color: "rgba(125, 2, 2, 1)"}}>
         <div style={{position: "absolute", top: 0, left: 0, textAlign: "left"}}>
@@ -51,7 +53,7 @@ function Card({ val }: CardValue){
         {NumToSuit(val)}
       </button>
     )
-  } else {
+  } else { // Otherwise, the card is either a club or spade, both of which are black suits.
     return (
       <button id="card-face" type="button" style={{color: "rgba(4, 0, 26, 1)"}}>
         <div style={{position: "absolute", top: 0, left: 0, textAlign: "left"}}>

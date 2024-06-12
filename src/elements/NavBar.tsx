@@ -6,26 +6,32 @@ function NavBar() {
   const nav = useNavigate();
 
   const goToPlay = () => {
+    // Redirects the user to the local multiplayer page.
     nav("/play");
   }
 
   const goToTrain = () => {
+    // Redirects the user to the training lesson selection page.
     nav("/train");
   }
 
   const goToLogin = () => {
+    // Redirects the user to the login page.
     nav("/login");
   }
 
   const goToSettings = () => {
+    // Redirects the user to the settings page.
     nav("/settings");
   }
 
   const goToHome = () => {
+    // Redirects the user to the home page.
     nav("/");
   }
 
   function logInButtonText() {
+    // Ensures that the the text on the link to the login page matches whether or not a user is logged in.
     if (sessionStorage.getItem("userID")) {
       return "Log Out";
     } else {
@@ -34,6 +40,7 @@ function NavBar() {
   }
 
   const openGuide = () => {
+    // Opens the guide page on in a new tab in the current window.
     window.open("/guide", "_blank")!.focus();
   }
 

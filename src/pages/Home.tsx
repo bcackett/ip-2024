@@ -8,27 +8,34 @@ function Welcome() {
   const nav = useNavigate();
 
   const goToPlay = () => {
+    // Redirects the user to a local multiplayer game.
     nav("/play");
   }
 
   const goToTrain = () => {
+    // Redirects the user to the training lesson selection page.
     nav("/train");
   }
 
   const goToLogin = () => {
+    // Redirects the user to the login page.
     nav("/login");
   }
 
   const goToSettings = () => {
+    // Redirects the user to the settings page.
     nav("/settings");
   }
 
   const openGuide = () => {
+    // Opens the guide page in a new tab in the same browser.
     window.open("/guide", "_blank")!.focus();
   }
 
   function isLoggedIn() {
+    // Checks if the data in session storage indicates that a user is currently logged into the platform.
     if (sessionStorage.getItem("userID")) {
+      // If this item exists in session storage, the user has already logged in.
       return true;
     } else {
       return false;
@@ -36,6 +43,7 @@ function Welcome() {
   }
 
   if (!sessionStorage.getItem("userID")) {
+    // If no user is currently logged in, set the settings variables in session storage to their default values.
     sessionStorage.setItem("fasterCalcs", "true");
     sessionStorage.setItem("lessonText", "true");
     sessionStorage.setItem("moveRetracing", "true");
@@ -43,7 +51,7 @@ function Welcome() {
 
   return (
     <>
-      <GambleAwareBar />
+      <GambleAwareBar /> 
       <div className="logo-grid">
         <div className="logo-image" />
         <div className="logo-div">
@@ -68,20 +76,15 @@ function Welcome() {
       </div>
       
       <div className="relocate-grid">
-        {/* <div className="dividing-line" /> */}
         <button className="relocate-button guide-button" onClick={openGuide}>
           Want a guide to this platform?
         </button>
-
-        {/* <div className="dividing-line" /> */}
         <button className="relocate-button solo-button" onClick={goToTrain}>
           Ready to start solo training?
         </button>
-        {/* <div className="dividing-line" /> */}
         <button className="relocate-button multiplayer-button" onClick={goToPlay}>
           Want to practice as a group?
         </button>
-        {/* <div className="dividing-line" /> */}
         <button hidden={isLoggedIn()} className="relocate-button login-register-button" onClick={goToLogin}>
           Want to save your progress?
         </button>

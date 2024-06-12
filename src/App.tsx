@@ -16,7 +16,7 @@ import Guide from './pages/Guide';
 
 function App() {
   const regex = "([0-9]+)";
-  return (
+  return ( //The extensions to the URL that lead to other pages.
     <Routes>
       <Route path="/train" element={<Training />} />
       <Route path={`/lessons/:id`} element={<TrainingScenario />} />

@@ -8,12 +8,13 @@ function Play() {
   const [playerCount, setPlayerCount] = useState(2);
 
   function startGame() {
+    // Handles the transition from setting the player count to displaying the game.
     setGameStarted(() => true);
   }
 
-  if (gameStarted) {
+  if (gameStarted) { // Only begin the game once the number of players has been set.
     return (<Board totalPlayers={playerCount} computerPlayers={0}/>);
-  } else {
+  } else { // If gameStarted is in its default state, provide the user with the chance to set the number of players.
     return (
       <div style={{background:"rgba(125, 2, 2, 1)", height:"17vw", minHeight:"150px", width:"32vw", display:"inline-block", marginTop:"3vw", borderRadius: "15px", border: "5px solid rgba(4, 0, 26, 1)"}}>
         <div style={{paddingBottom: "30px"}}>
