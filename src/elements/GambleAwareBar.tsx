@@ -6,7 +6,7 @@ function GambleAwareBar() {
 
   return (
     <div id="gamble-bar" /*hidden={hiddenBar}*/ style={{marginBottom: "1vw"}}>
-      <h2 className="gamble-warning">Gambling can be addictive and should be fun, not harmful. GetPokerEd does not and will never use any form of real currency, nor will it ever ask for payment information. However, play should still be self-regulated. Play to your limits. If you feel that you or someone you know needs help with gambling addiction, visit BeGambleAware.org.</h2>
+      <h2 className="gamble-warning">Gambling can be addictive and should be fun, not harmful. GetPokerEd does not and will never use any form of real currency, nor will it ever ask for payment information. However, play should still be self-regulated. Play to your limits and be aware of the legal age of gambling in your country of residence. If you feel that you or someone you know needs help with gambling addiction, visit BeGambleAware.org.</h2>
       {/* <button className="hollow-button" onClick={() => hideBar()}>x</button>     */}
     </div>
   )

@@ -22,13 +22,13 @@ function Guide () {
         </div>
       </div>
       <div id="table">
-        {/* <div className="tooltip">
-          <span className="tooltip-text">This button will only be visible if you have Move Retracing enabled. If you wish to return to the previous betting round and change your mind, this button will allow you to do so.</span>
-          <button id="revert-by-round-button" className="hollow-button" type="button" disabled={true}>Back to Preflop</button>
-        </div> */}
-        <button id="revert-by-round-button" className="hollow-button tooltip" type="button" disabled={true}>Back to Preflop
+        <div className="tooltip">
           <h1 className="tooltip-text">This button will only be visible if you have Move Retracing enabled. If you wish to return to the previous betting round and change your mind, this button will allow you to do so.</h1>
-        </button>
+          <button id="revert-by-round-button" className="hollow-button" type="button" disabled={true}>Back to Preflop</button>
+        </div>
+        {/* <button id="revert-by-round-button" className="hollow-button tooltip" type="button" disabled={true}>Back to Preflop
+          <h1 className="tooltip-text">This button will only be visible if you have Move Retracing enabled. If you wish to return to the previous betting round and change your mind, this button will allow you to do so.</h1>
+        </button> */}
         <div className="tooltip" id="hole-card-one">
           <h1 className="tooltip-text">These cards are your hole cards. Only you can see these cards, and you can use them in combination with the communal cards to try to make the best hand possible!</h1>
           <Card val={3}/>   
