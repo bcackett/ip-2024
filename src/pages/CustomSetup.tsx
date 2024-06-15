@@ -34,6 +34,11 @@ function CustomSetup() {
     let newMax = computerPlayerMax;
     newMax = 8 - playerCount;
     setComputerPlayerMax(newMax);
+
+    if (computerPlayers > newMax) {
+      setComputerPlayers(newMax);
+      handleComputerPlayerNumChange(newMax);
+    }
   }
 
   function handlePlayerValueChange(personalityNum: number, newVal: number) {
